@@ -1264,6 +1264,20 @@ h1, h2, h3, .display {
   letter-spacing: 0;
 }
 .prop-sub { font-size: 12px; font-weight: 300; opacity: 0.75; }
+.prop-empty {
+  min-width: 290px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(168,82,112,0.22);
+  border-radius: 18px;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 24px;
+  text-align: center;
+}
 .scroll-dots {
   display: flex; justify-content: center; gap: 5px;
   padding: 14px 0 0;
@@ -3273,7 +3287,7 @@ input[type=range].calc-range::-moz-range-thumb { width: 20px; height: 20px; bord
   <p class="hero-sub">Discover legally verified homes, plots and farmhouses in Jaipur — with end-to-end support for loans, legal checks, documentation and registration.</p>
   <div class="hero-actions">
     <a href="#properties" class="btn-primary">Explore properties →</a>
-    <a href="#list" class="btn-ghost">List your property</a>
+    <a href="login.html" class="btn-ghost">List your property</a>
   </div>
 </section>
 
@@ -3306,6 +3320,18 @@ input[type=range].calc-range::-moz-range-thumb { width: 20px; height: 20px; bord
 </div>
 
 <!-- WHY PINKCITY + HOW IT WORKS — UNIFIED -->
+<!-- APPROVED FIRESTORE LISTINGS -->
+<section class="featured" id="properties">
+  <div class="featured-header reveal-left">
+    <div class="eyebrow">Approved Listings</div>
+    <h2>Verified properties<br>live from PinkCity.</h2>
+  </div>
+  <div class="prop-track" id="property-track">
+    <div class="prop-empty">Loading approved properties...</div>
+  </div>
+</section>
+
+<!-- WHY PINKCITY + HOW IT WORKS -->
 <section class="why-how-unified" id="why">
 
   <!-- TOP: editorial header -->
@@ -3713,6 +3739,99 @@ input[type=range].calc-range::-moz-range-thumb { width: 20px; height: 20px; bord
 </div>
 
 <div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCNL2SB2vdyHVL7sh_tlUDjLskuyqIIRPE",
+  authDomain: "pinkcity-151c0.firebaseapp.com",
+  projectId: "pinkcity-151c0",
+  storageBucket: "pinkcity-151c0.firebasestorage.app",
+  messagingSenderId: "1020397719736",
+  appId: "1:1020397719736:web:87c9f2f04460cdf825a44d",
+  measurementId: "G-4FM2YGBQVV"
+};
+
+const listingGradients = {
+  plot: "linear-gradient(135deg,#c8a98a,#9a7050)",
+  farmhouse: "linear-gradient(135deg,#5a8a6a,#2a5a3a)",
+  apartment: "linear-gradient(135deg,#8090b0,#506080)",
+  villa: "linear-gradient(135deg,#c4a870,#8a6a40)",
+  land: "linear-gradient(135deg,#8aaa7a,#4a7a4a)",
+  commercial: "linear-gradient(135deg,#6a8faf,#3a5f7f)"
+};
+const listingIcons = {
+  plot: "Plot",
+  farmhouse: "Farm",
+  apartment: "Apt",
+  villa: "Villa",
+  land: "Land",
+  commercial: "Shop"
+};
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[ch]));
+}
+
+function renderApprovedListings(listings) {
+  const track = document.getElementById("property-track");
+  if (!track) return;
+
+  if (!listings.length) {
+    track.innerHTML = '<div class="prop-empty">No approved listings yet. Approved dashboard listings will appear here automatically.</div>';
+    return;
+  }
+
+  track.innerHTML = listings.map(item => {
+    const type = item.type || "plot";
+    const gradient = listingGradients[type] || listingGradients.plot;
+    const label = listingIcons[type] || "Home";
+    const meta = [item.size, item.area].filter(Boolean).join(" · ");
+
+    return `
+      <article class="prop-card">
+        <div class="prop-bg" style="background:${gradient}">${escapeHTML(label)}</div>
+        <div class="prop-pill-type">${escapeHTML(type)}</div>
+        ${item.verified ? '<div class="prop-pill-v">Verified</div>' : ""}
+        <div class="prop-info">
+          <div class="prop-price">${escapeHTML(item.price || "Price on request")}</div>
+          <div class="prop-sub">${escapeHTML(item.title || "PinkCity listing")}${meta ? " · " + escapeHTML(meta) : ""}</div>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+try {
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const approvedQuery = query(collection(db, "listings"), where("status", "==", "active"));
+
+  onSnapshot(approvedQuery, snapshot => {
+    const listings = snapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .sort((a, b) => {
+        const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return bTime - aTime;
+      });
+    renderApprovedListings(listings);
+  }, error => {
+    console.error("Approved listing load failed", error);
+    renderApprovedListings([]);
+  });
+} catch (error) {
+  console.error("Firebase listing setup failed", error);
+  renderApprovedListings([]);
+}
+</script>
 
 <script>
 function openM(id) { document.getElementById('m-'+id).classList.add('on'); document.body.style.overflow='hidden'; }
