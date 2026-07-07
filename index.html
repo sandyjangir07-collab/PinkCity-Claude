@@ -1236,6 +1236,9 @@ h1, h2, h3, .display {
   display: flex; align-items: center; justify-content: center;
   font-size: 44px;
 }
+.prop-bg img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
 .prop-pill-type {
   position: absolute; top: 12px; left: 12px;
   background: rgba(255,255,255,0.88); backdrop-filter: blur(8px);
@@ -3741,18 +3744,11 @@ input[type=range].calc-range::-moz-range-thumb { width: 20px; height: 20px; bord
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCNL2SB2vdyHVL7sh_tlUDjLskuyqIIRPE",
-  authDomain: "pinkcity-151c0.firebaseapp.com",
-  projectId: "pinkcity-151c0",
-  storageBucket: "pinkcity-151c0.firebasestorage.app",
-  messagingSenderId: "1020397719736",
-  appId: "1:1020397719736:web:87c9f2f04460cdf825a44d",
-  measurementId: "G-4FM2YGBQVV"
-};
+const supabaseUrl = window.SUPABASE_URL || "https://mfpnndrszjygespcfdbo.supabase.co";
+const supabaseKey = window.SUPABASE_ANON_KEY || "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const listingGradients = {
   plot: "linear-gradient(135deg,#c8a98a,#9a7050)",
@@ -3795,10 +3791,13 @@ function renderApprovedListings(listings) {
     const gradient = listingGradients[type] || listingGradients.plot;
     const label = listingIcons[type] || "Home";
     const meta = [item.size, item.area].filter(Boolean).join(" · ");
+    const imageMarkup = item.imageUrl
+      ? `<img src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(item.title || "PinkCity listing")}" />`
+      : "";
 
     return `
       <article class="prop-card">
-        <div class="prop-bg" style="background:${gradient}">${escapeHTML(label)}</div>
+        <div class="prop-bg" style="background:${gradient}">${imageMarkup || escapeHTML(label)}</div>
         <div class="prop-pill-type">${escapeHTML(type)}</div>
         ${item.verified ? '<div class="prop-pill-v">Verified</div>' : ""}
         <div class="prop-info">
@@ -3809,28 +3808,17 @@ function renderApprovedListings(listings) {
   }).join("");
 }
 
-try {
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const approvedQuery = query(collection(db, "listings"), where("status", "==", "active"));
-
-  onSnapshot(approvedQuery, snapshot => {
-    const listings = snapshot.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }))
-      .sort((a, b) => {
-        const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-        const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-        return bTime - aTime;
-      });
-    renderApprovedListings(listings);
-  }, error => {
+async function loadApprovedListings() {
+  const { data, error } = await supabase.from("listings").select("*").eq("status", "active").order("created_at", { ascending: false });
+  if (error) {
     console.error("Approved listing load failed", error);
     renderApprovedListings([]);
-  });
-} catch (error) {
-  console.error("Firebase listing setup failed", error);
-  renderApprovedListings([]);
+    return;
+  }
+  renderApprovedListings(data || []);
 }
+
+loadApprovedListings();
 </script>
 
 <script>

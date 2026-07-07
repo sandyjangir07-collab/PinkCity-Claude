@@ -5,63 +5,79 @@
 <title>PinkCity — Sign In</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// ── FIREBASE CONFIG ──────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyCNL2SB2vdyHVL7sh_tlUDjLskuyqIIRPE",
-  authDomain: "pinkcity-151c0.firebaseapp.com",
-  projectId: "pinkcity-151c0",
-  storageBucket: "pinkcity-151c0.firebasestorage.app",
-  messagingSenderId: "1020397719736",
-  appId: "1:1020397719736:web:87c9f2f04460cdf825a44d",
-  measurementId: "G-4FM2YGBQVV"
-};
+const supabaseUrl = window.SUPABASE_URL || "https://mfpnndrszjygespcfdbo.supabase.co";
+const supabaseKey = window.SUPABASE_ANON_KEY || "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf";
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true
+  }
+});
 
-// ─────────────────────────────────────────────────────────────
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
-const gp   = new GoogleAuthProvider();
-
-onAuthStateChanged(auth, u => { if (u) window.location.href = "dashboard.html"; });
+const redirectUrl = `${window.location.origin}/dashboard.html`;
 
 async function ensureUser(user) {
-  const ref = doc(db, "users", user.uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, {
-      name: user.displayName || "",
-      email: user.email,
-      photo: user.photoURL || "",
-      role: "team",
-      joinedAt: new Date().toISOString()
-    });
+  const role = user.email?.toLowerCase() === "admin@pinkcity.com" ? "admin" : "team";
+  const { error } = await supabase.from("profiles").upsert({
+    id: user.id,
+    full_name: user.user_metadata?.full_name || user.user_metadata?.name || "",
+    email: user.email,
+    avatar_url: user.user_metadata?.avatar_url || "",
+    role,
+    created_at: new Date().toISOString()
+  }, { onConflict: "id" });
+  if (error) console.error("Profile sync failed", error);
+}
+
+async function initializeLogin() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await ensureUser(session.user);
+      window.location.replace(redirectUrl);
+      return;
+    }
+  } catch (e) {
+    console.error("Session init failed", e);
   }
 }
 
+supabase.auth.onAuthStateChange(async (_event, session) => {
+  if (session?.user) {
+    await ensureUser(session.user);
+    window.location.replace(redirectUrl);
+  }
+});
+
+initializeLogin();
+
 window.googleSignIn = async () => {
   setBtn(true);
-  try {
-    const r = await signInWithPopup(auth, gp);
-    await ensureUser(r.user);
-    window.location.href = "dashboard.html";
-  } catch(e) { showErr(e.code === "auth/popup-closed-by-user" ? "Sign-in cancelled." : "Google sign-in failed. Try again."); setBtn(false); }
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: redirectUrl }
+  });
+  if (error) {
+    showErr(error.message || "Google sign-in failed. Try again.");
+    setBtn(false);
+  }
 };
 
 window.emailSignIn = async () => {
   const email = document.getElementById("em").value.trim();
-  const pass  = document.getElementById("pw").value;
+  const pass = document.getElementById("pw").value;
   if (!email || !pass) { showErr("Enter email and password."); return; }
   setBtn(true);
-  try {
-    const r = await signInWithEmailAndPassword(auth, email, pass);
-    await ensureUser(r.user);
-    window.location.href = "dashboard.html";
-  } catch(e) { showErr("Incorrect email or password."); setBtn(false); }
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    showErr("Incorrect email or password.");
+    setBtn(false);
+    return;
+  }
+  await ensureUser(data.user);
+  window.location.href = redirectUrl;
 };
 
 window.onKeyDown = e => { if (e.key === "Enter") window.emailSignIn(); };

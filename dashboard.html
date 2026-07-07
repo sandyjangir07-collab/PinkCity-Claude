@@ -5,46 +5,95 @@
 <title>PinkCity — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// ── PASTE YOUR FIREBASE CONFIG ─────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyCNL2SB2vdyHVL7sh_tlUDjLskuyqIIRPE",
-  authDomain: "pinkcity-151c0.firebaseapp.com",
-  projectId: "pinkcity-151c0",
-  storageBucket: "pinkcity-151c0.firebasestorage.app",
-  messagingSenderId: "1020397719736",
-  appId: "1:1020397719736:web:87c9f2f04460cdf825a44d",
-  measurementId: "G-4FM2YGBQVV"
-};
-
-// ── YOUR UID (Firebase Console → Auth → Users → copy UID) ──
-const ADMIN_UID = "4UIRqmlRvxQbEt2VrInuTEeq5T53";
-// ──────────────────────────────────────────────────────────
-
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
-let currentUser = null, isAdmin = false;
-
-onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = "login.html"; return; }
-  currentUser = user;
-  isAdmin = user.uid === ADMIN_UID;
-  renderNav(user);
-  if (isAdmin) renderAdminView(); else renderTeamView();
+const supabaseUrl = window.SUPABASE_URL || "https://mfpnndrszjygespcfdbo.supabase.co";
+const supabaseKey = window.SUPABASE_ANON_KEY || "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf";
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true
+  }
 });
 
+const storageBucket = "property-images";
+let currentUser = null, isAdmin = false;
+let selectedImageFile = null;
+let currentImageUrl = "";
+
+async function resolveUserRole(user) {
+  const { data, error } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (error) {
+    console.error("Profile role lookup failed", error);
+    return user.email?.toLowerCase() === "admin@pinkcity.com";
+  }
+  return data?.role === "admin" || user.email?.toLowerCase() === "admin@pinkcity.com";
+}
+
+function showPageError(msg) {
+  const el = document.getElementById("page-error");
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+}
+
+function clearPageError() {
+  const el = document.getElementById("page-error");
+  if (!el) return;
+  el.textContent = "";
+  el.classList.remove("show");
+}
+
+let authResolved = false;
+
+async function bootDashboard(user) {
+  currentUser = user;
+  isAdmin = await resolveUserRole(user);
+  renderNav(user);
+  if (isAdmin) renderAdminView(); else renderTeamView();
+}
+
+async function initializeDashboard() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      authResolved = true;
+      await bootDashboard(session.user);
+      return;
+    }
+  } catch (e) {
+    console.error("Dashboard session init failed", e);
+  }
+  setTimeout(() => {
+    if (!authResolved) {
+      window.location.replace(`${window.location.origin}/login.html`);
+    }
+  }, 1500);
+}
+
+supabase.auth.onAuthStateChange(async (_event, session) => {
+  const user = session?.user || null;
+  if (!user) {
+    if (authResolved) {
+      window.location.replace(`${window.location.origin}/login.html`);
+    }
+    return;
+  }
+  authResolved = true;
+  await bootDashboard(user);
+});
+
+initializeDashboard();
+
 function renderNav(user) {
-  document.getElementById("uname").textContent = user.displayName?.split(" ")[0] || user.email;
-  if (user.photoURL) {
-    document.getElementById("uavatar").style.backgroundImage = `url(${user.photoURL})`;
+  const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email || "User";
+  document.getElementById("uname").textContent = name.split(" ")[0];
+  if (user.user_metadata?.avatar_url) {
+    document.getElementById("uavatar").style.backgroundImage = `url(${user.user_metadata.avatar_url})`;
     document.getElementById("uavatar").style.backgroundSize = "cover";
     document.getElementById("uavatar").textContent = "";
   } else {
-    document.getElementById("uavatar").textContent = (user.displayName || user.email || "?")[0].toUpperCase();
+    document.getElementById("uavatar").textContent = name[0].toUpperCase();
   }
   if (isAdmin) {
     document.getElementById("admin-tag").style.display = "inline-flex";
@@ -54,29 +103,36 @@ function renderNav(user) {
   }
 }
 
-// ── TEAM VIEW ─────────────────────────────────────────────
-function renderTeamView() {
-  const q = query(collection(db,"listings"), where("uid","==",currentUser.uid), orderBy("createdAt","desc"));
-  onSnapshot(q, snap => {
-    const listings = snap.docs.map(d => ({id:d.id,...d.data()}));
-    renderCards(listings, false);
-  });
+async function renderTeamView() {
+  clearPageError();
+  const { data, error } = await supabase.from("listings").select("*").eq("uid", currentUser.id).order("created_at", { ascending: false });
+  const listings = (data || []).map(item => ({ id: item.id, ...item }));
+  if (error) {
+    console.error("Team listings load failed", error);
+    showPageError("Could not load your listings. Check the Supabase listings table and RLS policies.");
+    renderCards([], false);
+    return;
+  }
+  renderCards(listings, false);
 }
 
-// ── ADMIN VIEW ────────────────────────────────────────────
-function renderAdminView() {
-  const q = query(collection(db,"listings"), orderBy("createdAt","desc"));
-  onSnapshot(q, snap => {
-    const listings = snap.docs.map(d => ({id:d.id,...d.data()}));
-    // Stats
-    const pending = listings.filter(l=>l.status==="pending").length;
-    const active  = listings.filter(l=>l.status==="active").length;
-    document.getElementById("stat-pending").textContent = pending;
-    document.getElementById("stat-active").textContent  = active;
-    document.getElementById("stat-total").textContent   = listings.length;
-    document.getElementById("admin-stats").style.display = "grid";
-    renderCards(listings, true);
-  });
+async function renderAdminView() {
+  clearPageError();
+  const { data, error } = await supabase.from("listings").select("*").order("created_at", { ascending: false });
+  const listings = (data || []).map(item => ({ id: item.id, ...item }));
+  if (error) {
+    console.error("Admin listings load failed", error);
+    showPageError("Could not load submissions. Check the Supabase listings table and RLS policies.");
+    renderCards([], true);
+    return;
+  }
+  const pending = listings.filter(l => l.status === "pending").length;
+  const active = listings.filter(l => l.status === "active").length;
+  document.getElementById("stat-pending").textContent = pending;
+  document.getElementById("stat-active").textContent = active;
+  document.getElementById("stat-total").textContent = listings.length;
+  document.getElementById("admin-stats").style.display = "grid";
+  renderCards(listings, true);
 }
 
 function renderCards(listings, admin) {
@@ -89,27 +145,25 @@ function renderCards(listings, admin) {
 }
 
 function cardHTML(l, admin) {
-  const st = {pending:["#f0c84a","◐ Pending approval"], active:["#4ade80","● Live on site"], rejected:["#f87171","✕ Rejected"]}[l.status] || ["#c0b4b8","— Unknown"];
-  const grad = {plot:"linear-gradient(135deg,#c8a98a,#9a7050)",farmhouse:"linear-gradient(135deg,#5a8a6a,#2a5a3a)",apartment:"linear-gradient(135deg,#8090b0,#506080)",villa:"linear-gradient(135deg,#c4a870,#8a6a40)",land:"linear-gradient(135deg,#8aaa7a,#4a7a4a)",commercial:"linear-gradient(135deg,#6a8faf,#3a5f7f)"}[l.type] || "linear-gradient(135deg,#c8a98a,#9a7050)";
-  const emoji = {plot:"🏜️",farmhouse:"🌿",apartment:"🏢",villa:"🏯",land:"🌾",commercial:"🏗️"}[l.type] || "🏠";
-  const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}) : "";
+  const st = { pending: ["#f0c84a", "◐ Pending approval"], active: ["#4ade80", "● Live on site"], rejected: ["#f87171", "✕ Rejected"] }[l.status] || ["#c0b4b8", "— Unknown"];
+  const grad = { plot: "linear-gradient(135deg,#c8a98a,#9a7050)", farmhouse: "linear-gradient(135deg,#5a8a6a,#2a5a3a)", apartment: "linear-gradient(135deg,#8090b0,#506080)", villa: "linear-gradient(135deg,#c4a870,#8a6a40)", land: "linear-gradient(135deg,#8aaa7a,#4a7a4a)", commercial: "linear-gradient(135deg,#6a8faf,#3a5f7f)" }[l.type] || "linear-gradient(135deg,#c8a98a,#9a7050)";
+  const emoji = { plot: "🏜️", farmhouse: "🌿", apartment: "🏢", villa: "🏯", land: "🌾", commercial: "🏗️" }[l.type] || "🏠";
+  const date = l.created_at ? new Date(l.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
   return `<div class="card" id="card-${l.id}">
     <div class="card-thumb" style="background:${grad}">${emoji}</div>
     <div class="card-body">
       <div class="card-top">
         <div>
           <div class="card-title">${l.title}</div>
-          <div class="card-meta">${[l.size, l.area].filter(Boolean).join(" · ")}${l.verified?" · ✓ Verified":""}</div>
+          <div class="card-meta">${[l.size, l.area].filter(Boolean).join(" · ")}${l.verified ? " · ✓ Verified" : ""}</div>
         </div>
         <div class="card-price">${l.price}</div>
       </div>
       <div class="card-status" style="color:${st[0]};background:${st[0]}22">${st[1]}</div>
-      ${admin ? `<div class="card-by">By ${l.submitterName||"Team member"} · ${date}</div>` : `<div class="card-by">${date}</div>`}
+      ${admin ? `<div class="card-by">By ${l.submitter_name || "Team member"} · ${date}</div>` : `<div class="card-by">${date}</div>`}
       ${l.desc ? `<div class="card-desc">${l.desc}</div>` : ""}
       <div class="card-actions">
-        ${admin && l.status==="pending" ? `
-          <button class="btn-approve" onclick="approve('${l.id}')">✓ Approve</button>
-          <button class="btn-reject"  onclick="reject('${l.id}')">✕ Reject</button>` : ""}
+        ${admin && l.status === "pending" ? `<button class="btn-approve" onclick="approve('${l.id}')">✓ Approve</button><button class="btn-reject" onclick="reject('${l.id}')">✕ Reject</button>` : ""}
         ${!admin && l.status !== "active" ? `<button class="btn-edit" onclick="openEdit('${l.id}')">Edit</button>` : ""}
         ${admin ? `<button class="btn-del" onclick="del('${l.id}')">Delete</button>` : ""}
       </div>
@@ -117,74 +171,119 @@ function cardHTML(l, admin) {
   </div>`;
 }
 
-// ── APPROVE / REJECT / DELETE ─────────────────────────────
 window.approve = async id => {
-  await updateDoc(doc(db,"listings",id), {status:"active", approvedAt: serverTimestamp(), approvedBy: currentUser.uid});
-  pulse(id, "#4ade8022");
+  const { error } = await supabase.from("listings").update({ status: "active", approved_at: new Date().toISOString(), approved_by: currentUser.id }).eq("id", id);
+  if (!error) pulse(id, "#4ade8022");
 };
 window.reject = async id => {
-  await updateDoc(doc(db,"listings",id), {status:"rejected", rejectedAt: serverTimestamp()});
-  pulse(id, "#f8717122");
+  const { error } = await supabase.from("listings").update({ status: "rejected", rejected_at: new Date().toISOString() }).eq("id", id);
+  if (!error) pulse(id, "#f8717122");
 };
 window.del = async id => {
   if (!confirm("Permanently delete this listing?")) return;
-  await deleteDoc(doc(db,"listings",id));
+  await supabase.from("listings").delete().eq("id", id);
 };
 function pulse(id, bg) {
-  const el = document.getElementById("card-"+id);
-  if (el) { el.style.background = bg; setTimeout(()=>el.style.background="", 800); }
+  const el = document.getElementById("card-" + id);
+  if (el) { el.style.background = bg; setTimeout(() => el.style.background = "", 800); }
 }
 
-// ── ADD / EDIT MODAL ──────────────────────────────────────
 let editId = null;
 window.openAdd = () => {
   editId = null;
+  currentImageUrl = "";
+  selectedImageFile = null;
   document.getElementById("modal-title").textContent = "Add New Listing";
   document.getElementById("lform").reset();
+  document.getElementById("image-preview").src = "";
+  document.getElementById("image-preview").style.display = "none";
   document.getElementById("submit-btn").textContent = "Submit for approval";
   openModal();
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  const addButton = document.getElementById("add-btn");
+  if (addButton) {
+    addButton.onclick = () => window.openAdd();
+    addButton.addEventListener("click", () => window.openAdd());
+  }
+});
+
 window.openEdit = async id => {
-  const snap = await getDoc(doc(db,"listings",id));
-  if (!snap.exists()) return;
-  const d = snap.data(); editId = id;
+  const { data } = await supabase.from("listings").select("*").eq("id", id).single();
+  if (!data) return;
+  editId = id;
+  currentImageUrl = data.image_url || "";
   document.getElementById("modal-title").textContent = "Edit Listing";
-  document.getElementById("f-title").value = d.title||"";
-  document.getElementById("f-type").value  = d.type||"plot";
-  document.getElementById("f-area").value  = d.area||"";
-  document.getElementById("f-price").value = d.price||"";
-  document.getElementById("f-size").value  = d.size||"";
-  document.getElementById("f-desc").value  = d.desc||"";
+  document.getElementById("f-title").value = data.title || "";
+  document.getElementById("f-type").value = data.type || "plot";
+  document.getElementById("f-area").value = data.area || "";
+  document.getElementById("f-price").value = data.price || "";
+  document.getElementById("f-size").value = data.size || "";
+  document.getElementById("f-desc").value = data.desc || "";
+  document.getElementById("image-preview").src = currentImageUrl;
+  document.getElementById("image-preview").style.display = currentImageUrl ? "block" : "none";
+  selectedImageFile = null;
   document.getElementById("submit-btn").textContent = "Save changes";
   openModal();
 };
+window.handleListingImage = async event => {
+  const file = event.target.files?.[0];
+  selectedImageFile = file || null;
+  const preview = document.getElementById("image-preview");
+  if (!file) { preview.src = ""; preview.style.display = "none"; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    preview.src = reader.result;
+    preview.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+};
+async function uploadListingImage(file) {
+  if (!file) return "";
+  const filePath = `${currentUser.id}/${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+  const { data, error } = await supabase.storage.from(storageBucket).upload(filePath, file, { cacheControl: "3600", upsert: false });
+  if (error) throw error;
+  const { data: publicUrlData } = supabase.storage.from(storageBucket).getPublicUrl(data.path);
+  return publicUrlData.publicUrl;
+}
 window.submitListing = async () => {
   const title = document.getElementById("f-title").value.trim();
-  const type  = document.getElementById("f-type").value;
-  const area  = document.getElementById("f-area").value.trim();
+  const type = document.getElementById("f-type").value;
+  const area = document.getElementById("f-area").value.trim();
   const price = document.getElementById("f-price").value.trim();
-  const size  = document.getElementById("f-size").value.trim();
-  const desc  = document.getElementById("f-desc").value.trim();
-  if (!title||!area||!price) { showFormErr("Please fill Title, Area and Price."); return; }
+  const size = document.getElementById("f-size").value.trim();
+  const desc = document.getElementById("f-desc").value.trim();
+  if (!title || !area || !price) { showFormErr("Please fill Title, Area and Price."); return; }
   const btn = document.getElementById("submit-btn");
   btn.textContent = "Saving…"; btn.disabled = true;
   try {
+    const imageUrl = selectedImageFile ? await uploadListingImage(selectedImageFile) : currentImageUrl;
     if (editId) {
-      await updateDoc(doc(db,"listings",editId), {title,type,area,price,size,desc,updatedAt:serverTimestamp()});
+      const payload = { title, type, area, price, size, desc, updated_at: new Date().toISOString() };
+      if (imageUrl) payload.image_url = imageUrl;
+      await supabase.from("listings").update(payload).eq("id", editId);
     } else {
-      await addDoc(collection(db,"listings"), {
-        title, type, area, price, size, desc,
+      await supabase.from("listings").insert({
+        title,
+        type,
+        area,
+        price,
+        size,
+        desc,
+        image_url: imageUrl,
         status: "pending",
-        uid: currentUser.uid,
-        submitterName: currentUser.displayName || currentUser.email,
-        submitterEmail: currentUser.email,
+        uid: currentUser.id,
+        submitter_name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email,
+        submitter_email: currentUser.email,
         verified: false,
-        createdAt: serverTimestamp()
+        created_at: new Date().toISOString()
       });
     }
     closeModal();
     toast(editId ? "✓ Listing updated!" : "✓ Submitted! Awaiting admin approval.");
-  } catch(e) {
+    if (isAdmin) renderAdminView(); else renderTeamView();
+  } catch (e) {
     showFormErr("Error saving. Try again.");
   } finally {
     btn.textContent = editId ? "Save changes" : "Submit for approval";
@@ -192,18 +291,30 @@ window.submitListing = async () => {
   }
 };
 
-function openModal()  { document.getElementById("modal-overlay").classList.add("show"); document.body.style.overflow="hidden"; setTimeout(()=>document.getElementById("f-title").focus(), 300); }
-function closeModal() { document.getElementById("modal-overlay").classList.remove("show"); document.body.style.overflow=""; }
-window.closeModal = closeModal;
-function showFormErr(msg) { const el=document.getElementById("form-err"); el.textContent=msg; el.style.opacity="1"; setTimeout(()=>el.style.opacity="0",3500); }
-
-window.handleSignOut = async () => { await signOut(auth); window.location.href="login.html"; };
-
-function toast(msg) {
-  const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),3200);
+function openModal() {
+  const overlay = document.getElementById("modal-overlay");
+  if (overlay) {
+    overlay.classList.add("show");
+    overlay.style.display = "flex";
+  }
+  document.body.style.overflow = "hidden";
+  setTimeout(() => document.getElementById("f-title").focus(), 300);
 }
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+function closeModal() {
+  const overlay = document.getElementById("modal-overlay");
+  if (overlay) {
+    overlay.classList.remove("show");
+    overlay.style.display = "none";
+  }
+  document.body.style.overflow = "";
+}
+window.closeModal = closeModal;
+function showFormErr(msg) { const el = document.getElementById("form-err"); el.textContent = msg; el.style.opacity = "1"; setTimeout(() => el.style.opacity = "0", 3500); }
+
+window.handleSignOut = async () => { await supabase.auth.signOut(); window.location.href = `${window.location.origin}/login.html`; };
+
+function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3200); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 </script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -225,7 +336,9 @@ body{font-family:'Inter',sans-serif;background:#f0ebe2;min-height:100vh;-webkit-
 .main{max-width:680px;margin:0 auto;padding:36px 20px 100px}
 .page-eyebrow{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#b06080;margin-bottom:8px}
 .page-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;color:#2c1b22;letter-spacing:-0.02em;line-height:1.1;margin-bottom:8px}
-.page-sub{font-size:14px;color:#9e8d92;line-height:1.65;margin-bottom:28px;font-weight:300}
+.page-sub{font-size:14px;color:#9e8d92;line-height:1.65;margin-bottom:12px;font-weight:300}
+.page-error{display:none;background:#fff1f2;border:1px solid #fecdd3;color:#be123c;padding:12px 14px;border-radius:12px;font-size:13px;margin-bottom:20px}
+.page-error.show{display:block}
 /* ADMIN STATS */
 .admin-stats{display:none;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
 .stat-card{background:#fff;border:1px solid rgba(176,96,128,0.08);border-radius:16px;padding:16px;text-align:center}
@@ -277,6 +390,9 @@ body{font-family:'Inter',sans-serif;background:#f0ebe2;min-height:100vh;-webkit-
 .field-input:focus,.field-select:focus,.field-textarea:focus{border-color:rgba(176,96,128,0.40);box-shadow:0 0 0 3px rgba(176,96,128,0.08)}
 .field-input::placeholder{color:#c0b4b8}
 .field-textarea{resize:vertical;min-height:80px}
+.image-preview-row{display:flex;align-items:center;gap:12px;margin-top:8px}
+.image-preview{display:none;width:72px;height:72px;object-fit:cover;border-radius:12px;border:1px solid rgba(176,96,128,0.18);background:#f7efe9}
+.image-hint{font-size:12px;color:#9e8d92;line-height:1.5}
 .modal-footer{display:flex;gap:10px;margin-top:6px}
 .submit-btn{flex:1;background:#b06080;color:#fff;border:none;border-radius:999px;padding:15px;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s}
 .submit-btn:hover{background:#c47a94}
@@ -306,6 +422,7 @@ body{font-family:'Inter',sans-serif;background:#f0ebe2;min-height:100vh;-webkit-
   <div class="page-eyebrow" id="page-eyebrow">YOUR LISTINGS</div>
   <h1 class="page-title" id="page-title">Manage properties</h1>
   <p class="page-sub" id="page-sub">Submissions are reviewed by admin before going live.</p>
+  <div class="page-error" id="page-error" role="alert"></div>
   <div class="admin-stats" id="admin-stats">
     <div class="stat-card"><div class="stat-n" id="stat-pending">—</div><div class="stat-l">Pending review</div></div>
     <div class="stat-card"><div class="stat-n" id="stat-active">—</div><div class="stat-l">Live listings</div></div>
@@ -359,6 +476,14 @@ body{font-family:'Inter',sans-serif;background:#f0ebe2;min-height:100vh;-webkit-
       <div>
         <label class="field-label">Description</label>
         <textarea class="field-textarea" id="f-desc" placeholder="Key highlights — road access, floor, facing, nearby landmarks…"></textarea>
+      </div>
+      <div>
+        <label class="field-label">Property image</label>
+        <input class="field-input" id="f-image" type="file" accept="image/*" onchange="handleListingImage(event)" />
+        <div class="image-preview-row">
+          <img id="image-preview" class="image-preview" alt="Selected property preview" />
+          <div class="image-hint">Optional. JPG or PNG files will be stored in Supabase Storage and shown on the homepage.</div>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="cancel-btn" onclick="closeModal()">Cancel</button>
