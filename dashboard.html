@@ -4,12 +4,14 @@
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>PinkCity — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// Supabase loaded via CDN above
+const { createClient } = window.supabase;
 
 const supabaseUrl = window.SUPABASE_URL || "https://mfpnndrszjygespcfdbo.supabase.co";
 const supabaseKey = window.SUPABASE_ANON_KEY || "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf";
-const supabase = createClient(supabaseUrl, supabaseKey, {
+const sbClient = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true
@@ -22,7 +24,7 @@ let selectedImageFile = null;
 let currentImageUrl = "";
 
 async function resolveUserRole(user) {
-  const { data, error } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data, error } = await sbClient.from("profiles").select("role").eq("id", user.id).single();
   if (error) {
     console.error("Profile role lookup failed", error);
     return user.email?.toLowerCase() === "admin@pinkcity.com";
@@ -55,7 +57,7 @@ async function bootDashboard(user) {
 
 async function initializeDashboard() {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await sbClient.auth.getSession();
     if (session?.user) {
       authResolved = true;
       await bootDashboard(session.user);
@@ -71,7 +73,7 @@ async function initializeDashboard() {
   }, 1500);
 }
 
-supabase.auth.onAuthStateChange(async (_event, session) => {
+sbClient.auth.onAuthStateChange(async (_event, session) => {
   const user = session?.user || null;
   if (!user) {
     if (authResolved) {
@@ -105,7 +107,7 @@ function renderNav(user) {
 
 async function renderTeamView() {
   clearPageError();
-  const { data, error } = await supabase.from("listings").select("*").eq("uid", currentUser.id).order("created_at", { ascending: false });
+  const { data, error } = await sbClient.from("listings").select("*").eq("uid", currentUser.id).order("created_at", { ascending: false });
   const listings = (data || []).map(item => ({ id: item.id, ...item }));
   if (error) {
     console.error("Team listings load failed", error);
@@ -118,7 +120,7 @@ async function renderTeamView() {
 
 async function renderAdminView() {
   clearPageError();
-  const { data, error } = await supabase.from("listings").select("*").order("created_at", { ascending: false });
+  const { data, error } = await sbClient.from("listings").select("*").order("created_at", { ascending: false });
   const listings = (data || []).map(item => ({ id: item.id, ...item }));
   if (error) {
     console.error("Admin listings load failed", error);
@@ -172,16 +174,16 @@ function cardHTML(l, admin) {
 }
 
 window.approve = async id => {
-  const { error } = await supabase.from("listings").update({ status: "active", approved_at: new Date().toISOString(), approved_by: currentUser.id }).eq("id", id);
+  const { error } = await sbClient.from("listings").update({ status: "active", approved_at: new Date().toISOString(), approved_by: currentUser.id }).eq("id", id);
   if (!error) pulse(id, "#4ade8022");
 };
 window.reject = async id => {
-  const { error } = await supabase.from("listings").update({ status: "rejected", rejected_at: new Date().toISOString() }).eq("id", id);
+  const { error } = await sbClient.from("listings").update({ status: "rejected", rejected_at: new Date().toISOString() }).eq("id", id);
   if (!error) pulse(id, "#f8717122");
 };
 window.del = async id => {
   if (!confirm("Permanently delete this listing?")) return;
-  await supabase.from("listings").delete().eq("id", id);
+  await sbClient.from("listings").delete().eq("id", id);
 };
 function pulse(id, bg) {
   const el = document.getElementById("card-" + id);
@@ -210,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.openEdit = async id => {
-  const { data } = await supabase.from("listings").select("*").eq("id", id).single();
+  const { data } = await sbClient.from("listings").select("*").eq("id", id).single();
   if (!data) return;
   editId = id;
   currentImageUrl = data.image_url || "";
@@ -242,9 +244,9 @@ window.handleListingImage = async event => {
 async function uploadListingImage(file) {
   if (!file) return "";
   const filePath = `${currentUser.id}/${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-  const { data, error } = await supabase.storage.from(storageBucket).upload(filePath, file, { cacheControl: "3600", upsert: false });
+  const { data, error } = await sbClient.storage.from(storageBucket).upload(filePath, file, { cacheControl: "3600", upsert: false });
   if (error) throw error;
-  const { data: publicUrlData } = supabase.storage.from(storageBucket).getPublicUrl(data.path);
+  const { data: publicUrlData } = sbClient.storage.from(storageBucket).getPublicUrl(data.path);
   return publicUrlData.publicUrl;
 }
 window.submitListing = async () => {
@@ -262,10 +264,10 @@ window.submitListing = async () => {
     if (editId) {
       const payload = { title, type, area, price, size, desc, updated_at: new Date().toISOString() };
       if (imageUrl) payload.image_url = imageUrl;
-      const { error: updateError } = await supabase.from("listings").update(payload).eq("id", editId);
+      const { error: updateError } = await sbClient.from("listings").update(payload).eq("id", editId);
       if (updateError) throw updateError;
     } else {
-      const { data: insertData, error: insertError } = await supabase.from("listings").insert({
+      const { data: insertData, error: insertError } = await sbClient.from("listings").insert({
         title,
         type,
         area,
@@ -315,7 +317,7 @@ function closeModal() {
 window.closeModal = closeModal;
 function showFormErr(msg) { const el = document.getElementById("form-err"); el.textContent = msg; el.style.opacity = "1"; setTimeout(() => el.style.opacity = "0", 3500); }
 
-window.handleSignOut = async () => { await supabase.auth.signOut(); window.location.href = `${window.location.origin}/login.html`; };
+window.handleSignOut = async () => { await sbClient.auth.signOut(); window.location.href = `${window.location.origin}/login.html`; };
 
 function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3200); }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
