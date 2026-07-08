@@ -262,9 +262,10 @@ window.submitListing = async () => {
     if (editId) {
       const payload = { title, type, area, price, size, desc, updated_at: new Date().toISOString() };
       if (imageUrl) payload.image_url = imageUrl;
-      await supabase.from("listings").update(payload).eq("id", editId);
+      const { error: updateError } = await supabase.from("listings").update(payload).eq("id", editId);
+      if (updateError) throw updateError;
     } else {
-      await supabase.from("listings").insert({
+      const { data: insertData, error: insertError } = await supabase.from("listings").insert({
         title,
         type,
         area,
@@ -279,12 +280,15 @@ window.submitListing = async () => {
         verified: false,
         created_at: new Date().toISOString()
       });
+      console.log("Insert result:", insertData, insertError);
+      if (insertError) throw insertError;
     }
     closeModal();
     toast(editId ? "✓ Listing updated!" : "✓ Submitted! Awaiting admin approval.");
     if (isAdmin) renderAdminView(); else renderTeamView();
   } catch (e) {
-    showFormErr("Error saving. Try again.");
+    console.error("submitListing error:", e);
+    showFormErr("Error: " + (e?.message || e?.error_description || JSON.stringify(e) || "Unknown error"));
   } finally {
     btn.textContent = editId ? "Save changes" : "Submit for approval";
     btn.disabled = false;
