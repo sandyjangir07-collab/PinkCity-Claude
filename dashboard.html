@@ -265,7 +265,7 @@ window.submitListing = async () => {
       const { error: updateError } = await sbClient.from("listings").update(payload).eq("id", editId);
       if (updateError) throw updateError;
     } else {
-      const { data: insertData, error: insertError } = await sbClient.from("listings").insert([
+      const { data: insertData, error: insertError } = await sbClient.from("listings").insert({
         title,
         type,
         area,
