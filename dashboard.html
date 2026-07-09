@@ -6,12 +6,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// Supabase loaded via CDN above
-const { createClient } = window.supabase;
 
 const supabaseUrl = window.SUPABASE_URL || "https://mfpnndrszjygespcfdbo.supabase.co";
 const supabaseKey = window.SUPABASE_ANON_KEY || "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf";
-const sbClient = createClient(supabaseUrl, supabaseKey, {
+const sbClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true
@@ -24,12 +22,12 @@ let selectedImageFile = null;
 let currentImageUrl = "";
 
 async function resolveUserRole(user) {
-  const { data, error } = await sbClient.from("profiles").select("role").eq("id", user.id).single();
+  const { data, error } = await sbClient.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (error) {
     console.error("Profile role lookup failed", error);
-    return user.email?.toLowerCase() === "admin@pinkcity.com";
+    return user.email?.toLowerCase() === "sandyjangir07@gmail.com";
   }
-  return data?.role === "admin" || user.email?.toLowerCase() === "admin@pinkcity.com";
+  return data?.role === "admin" || user.email?.toLowerCase() === "sandyjangir07@gmail.com";
 }
 
 function showPageError(msg) {
@@ -196,7 +194,7 @@ window.openAdd = () => {
   currentImageUrl = "";
   selectedImageFile = null;
   document.getElementById("modal-title").textContent = "Add New Listing";
-  document.getElementById("lform").reset();
+  ["f-title","f-area","f-price","f-size","f-desc"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});const _s=document.getElementById("f-type");if(_s)_s.selectedIndex=0;const _fi=document.getElementById("f-image");if(_fi)_fi.value="";
   document.getElementById("image-preview").src = "";
   document.getElementById("image-preview").style.display = "none";
   document.getElementById("submit-btn").textContent = "Submit for approval";
@@ -212,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.openEdit = async id => {
-  const { data } = await sbClient.from("listings").select("*").eq("id", id).single();
+  const { data } = await sbClient.from("listings").select("*").eq("id", id).maybeSingle();
   if (!data) return;
   editId = id;
   currentImageUrl = data.image_url || "";
@@ -267,7 +265,7 @@ window.submitListing = async () => {
       const { error: updateError } = await sbClient.from("listings").update(payload).eq("id", editId);
       if (updateError) throw updateError;
     } else {
-      const { data: insertData, error: insertError } = await sbClient.from("listings").insert({
+      const { data: insertData, error: insertError } = await sbClient.from("listings").insert([
         title,
         type,
         area,
