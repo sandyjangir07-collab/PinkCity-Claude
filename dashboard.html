@@ -4,12 +4,12 @@
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>PinkCity — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const supabaseUrl = window.SUPABASE_URL || "https://mfpnndrszjygespcfdbo.supabase.co";
 const supabaseKey = window.SUPABASE_ANON_KEY || "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf";
-const sbClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true
@@ -22,12 +22,12 @@ let selectedImageFile = null;
 let currentImageUrl = "";
 
 async function resolveUserRole(user) {
-  const { data, error } = await sbClient.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  const { data, error } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (error) {
     console.error("Profile role lookup failed", error);
-    return user.email?.toLowerCase() === "sandyjangir07@gmail.com";
+    return user.email?.toLowerCase() === "admin@pinkcity.com";
   }
-  return data?.role === "admin" || user.email?.toLowerCase() === "sandyjangir07@gmail.com";
+  return data?.role === "admin" || user.email?.toLowerCase() === "admin@pinkcity.com";
 }
 
 function showPageError(msg) {
@@ -55,7 +55,7 @@ async function bootDashboard(user) {
 
 async function initializeDashboard() {
   try {
-    const { data: { session } } = await sbClient.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       authResolved = true;
       await bootDashboard(session.user);
@@ -71,7 +71,7 @@ async function initializeDashboard() {
   }, 1500);
 }
 
-sbClient.auth.onAuthStateChange(async (_event, session) => {
+supabase.auth.onAuthStateChange(async (_event, session) => {
   const user = session?.user || null;
   if (!user) {
     if (authResolved) {
@@ -105,7 +105,7 @@ function renderNav(user) {
 
 async function renderTeamView() {
   clearPageError();
-  const { data, error } = await sbClient.from("listings").select("*").eq("uid", currentUser.id).order("created_at", { ascending: false });
+  const { data, error } = await supabase.from("listings").select("*").eq("uid", currentUser.id).order("created_at", { ascending: false });
   const listings = (data || []).map(item => ({ id: item.id, ...item }));
   if (error) {
     console.error("Team listings load failed", error);
@@ -118,7 +118,7 @@ async function renderTeamView() {
 
 async function renderAdminView() {
   clearPageError();
-  const { data, error } = await sbClient.from("listings").select("*").order("created_at", { ascending: false });
+  const { data, error } = await supabase.from("listings").select("*").order("created_at", { ascending: false });
   const listings = (data || []).map(item => ({ id: item.id, ...item }));
   if (error) {
     console.error("Admin listings load failed", error);
@@ -163,7 +163,7 @@ function cardHTML(l, admin) {
       ${admin ? `<div class="card-by">By ${l.submitter_name || "Team member"} · ${date}</div>` : `<div class="card-by">${date}</div>`}
       ${l.desc ? `<div class="card-desc">${l.desc}</div>` : ""}
       <div class="card-actions">
-        ${admin && l.status === "pending" ? `<button class="btn-approve" onclick="approve('${l.id}')">✓ Approve</button><button class="btn-reject" onclick="reject('${l.id}')">✕ Reject</button>` : ""}
+        ${admin && l.status === "pending" ? `<button class="btn-approve" onclick="approve('${l.id}')">✓ Approve</button>` + (admin && l.status==="pending" ? `<button class="btn-edit" onclick="adminEdit('${l.id}')">✎ Edit</button>` : "") + `<button class="btn-reject" onclick="reject('${l.id}')">✕ Reject</button>` : ""}
         ${!admin && l.status !== "active" ? `<button class="btn-edit" onclick="openEdit('${l.id}')">Edit</button>` : ""}
         ${admin ? `<button class="btn-del" onclick="del('${l.id}')">Delete</button>` : ""}
       </div>
@@ -172,16 +172,16 @@ function cardHTML(l, admin) {
 }
 
 window.approve = async id => {
-  const { error } = await sbClient.from("listings").update({ status: "active", approved_at: new Date().toISOString(), approved_by: currentUser.id }).eq("id", id);
+  const { error } = await supabase.from("listings").update({ status: "active", approved_at: new Date().toISOString(), approved_by: currentUser.id }).eq("id", id);
   if (!error) pulse(id, "#4ade8022");
 };
 window.reject = async id => {
-  const { error } = await sbClient.from("listings").update({ status: "rejected", rejected_at: new Date().toISOString() }).eq("id", id);
+  const { error } = await supabase.from("listings").update({ status: "rejected", rejected_at: new Date().toISOString() }).eq("id", id);
   if (!error) pulse(id, "#f8717122");
 };
 window.del = async id => {
   if (!confirm("Permanently delete this listing?")) return;
-  await sbClient.from("listings").delete().eq("id", id);
+  await supabase.from("listings").delete().eq("id", id);
 };
 function pulse(id, bg) {
   const el = document.getElementById("card-" + id);
@@ -194,7 +194,7 @@ window.openAdd = () => {
   currentImageUrl = "";
   selectedImageFile = null;
   document.getElementById("modal-title").textContent = "Add New Listing";
-  ["f-title","f-area","f-price","f-size","f-desc"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});const _s=document.getElementById("f-type");if(_s)_s.selectedIndex=0;const _fi=document.getElementById("f-image");if(_fi)_fi.value="";
+  document.getElementById("lform").reset();
   document.getElementById("image-preview").src = "";
   document.getElementById("image-preview").style.display = "none";
   document.getElementById("submit-btn").textContent = "Submit for approval";
@@ -209,8 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+window.adminEdit = async id => {
+  await window.openEdit(id);
+};
 window.openEdit = async id => {
-  const { data } = await sbClient.from("listings").select("*").eq("id", id).maybeSingle();
+  const { data } = await supabase.from("listings").select("*").eq("id", id).single();
   if (!data) return;
   editId = id;
   currentImageUrl = data.image_url || "";
@@ -224,6 +227,7 @@ window.openEdit = async id => {
   document.getElementById("image-preview").src = currentImageUrl;
   document.getElementById("image-preview").style.display = currentImageUrl ? "block" : "none";
   selectedImageFile = null;
+  const fv = document.getElementById("f-verified"); if(fv) fv.checked = d.verified || false;
   document.getElementById("submit-btn").textContent = "Save changes";
   openModal();
 };
@@ -262,10 +266,10 @@ window.submitListing = async () => {
     if (editId) {
       const payload = { title, type, area, price, size, desc, updated_at: new Date().toISOString() };
       if (imageUrl) payload.image_url = imageUrl;
-      const { error: updateError } = await sbClient.from("listings").update(payload).eq("id", editId);
+      const { error: updateError } = await supabase.from("listings").update(payload).eq("id", editId);
       if (updateError) throw updateError;
     } else {
-      const { data: insertData, error: insertError } = await sbClient.from("listings").insert({
+      const { data: insertData, error: insertError } = await supabase.from("listings").insert({
         title,
         type,
         area,
@@ -277,7 +281,7 @@ window.submitListing = async () => {
         uid: currentUser.id,
         submitter_name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email,
         submitter_email: currentUser.email,
-        verified: false,
+        verified: document.getElementById("f-verified")?.checked || false,
         created_at: new Date().toISOString()
       });
       console.log("Insert result:", insertData, insertError);
@@ -315,7 +319,7 @@ function closeModal() {
 window.closeModal = closeModal;
 function showFormErr(msg) { const el = document.getElementById("form-err"); el.textContent = msg; el.style.opacity = "1"; setTimeout(() => el.style.opacity = "0", 3500); }
 
-window.handleSignOut = async () => { await sbClient.auth.signOut(); window.location.href = `${window.location.origin}/login.html`; };
+window.handleSignOut = async () => { await supabase.auth.signOut(); window.location.href = `${window.location.origin}/login.html`; };
 
 function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3200); }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
@@ -488,6 +492,12 @@ body{font-family:'Inter',sans-serif;background:#f0ebe2;min-height:100vh;-webkit-
           <img id="image-preview" class="image-preview" alt="Selected property preview" />
           <div class="image-hint">Optional. JPG or PNG files will be stored in Supabase Storage and shown on the homepage.</div>
         </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+        <input type="checkbox" id="f-verified" style="width:16px;height:16px;accent-color:#b06080;"/>
+        <label for="f-verified" style="font-family:Inter,sans-serif;font-size:13px;color:#3e2a32;cursor:pointer;">
+          Mark as PinkCity Verified™
+        </label>
       </div>
       <div class="modal-footer">
         <button class="cancel-btn" onclick="closeModal()">Cancel</button>
