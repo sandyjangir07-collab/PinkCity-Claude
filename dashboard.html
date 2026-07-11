@@ -4,12 +4,12 @@
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>PinkCity — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
 
 const supabaseUrl = window.SUPABASE_URL || "https://mfpnndrszjygespcfdbo.supabase.co";
 const supabaseKey = window.SUPABASE_ANON_KEY || "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf";
-const supabase = createClient(supabaseUrl, supabaseKey, {
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true
@@ -22,12 +22,12 @@ let selectedImageFile = null;
 let currentImageUrl = "";
 
 async function resolveUserRole(user) {
-  const { data, error } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data, error } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (error) {
     console.error("Profile role lookup failed", error);
-    return user.email?.toLowerCase() === "admin@pinkcity.com";
+    return user.email?.toLowerCase() === "sandyjangir07@gmail.com";
   }
-  return data?.role === "admin" || user.email?.toLowerCase() === "admin@pinkcity.com";
+  return data?.role === "admin" || user.email?.toLowerCase() === "sandyjangir07@gmail.com";
 }
 
 function showPageError(msg) {
@@ -163,7 +163,7 @@ function cardHTML(l, admin) {
       ${admin ? `<div class="card-by">By ${l.submitter_name || "Team member"} · ${date}</div>` : `<div class="card-by">${date}</div>`}
       ${l.desc ? `<div class="card-desc">${l.desc}</div>` : ""}
       <div class="card-actions">
-        ${admin && l.status === "pending" ? `<button class="btn-approve" onclick="approve('${l.id}')">✓ Approve</button>` + (admin && l.status==="pending" ? `<button class="btn-edit" onclick="adminEdit('${l.id}')">✎ Edit</button>` : "") + `<button class="btn-reject" onclick="reject('${l.id}')">✕ Reject</button>` : ""}
+        ${admin && l.status === "pending" ? `<button class="btn-approve" onclick="approve('${l.id}')">✓ Approve</button><button class="btn-reject" onclick="reject('${l.id}')">✕ Reject</button>` : ""}
         ${!admin && l.status !== "active" ? `<button class="btn-edit" onclick="openEdit('${l.id}')">Edit</button>` : ""}
         ${admin ? `<button class="btn-del" onclick="del('${l.id}')">Delete</button>` : ""}
       </div>
@@ -194,9 +194,7 @@ window.openAdd = () => {
   currentImageUrl = "";
   selectedImageFile = null;
   document.getElementById("modal-title").textContent = "Add New Listing";
-  document.getElementById("lform").reset();
-  document.getElementById("image-preview").src = "";
-  document.getElementById("image-preview").style.display = "none";
+  ["f-title","f-area","f-price","f-size","f-desc"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});const _st=document.getElementById("f-type");if(_st)_st.selectedIndex=0;const _fi=document.getElementById("f-image");if(_fi)_fi.value="";const _fv=document.getElementById("f-verified");if(_fv)_fv.checked=false;const _ip=document.getElementById("image-preview");if(_ip){_ip.src="";_ip.style.display="none";}
   document.getElementById("submit-btn").textContent = "Submit for approval";
   openModal();
 };
@@ -209,11 +207,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-window.adminEdit = async id => {
-  await window.openEdit(id);
-};
 window.openEdit = async id => {
-  const { data } = await supabase.from("listings").select("*").eq("id", id).single();
+  const { data } = await supabase.from("listings").select("*").eq("id", id).maybeSingle();
   if (!data) return;
   editId = id;
   currentImageUrl = data.image_url || "";
@@ -227,7 +222,6 @@ window.openEdit = async id => {
   document.getElementById("image-preview").src = currentImageUrl;
   document.getElementById("image-preview").style.display = currentImageUrl ? "block" : "none";
   selectedImageFile = null;
-  const fv = document.getElementById("f-verified"); if(fv) fv.checked = d.verified || false;
   document.getElementById("submit-btn").textContent = "Save changes";
   openModal();
 };
@@ -246,9 +240,9 @@ window.handleListingImage = async event => {
 async function uploadListingImage(file) {
   if (!file) return "";
   const filePath = `${currentUser.id}/${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-  const { data, error } = await sbClient.storage.from(storageBucket).upload(filePath, file, { cacheControl: "3600", upsert: false });
+  const { data, error } = await supabase.storage.from(storageBucket).upload(filePath, file, { cacheControl: "3600", upsert: false });
   if (error) throw error;
-  const { data: publicUrlData } = sbClient.storage.from(storageBucket).getPublicUrl(data.path);
+  const { data: publicUrlData } = supabase.storage.from(storageBucket).getPublicUrl(data.path);
   return publicUrlData.publicUrl;
 }
 window.submitListing = async () => {
@@ -281,7 +275,7 @@ window.submitListing = async () => {
         uid: currentUser.id,
         submitter_name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email,
         submitter_email: currentUser.email,
-        verified: document.getElementById("f-verified")?.checked || false,
+        verified: false,
         created_at: new Date().toISOString()
       });
       console.log("Insert result:", insertData, insertError);
@@ -492,12 +486,6 @@ body{font-family:'Inter',sans-serif;background:#f0ebe2;min-height:100vh;-webkit-
           <img id="image-preview" class="image-preview" alt="Selected property preview" />
           <div class="image-hint">Optional. JPG or PNG files will be stored in Supabase Storage and shown on the homepage.</div>
         </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
-        <input type="checkbox" id="f-verified" style="width:16px;height:16px;accent-color:#b06080;"/>
-        <label for="f-verified" style="font-family:Inter,sans-serif;font-size:13px;color:#3e2a32;cursor:pointer;">
-          Mark as PinkCity Verified™
-        </label>
       </div>
       <div class="modal-footer">
         <button class="cancel-btn" onclick="closeModal()">Cancel</button>
