@@ -176,6 +176,17 @@ let currentUser=null,isAdmin=false,editId=null,selectedFile=null,currentImageUrl
 
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),3200);}
 
+// Handle OAuth redirect token in URL hash
+sb.auth.getSession().then(async({data:{session}})=>{
+  if(!session){
+    // Try to exchange code from URL if present
+    const hash=window.location.hash;
+    const params=new URLSearchParams(window.location.search);
+    if(hash.includes("access_token")||params.get("code")){
+      await sb.auth.exchangeCodeForSession(window.location.href).catch(()=>{});
+    }
+  }
+});
 sb.auth.onAuthStateChange(async(event,session)=>{
   if(!session){window.location.href="login.html";return;}
   currentUser=session.user;

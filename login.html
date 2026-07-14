@@ -144,7 +144,7 @@ const sb=window.supabase.createClient("https://mfpnndrszjygespcfdbo.supabase.co"
 sb.auth.getSession().then((r)=>{if(r.data.session)window.location.href="dashboard.html";});
 function setBusy(on){document.getElementById("g-btn").disabled=on;const e=document.getElementById("e-btn");e.disabled=on;e.textContent=on?"Signing in…":"Sign in";}
 function showErr(msg){const el=document.getElementById("err");el.textContent=msg;el.style.opacity="1";setTimeout(()=>el.style.opacity="0",5000);}
-window.googleSignIn=async()=>{setBusy(true);const r=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin+"/dashboard.html"}});if(r.error){showErr("Google sign-in failed: "+r.error.message);setBusy(false);}};
+window.googleSignIn=async()=>{setBusy(true);const redirectTo=window.location.origin+"/dashboard.html";const r=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo,scopes:"email profile"}});if(r.error){showErr("Google sign-in failed: "+r.error.message);setBusy(false);}};
 window.emailSignIn=async()=>{const email=document.getElementById("em").value.trim();const pass=document.getElementById("pw").value;if(!email||!pass){showErr("Enter email and password.");return;}setBusy(true);const r=await sb.auth.signInWithPassword({email,password:pass});if(r.error){showErr("Incorrect email or password.");setBusy(false);}else window.location.href="dashboard.html";};
 </script>
 </body></html>
