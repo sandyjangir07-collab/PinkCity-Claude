@@ -635,6 +635,34 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .vlog-divider{height:1px;background:var(--border);margin:0 24px 16px;}
 
 .visit-textarea{width:100%;background:white;border:1.5px solid var(--border);border-radius:18px;padding:14px 16px;font-family:var(--font-sans);font-size:14px;color:var(--foreground);outline:none;transition:all 0.2s;resize:none;min-height:88px;line-height:1.6;} .visit-textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(157,29,76,0.08);} .visit-textarea::placeholder{color:var(--muted-foreground);}
+
+/* ── BLOG EDITOR ── */
+.blog-editor-overlay{display:none;position:fixed;inset:0;background:rgba(20,16,18,0.6);backdrop-filter:blur(8px);z-index:500;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.blog-editor-overlay.on{display:flex;}
+.blog-editor{background:var(--background);border-radius:24px;width:100%;max-width:780px;margin:auto;padding:32px;box-shadow:0 20px 60px rgba(20,16,18,0.25);}
+.blog-editor-title{font-family:var(--font-display);font-size:28px;color:var(--foreground);margin-bottom:24px;}
+.blog-grid{display:flex;flex-direction:column;gap:16px;}
+.blog-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:540px){.blog-row{grid-template-columns:1fr;}}
+.content-editor{width:100%;min-height:320px;background:white;border:1.5px solid var(--border);border-radius:14px;padding:16px;font-family:var(--font-sans);font-size:15px;color:var(--foreground);outline:none;transition:all 0.2s;resize:vertical;line-height:1.8;}
+.content-editor:focus{border-color:rgba(157,29,76,0.3);box-shadow:0 0 0 3px rgba(157,29,76,0.08);}
+.content-editor::placeholder{color:var(--muted-foreground);}
+.editor-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;padding:8px 12px;background:var(--secondary);border-radius:10px;}
+.toolbar-btn{padding:5px 10px;border-radius:8px;border:none;background:white;font-size:13px;font-weight:500;cursor:pointer;color:var(--foreground);font-family:var(--font-sans);transition:all 0.15s;}
+.toolbar-btn:hover{background:var(--primary-soft);color:var(--primary);}
+.status-pills{display:flex;gap:8px;}
+.status-pill{padding:8px 16px;border-radius:999px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--foreground);font-family:var(--font-sans);transition:all 0.2s;}
+.status-pill.active{background:var(--primary);color:white;border-color:var(--primary);}
+/* Blog post cards in dashboard */
+.blog-post-card{background:white;border:1px solid var(--border);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px;transition:all 0.2s;}
+.blog-post-card:hover{box-shadow:var(--shadow-soft);transform:translateY(-1px);}
+.blog-post-thumb{width:72px;height:54px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--secondary);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.blog-post-thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;}
+.blog-post-body{flex:1;min-width:0;}
+.blog-post-title{font-size:15px;font-weight:600;color:var(--foreground);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.blog-post-meta{font-size:12px;color:var(--muted-foreground);}
+.blog-post-actions{display:flex;gap:8px;flex-shrink:0;}
+
 </style>
 </head>
 <body>
@@ -657,6 +685,10 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   <div class="page-eyebrow fade-up" id="page-eyebrow">YOUR LISTINGS</div>
   <h1 class="page-title fade-up fade-up-1" id="page-title">Manage properties</h1>
   <p class="page-sub fade-up fade-up-2" id="page-sub">Submissions are reviewed by admin before going live.</p>
+  <div id="admin-tabs" style="display:none;display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;">
+    <button onclick="showTab('listings')" id="tab-listings" class="add-btn" style="margin-bottom:0;background:var(--primary);">🏠 Listings</button>
+    <button onclick="showTab('blogs')" id="tab-blogs" class="add-btn" style="margin-bottom:0;background:var(--secondary);color:var(--foreground);box-shadow:none;">✍️ Blog Posts</button>
+  </div>
 
   <div class="stat-grid" id="admin-stats" style="display:none;">
     <div class="stat-card fade-up"><div class="stat-n" id="stat-pending">—</div><div class="stat-l">Pending review</div></div>
@@ -672,6 +704,20 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 
   <div class="listing-list" id="listings">
     <div class="empty"><div class="empty-icon">⏳</div><p>Loading your listings…</p></div>
+  </div>
+
+  <!-- BLOG SECTION (admin only) -->
+  <div id="blog-section" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">BLOG POSTS</div>
+        <div style="font-size:22px;font-family:var(--font-display);color:var(--foreground);">Content Manager</div>
+      </div>
+      <button class="add-btn" style="margin-bottom:0;" onclick="openBlogEditor()">+ New Post</button>
+    </div>
+    <div class="listing-list" id="blog-list">
+      <div class="empty"><div class="empty-icon">✍️</div><p>No blog posts yet.</p></div>
+    </div>
   </div>
 </main>
 
@@ -775,6 +821,66 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   </div>
 </div>
 
+
+<!-- BLOG EDITOR MODAL -->
+<div class="blog-editor-overlay" id="blog-editor-overlay" onclick="if(event.target===this)closeBlogEditor()">
+  <div class="blog-editor">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div class="blog-editor-title" id="blog-editor-title">New Blog Post</div>
+      <button onclick="closeBlogEditor()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted-foreground);">×</button>
+    </div>
+    <div class="blog-grid">
+      <div><label class="fl">Post Title *</label><input class="fi" id="be-title" placeholder="e.g. Top 5 Localities to Invest in Jaipur 2026" oninput="autoSlug()"/></div>
+      <div class="blog-row">
+        <div><label class="fl">URL Slug *</label><input class="fi" id="be-slug" placeholder="top-5-localities-jaipur-2026"/></div>
+        <div><label class="fl">Category</label><select class="fsel" id="be-category"><option>Market Insights</option><option>Investment</option><option>Legal & Docs</option><option>Home Buying</option><option>NRI Guide</option><option>Lifestyle</option></select></div>
+      </div>
+      <div><label class="fl">Excerpt (shown in listing)</label><textarea class="ftextarea" id="be-excerpt" placeholder="A short 1-2 sentence summary of the post…" style="min-height:60px;"></textarea></div>
+      <div>
+        <label class="fl">Content (HTML) *</label>
+        <div class="editor-toolbar">
+          <button class="toolbar-btn" onclick="insertFormat('h2')">H2</button>
+          <button class="toolbar-btn" onclick="insertFormat('h3')">H3</button>
+          <button class="toolbar-btn" onclick="insertFormat('p')">¶</button>
+          <button class="toolbar-btn" onclick="insertFormat('b')"><strong>B</strong></button>
+          <button class="toolbar-btn" onclick="insertFormat('i')"><em>I</em></button>
+          <button class="toolbar-btn" onclick="insertFormat('ul')">• List</button>
+          <button class="toolbar-btn" onclick="insertFormat('link')">🔗</button>
+          <button class="toolbar-btn" onclick="insertFormat('quote')">" Quote</button>
+          <button class="toolbar-btn" onclick="insertFormat('img')">🖼</button>
+        </div>
+        <textarea class="content-editor" id="be-content" placeholder="Write your article in HTML. Use the toolbar buttons above to insert formatting. Example:&#10;&#10;&lt;p&gt;Your first paragraph here.&lt;/p&gt;&#10;&#10;&lt;h2&gt;Section Title&lt;/h2&gt;&#10;&lt;p&gt;Content here.&lt;/p&gt;"></textarea>
+      </div>
+      <div><label class="fl">Cover Image URL</label><input class="fi" id="be-cover" placeholder="https://... (paste an image URL)"/></div>
+      <div class="blog-row">
+        <div><label class="fl">Author Name</label><input class="fi" id="be-author" value="PinkCity Team"/></div>
+        <div><label class="fl">Read Time (mins)</label><input class="fi" id="be-read-time" type="number" value="3" min="1" max="60"/></div>
+      </div>
+      <div><label class="fl">Tags (comma separated)</label><input class="fi" id="be-tags" placeholder="jaipur, property, investment, 2026"/></div>
+      <div style="height:1px;background:var(--border);"></div>
+      <div><label class="fl">SEO Title (60 chars ideal)</label><input class="fi" id="be-seo-title" placeholder="Top 5 Localities to Invest in Jaipur 2026 | PinkCity"/></div>
+      <div><label class="fl">SEO Description (155 chars ideal)</label><textarea class="ftextarea" id="be-seo-desc" placeholder="Write a compelling meta description for Google search results…" style="min-height:70px;"></textarea></div>
+      <div>
+        <label class="fl">Status</label>
+        <div class="status-pills">
+          <button class="status-pill active" data-status="draft" onclick="setStatusPill('draft')">◐ Draft</button>
+          <button class="status-pill" data-status="published" onclick="setStatusPill('published')">● Published</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" id="be-featured" style="width:17px;height:17px;accent-color:var(--primary);cursor:pointer;" onchange="blogFeatured=this.checked"/>
+        <label for="be-featured" style="font-size:13px;color:var(--foreground);cursor:pointer;">⭐ Feature this post (shows as hero on blog page)</label>
+      </div>
+      <div class="form-err" id="be-err" style="opacity:0;"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-ghost" onclick="closeBlogEditor()" style="flex:0 0 auto;">Cancel</button>
+        <button class="btn-submit" id="be-save-btn" onclick="saveBlogPost(false)" style="flex:1;">Save</button>
+        <button class="btn-primary" onclick="saveBlogPost(true)" style="border:none;cursor:pointer;flex:0 0 auto;">Publish →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -815,6 +921,8 @@ sb.auth.onAuthStateChange(async (event, session) => {
     document.getElementById("page-title").textContent = "All Submissions";
     document.getElementById("page-sub").textContent = "Review, edit and approve listings from your team.";
     document.getElementById("add-btn").style.display = "none";
+    document.getElementById("admin-tabs").style.display = "flex";
+    document.getElementById("listings").style.display = "flex";
     document.getElementById("admin-stats").style.display = "grid";
     loadAdminListings();
   } else {
