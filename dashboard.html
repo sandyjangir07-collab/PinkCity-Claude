@@ -1269,5 +1269,201 @@ window.closeVisitLog = () => {
   document.body.style.overflow = "";
 };
 
+
+// ── BLOG MANAGEMENT ──
+let blogEditId = null, blogStatus = 'draft', blogFeatured = false;
+
+window.showTab = function(tab) {
+  const isListings = tab === 'listings';
+  document.getElementById('listings').style.display = isListings ? 'flex' : 'none';
+  document.getElementById('add-btn').style.display = isListings ? 'inline-flex' : 'none';
+  document.getElementById('blog-section').style.display = isListings ? 'none' : 'block';
+  document.getElementById('tab-listings').style.background = isListings ? 'var(--primary)' : 'var(--secondary)';
+  document.getElementById('tab-listings').style.color = isListings ? 'white' : 'var(--foreground)';
+  document.getElementById('tab-listings').style.boxShadow = isListings ? '' : 'none';
+  document.getElementById('tab-blogs').style.background = !isListings ? 'var(--primary)' : 'var(--secondary)';
+  document.getElementById('tab-blogs').style.color = !isListings ? 'white' : 'var(--foreground)';
+  document.getElementById('tab-blogs').style.boxShadow = !isListings ? '' : 'none';
+  if (!isListings) loadBlogPosts();
+};
+
+window.loadBlogPosts = async function() {
+  const { data } = await sb.from("blogs").select("id,slug,title,category,cover_image,status,featured,published_at,read_time_mins").order("created_at",{ascending:false});
+  const el = document.getElementById("blog-list");
+  const CAT_EMOJI = {"Market Insights":"📊","Investment":"📈","Legal & Docs":"📋","Home Buying":"🏠","NRI Guide":"✈️","Lifestyle":"🌿"};
+  if (!data || !data.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">✍️</div><p>No blog posts yet. Click <strong>+ New Post</strong> to write your first article.</p></div>';
+    return;
+  }
+  el.innerHTML = data.map(function(p) {
+    const em = CAT_EMOJI[p.category] || "📝";
+    const dateStr = p.published_at ? new Date(p.published_at).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}) : "Draft";
+    const statusBadge = p.status === 'published'
+      ? '<span class="badge badge-active">● Published</span>'
+      : '<span class="badge badge-pending">◐ Draft</span>';
+    return '<div class="blog-post-card">'
+      + '<div class="blog-post-thumb">' + (p.cover_image ? '<img src="'+p.cover_image+'" alt=""/>' : em) + '</div>'
+      + '<div class="blog-post-body">'
+      + '<div class="blog-post-title">'+p.title+'</div>'
+      + '<div class="blog-post-meta">'+p.category+' · '+dateStr+' · '+(p.read_time_mins||3)+' min'+(p.featured?' · ⭐ Featured':'')+'</div>'
+      + '<div style="margin-top:6px;">'+statusBadge+'</div>'
+      + '</div>'
+      + '<div class="blog-post-actions">'
+      + '<a href="blog-post.html?slug='+p.slug+'" target="_blank" class="btn-ghost" style="padding:6px 12px;font-size:12px;">Preview</a>'
+      + '<button class="btn-edit" data-bid="'+p.id+'" onclick="editBlogPost(this.dataset.bid)">Edit</button>'
+      + '<button class="btn-del" data-bid="'+p.id+'" onclick="deleteBlogPost(this.dataset.bid)">Delete</button>'
+      + '</div></div>';
+  }).join("");
+};
+
+window.openBlogEditor = function() {
+  blogEditId = null; blogStatus = 'draft'; blogFeatured = false;
+  var fields = ["be-title","be-slug","be-excerpt","be-content","be-seo-title","be-seo-desc","be-tags","be-cover"];
+  fields.forEach(function(id){ var el=document.getElementById(id); if(el)el.value=""; });
+  document.getElementById("be-category").value = "Market Insights";
+  document.getElementById("be-read-time").value = "3";
+  document.getElementById("be-author").value = "PinkCity Team";
+  document.getElementById("be-featured").checked = false;
+  setStatusPill('draft');
+  document.getElementById("blog-editor-title").textContent = "New Blog Post";
+  document.getElementById("be-err").style.opacity = "0";
+  document.getElementById("blog-editor-overlay").classList.add("on");
+  document.body.style.overflow = "hidden";
+  setTimeout(function(){ document.getElementById("be-title").focus(); }, 300);
+};
+
+window.editBlogPost = async function(id) {
+  const { data } = await sb.from("blogs").select("*").eq("id",id).maybeSingle();
+  if (!data) return;
+  blogEditId = id; blogStatus = data.status; blogFeatured = data.featured;
+  document.getElementById("be-title").value = data.title || "";
+  document.getElementById("be-slug").value = data.slug || "";
+  document.getElementById("be-excerpt").value = data.excerpt || "";
+  document.getElementById("be-content").value = data.content || "";
+  document.getElementById("be-category").value = data.category || "Market Insights";
+  document.getElementById("be-seo-title").value = data.seo_title || "";
+  document.getElementById("be-seo-desc").value = data.seo_description || "";
+  document.getElementById("be-tags").value = (data.tags || []).join(", ");
+  document.getElementById("be-read-time").value = data.read_time_mins || 3;
+  document.getElementById("be-author").value = data.author_name || "PinkCity Team";
+  document.getElementById("be-cover").value = data.cover_image || "";
+  document.getElementById("be-featured").checked = !!data.featured;
+  blogFeatured = !!data.featured;
+  setStatusPill(data.status || 'draft');
+  document.getElementById("blog-editor-title").textContent = "Edit Post";
+  document.getElementById("blog-editor-overlay").classList.add("on");
+  document.body.style.overflow = "hidden";
+};
+
+window.setStatusPill = function(status) {
+  blogStatus = status;
+  document.querySelectorAll('.status-pill').forEach(function(p){
+    p.classList.toggle('active', p.dataset.status === status);
+  });
+};
+window.setStatusPill = window.setStatusPill; // ensure global
+
+window.autoSlug = function() {
+  const title = document.getElementById("be-title").value;
+  if (!blogEditId) {
+    const slug = title.toLowerCase().trim()
+      .replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,80);
+    document.getElementById("be-slug").value = slug;
+    if (!document.getElementById("be-seo-title").value) {
+      document.getElementById("be-seo-title").value = title + " | PinkCity";
+    }
+  }
+};
+
+window.insertFormat = function(tag) {
+  const ta = document.getElementById("be-content");
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const sel = ta.value.substring(start, end);
+  const formats = {
+    h2: "<h2>"+(sel||"Heading")+"</h2>",
+    h3: "<h3>"+(sel||"Sub-heading")+"</h3>",
+    b: "<strong>"+(sel||"bold text")+"</strong>",
+    i: "<em>"+(sel||"italic text")+"</em>",
+    ul: "<ul>\n  <li>"+(sel||"List item")+"</li>\n  <li>List item</li>\n</ul>",
+    link: '<a href="https://pinkcityproperties.com">'+(sel||"link text")+"</a>",
+    quote: "<blockquote>"+(sel||"Quote text")+"</blockquote>",
+    img: '<img src="IMAGE_URL_HERE" alt="'+(sel||"description")+'"/>',
+    p: "<p>"+(sel||"Paragraph text")+"</p>",
+  };
+  const insert = formats[tag] || sel;
+  ta.value = ta.value.substring(0,start) + insert + ta.value.substring(end);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = start + insert.length;
+};
+
+window.saveBlogPost = async function(publish) {
+  const title   = document.getElementById("be-title").value.trim();
+  const slug    = document.getElementById("be-slug").value.trim().replace(/[^a-z0-9-]/g,'');
+  const content = document.getElementById("be-content").value.trim();
+  const errEl   = document.getElementById("be-err");
+  if (!title || !slug || !content) {
+    errEl.textContent = "Title, slug and content are required.";
+    errEl.style.opacity = "1";
+    setTimeout(function(){ errEl.style.opacity="0"; }, 3500);
+    return;
+  }
+  const btn = document.getElementById("be-save-btn");
+  btn.textContent = "Saving…"; btn.disabled = true;
+  const tagsRaw = document.getElementById("be-tags").value;
+  const tags = tagsRaw ? tagsRaw.split(",").map(function(t){return t.trim().toLowerCase();}).filter(Boolean) : [];
+  const finalStatus = publish ? 'published' : blogStatus;
+  const payload = {
+    title: title,
+    slug: slug,
+    excerpt: document.getElementById("be-excerpt").value.trim(),
+    content: content,
+    category: document.getElementById("be-category").value,
+    seo_title: document.getElementById("be-seo-title").value.trim() || title + " | PinkCity",
+    seo_description: document.getElementById("be-seo-desc").value.trim(),
+    tags: tags,
+    read_time_mins: parseInt(document.getElementById("be-read-time").value) || 3,
+    author_name: document.getElementById("be-author").value.trim() || "PinkCity Team",
+    cover_image: document.getElementById("be-cover").value.trim() || null,
+    status: finalStatus,
+    featured: document.getElementById("be-featured").checked,
+    updated_at: new Date().toISOString(),
+    created_by: currentUser.id,
+  };
+  if (finalStatus === 'published' && !blogEditId) {
+    payload.published_at = new Date().toISOString();
+  }
+  try {
+    var error;
+    if (blogEditId) {
+      const res = await sb.from("blogs").update(payload).eq("id", blogEditId);
+      error = res.error;
+    } else {
+      payload.created_at = new Date().toISOString();
+      const res = await sb.from("blogs").insert(payload);
+      error = res.error;
+    }
+    if (error) throw error;
+    toast(publish ? "✓ Post published!" : "✓ Draft saved!");
+    closeBlogEditor();
+    loadBlogPosts();
+  } catch(e) {
+    errEl.textContent = "Error: " + (e && e.message ? e.message : "Could not save.");
+    errEl.style.opacity = "1";
+  } finally {
+    btn.textContent = "Save"; btn.disabled = false;
+  }
+};
+
+window.deleteBlogPost = async function(id) {
+  if (!confirm("Delete this blog post permanently?")) return;
+  const { error } = await sb.from("blogs").delete().eq("id", id);
+  if (!error) { toast("Post deleted."); loadBlogPosts(); }
+};
+
+window.closeBlogEditor = function() {
+  document.getElementById("blog-editor-overlay").classList.remove("on");
+  document.body.style.overflow = "";
+};
+
 </script>
 </body></html>

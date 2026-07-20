@@ -526,8 +526,11 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .desc-card{background:white;border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:20px;}
 .desc-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted-foreground);margin-bottom:12px;}
 .desc-text{font-size:15px;line-height:1.78;color:var(--foreground);font-family:var(--font-sans);}
-.cta-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 20px;background:color-mix(in oklab,var(--background) 95%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;gap:10px;z-index:50;}
+.cta-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;background:color-mix(in oklab,var(--background) 97%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);z-index:50;display:flex;flex-direction:column;gap:8px;}
+.cta-row{display:flex;gap:10px;}
 @media(min-width:680px){.cta-bar{max-width:680px;margin:0 auto;left:0;right:0;}}
+.btn-add-visit{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:white;border:1.5px solid var(--border);color:var(--foreground);border-radius:999px;padding:12px;font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.btn-add-visit:hover{border-color:rgba(157,29,76,0.3);color:var(--primary);background:var(--primary-soft);}
 .btn-wa{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:white;border:none;border-radius:999px;padding:15px;font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;box-shadow:0 2px 10px rgba(37,211,102,0.30);transition:all 0.2s;}
 .btn-wa:hover{background:#1da851;}
 .btn-visit{flex:1;display:inline-flex;align-items:center;justify-content:center;background:var(--primary);color:white;border:none;border-radius:999px;padding:15px;font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer;box-shadow:0 2px 10px -2px rgba(157,29,76,0.35);transition:all 0.2s;}
@@ -566,6 +569,35 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 
 .topnav{position:sticky;top:0;z-index:100;padding:12px 16px;background:transparent;}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;background:color-mix(in oklab,white 78%,transparent);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);border:1px solid color-mix(in oklab,white 65%,transparent);border-radius:999px;padding:8px 12px;box-shadow:0 1px 2px rgba(20,16,18,0.025),0 4px 14px -6px rgba(20,16,18,0.06);}
+
+
+/* ── ADD VISIT LOG (listing page) ── */
+.addvisit-overlay{display:none;position:fixed;inset:0;background:rgba(20,16,18,0.52);backdrop-filter:blur(8px);z-index:400;align-items:flex-end;justify-content:center;}
+.addvisit-overlay.on{display:flex;}
+.addvisit-modal{background:var(--background);border-radius:32px 32px 0 0;padding:0 0 48px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:modal-in 0.35s cubic-bezier(0.22,1,0.36,1);}
+@media(min-width:600px){.addvisit-modal{border-radius:28px;margin:auto;margin-bottom:40px;}}
+.addvisit-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 0;}
+.addvisit-hero{text-align:center;padding:24px 24px 0;}
+.addvisit-icon{width:52px;height:52px;border-radius:50%;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.addvisit-title{font-family:var(--font-display);font-size:26px;color:var(--foreground);margin-bottom:6px;letter-spacing:-0.02em;}
+.addvisit-sub{font-size:13px;color:var(--muted-foreground);line-height:1.6;max-width:300px;margin:0 auto;}
+.addvisit-divider{height:1px;background:var(--border);margin:20px 0;}
+.addvisit-body{padding:0 22px;}
+.addvisit-grid{display:flex;flex-direction:column;gap:14px;}
+.addvisit-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.addvisit-row{grid-template-columns:1fr;}}
+.addvisit-photo-wrap{width:100%;aspect-ratio:16/9;border-radius:14px;border:1.5px dashed var(--border);overflow:hidden;background:var(--secondary);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative;}
+.addvisit-photo-wrap:hover{border-color:var(--primary);background:var(--primary-soft);}
+.addvisit-photo-label{font-size:13px;color:var(--muted-foreground);margin-top:8px;}
+/* Past visits in listing */
+.visit-past-section{margin-top:0;padding:0 22px 4px;}
+.visit-past-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted-foreground);margin-bottom:12px;}
+.visit-past-card{display:flex;align-items:flex-start;gap:12px;padding:12px;background:white;border:1px solid var(--border);border-radius:14px;margin-bottom:8px;}
+.visit-past-photo{width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.visit-past-photo img{width:100%;height:100%;object-fit:cover;border-radius:10px;}
+.visit-past-name{font-size:14px;font-weight:600;color:var(--foreground);}
+.visit-past-meta{font-size:12px;color:var(--muted-foreground);margin-top:2px;}
+.visit-past-note{font-size:13px;color:var(--foreground);margin-top:4px;line-height:1.5;}
 
 </style>
 </head>
@@ -645,11 +677,17 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 </div>
 
 <div class="cta-bar">
-  <a class="btn-wa" id="wa-btn" href="#" target="_blank">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
-    WhatsApp
-  </a>
-  <button class="btn-visit" onclick="openVisit()">Request Site Visit</button>
+  <div class="cta-row">
+    <a class="btn-wa" id="wa-btn" href="#" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+      WhatsApp
+    </a>
+    <button class="btn-visit" onclick="openVisit()">Request Visit</button>
+  </div>
+  <button class="btn-add-visit" id="btn-add-visit" onclick="openAddVisit()" style="display:none;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Log Visit
+  </button>
 </div>
 
 <div class="visit-overlay" id="visit-overlay" onclick="if(event.target===this)closeVisit()">
@@ -776,6 +814,10 @@ async function load() {
   document.getElementById("v-date").value = today;
   document.getElementById("skeleton").style.display = "none";
   document.getElementById("content").style.display = "block";
+  // Show Add Visit button (only for logged-in team members)
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) document.getElementById("btn-add-visit").style.display = "flex";
+  });
 }
 
 function showErr(msg) {
@@ -841,6 +883,178 @@ document.addEventListener("keydown",e=>{
 });
 
 load();
+
+// ── ADD VISIT LOG (listing page) ──
+let avPhotoFile = null;
+
+window.openAddVisit = async () => {
+  // Check if user is logged in
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    // Redirect to login
+    window.location.href = "login.html?redirect=" + encodeURIComponent(window.location.href);
+    return;
+  }
+  // Reset form
+  avPhotoFile = null;
+  ["av-name","av-phone","av-notes"].forEach(id => { const el=document.getElementById(id); if(el)el.value=""; });
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("av-date").value = today;
+  document.getElementById("av-date").max = today;
+  document.getElementById("av-photo-input").value = "";
+  const wrap = document.getElementById("av-photo-wrap");
+  wrap.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><div class="addvisit-photo-label">Tap to add photo</div>';
+  // Set property name
+  if (listingData) {
+    document.getElementById("addvisit-prop-name").textContent = listingData.title;
+  }
+  // Load past visits for this listing
+  if (listingData) await loadPastVisitsForListing(listingData.id, session.user);
+  document.getElementById("addvisit-form-wrap").style.display = "block";
+  document.getElementById("addvisit-success").style.display = "none";
+  document.getElementById("addvisit-overlay").classList.add("on");
+  document.body.style.overflow = "hidden";
+};
+
+async function loadPastVisitsForListing(listingId, user) {
+  const { data } = await sb.from("visits").select("*").eq("listing_id", listingId).order("visit_date",{ascending:false}).limit(10);
+  const pastSection = document.getElementById("av-past-section");
+  const pastList = document.getElementById("av-past-list");
+  if (!data || !data.length) { pastSection.style.display = "none"; return; }
+  pastList.innerHTML = data.map(v => {
+    const dateStr = new Date(v.visit_date).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+    return `<div class="visit-past-card">
+      <div class="visit-past-photo">${v.photo_url ? `<img src="${v.photo_url}" alt=""/>` : "👤"}</div>
+      <div>
+        <div class="visit-past-name">${v.visitor_name}</div>
+        <div class="visit-past-meta">${v.visitor_phone ? v.visitor_phone + " · " : ""}${dateStr}${v.visit_time ? " · " + v.visit_time : ""}</div>
+        ${v.notes ? `<div class="visit-past-note">${v.notes}</div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+  pastSection.style.display = "block";
+}
+
+window.previewAvPhoto = (input) => {
+  if (!input.files || !input.files[0]) return;
+  avPhotoFile = input.files[0];
+  const url = URL.createObjectURL(avPhotoFile);
+  const wrap = document.getElementById("av-photo-wrap");
+  wrap.innerHTML = `<img src="${url}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/><div style="position:absolute;bottom:8px;right:8px;background:rgba(20,16,18,0.65);color:white;font-size:11px;padding:4px 10px;border-radius:999px;">Change</div>`;
+};
+
+window.submitAddVisit = async () => {
+  const name  = document.getElementById("av-name").value.trim();
+  const phone = document.getElementById("av-phone").value.trim();
+  const date  = document.getElementById("av-date").value;
+  const time  = document.getElementById("av-time").value;
+  const notes = document.getElementById("av-notes").value.trim();
+  const errEl = document.getElementById("av-err");
+  if (!name || !date) {
+    errEl.textContent = "Please enter client name and visit date.";
+    errEl.style.opacity = "1";
+    setTimeout(() => errEl.style.opacity = "0", 3500);
+    return;
+  }
+  const btn = document.getElementById("av-submit-btn");
+  btn.textContent = "Saving…"; btn.disabled = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) throw new Error("Not logged in");
+    const user = session.user;
+    const meta = user.user_metadata;
+    let photoUrl = "";
+    if (avPhotoFile) {
+      const ext = avPhotoFile.name.split(".").pop();
+      const path = `visits/${user.id}-${Date.now()}.${ext}`;
+      const { error: upErr } = await sb.storage.from("property-images").upload(path, avPhotoFile, {cacheControl:"3600",upsert:false});
+      if (!upErr) { const { data } = sb.storage.from("property-images").getPublicUrl(path); photoUrl = data.publicUrl; }
+    }
+    const { error } = await sb.from("visits").insert({
+      listing_id: listingData.id,
+      listing_title: listingData.title,
+      visitor_name: name,
+      visitor_phone: phone || null,
+      visit_date: date,
+      visit_time: time,
+      notes: notes || null,
+      photo_url: photoUrl || null,
+      logged_by: user.id,
+      logged_by_name: meta.full_name || meta.name || user.email,
+      created_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    document.getElementById("addvisit-form-wrap").style.display = "none";
+    document.getElementById("addvisit-success").style.display = "block";
+  } catch(e) {
+    errEl.textContent = "Error: " + (e?.message || "Could not save.");
+    errEl.style.opacity = "1";
+  } finally {
+    btn.textContent = "Save Visit Record"; btn.disabled = false;
+  }
+};
+
+window.closeAddVisit = () => {
+  document.getElementById("addvisit-overlay").classList.remove("on");
+  document.body.style.overflow = "";
+};
+
 </script>
+
+<!-- ADD VISIT LOG MODAL -->
+<div class="addvisit-overlay" id="addvisit-overlay" onclick="if(event.target===this)closeAddVisit()">
+  <div class="addvisit-modal">
+    <div class="addvisit-handle"></div>
+    <div id="addvisit-form-wrap">
+      <div class="addvisit-hero">
+        <div class="addvisit-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div class="addvisit-title">Log a Visit</div>
+        <div class="addvisit-sub" id="addvisit-prop-name">Record who visited this property</div>
+      </div>
+      <div class="addvisit-divider"></div>
+      <div class="addvisit-body">
+        <div class="addvisit-grid">
+          <div><label class="fl">Client Name *</label><input class="fi" id="av-name" placeholder="e.g. Priya Sharma"/></div>
+          <div><label class="fl">Client Phone</label><input class="fi" id="av-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
+          <div class="addvisit-row">
+            <div><label class="fl">Visit Date *</label><input class="fi" id="av-date" type="date"/></div>
+            <div><label class="fl">Time Slot</label><select class="fsel" id="av-time"><option>9–11 AM</option><option>11 AM–1 PM</option><option>2–4 PM</option><option>4–6 PM</option><option>Evening</option></select></div>
+          </div>
+          <div>
+            <label class="fl">Visit Photo (optional)</label>
+            <input type="file" id="av-photo-input" accept="image/*" style="display:none;" onchange="previewAvPhoto(this)"/>
+            <div class="addvisit-photo-wrap" id="av-photo-wrap" onclick="document.getElementById('av-photo-input').click()">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              <div class="addvisit-photo-label">Tap to add photo</div>
+            </div>
+          </div>
+          <div><label class="fl">Notes (optional)</label><textarea class="visit-textarea" id="av-notes" placeholder="Interested in plot size, asked about loan options…" style="min-height:72px;"></textarea></div>
+          <div class="form-err" id="av-err" style="opacity:0;text-align:center;"></div>
+          <div style="display:flex;gap:10px;">
+            <button style="flex:0 0 auto;padding:14px 18px;border-radius:999px;border:1.5px solid var(--border);background:white;color:var(--muted-foreground);font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer;" onclick="closeAddVisit()">Cancel</button>
+            <button class="btn-submit" id="av-submit-btn" onclick="submitAddVisit()" style="flex:1;">Save Visit Record</button>
+          </div>
+        </div>
+      </div>
+      <!-- Past visits -->
+      <div id="av-past-section" style="display:none;">
+        <div class="addvisit-divider" style="margin:20px 22px;"></div>
+        <div class="visit-past-section">
+          <div class="visit-past-title">Previous Visits</div>
+          <div id="av-past-list"></div>
+        </div>
+      </div>
+    </div>
+    <div id="addvisit-success" style="display:none;text-align:center;padding:48px 28px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:rgba(74,222,128,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;">✅</div>
+      <div style="font-family:var(--font-display);font-size:28px;color:var(--foreground);margin-bottom:10px;letter-spacing:-0.02em;">Visit logged!</div>
+      <div style="font-size:14px;color:var(--muted-foreground);line-height:1.75;margin-bottom:28px;">The visit has been saved to your records.</div>
+      <button onclick="closeAddVisit()" class="btn-primary" style="border:none;cursor:pointer;display:inline-flex;">Done</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
