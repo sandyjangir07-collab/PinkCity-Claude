@@ -663,6 +663,64 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .blog-post-meta{font-size:12px;color:var(--muted-foreground);}
 .blog-post-actions{display:flex;gap:8px;flex-shrink:0;}
 
+
+/* ── TABS ── */
+.tab-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:999px;border:1.5px solid var(--border);background:white;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--muted-foreground);cursor:pointer;transition:all 0.2s;margin-bottom:0;}
+.tab-btn:hover{border-color:rgba(157,29,76,0.25);color:var(--primary);}
+.tab-btn.active-tab{background:var(--primary);color:white;border-color:var(--primary);box-shadow:0 3px 12px rgba(157,29,76,0.28);}
+/* ── CRM LEAD CARDS ── */
+.lead-card{background:white;border:1px solid var(--border);border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all 0.2s;cursor:pointer;}
+.lead-card:hover{box-shadow:var(--shadow-elev);border-color:rgba(157,29,76,0.18);transform:translateY(-1px);}
+.lead-av{width:44px;height:44px;border-radius:50%;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--primary);flex-shrink:0;}
+.lead-name{font-size:15px;font-weight:600;color:var(--foreground);margin-bottom:2px;}
+.lead-meta{font-size:12px;color:var(--muted-foreground);line-height:1.5;}
+.lead-source-tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
+.src-whatsapp{background:rgba(37,211,102,0.12);color:#15803d;}
+.src-visit_form{background:rgba(157,29,76,0.10);color:var(--primary);}
+.src-consultation{background:rgba(99,102,241,0.10);color:#4338ca;}
+.src-manual{background:var(--secondary);color:var(--muted-foreground);}
+.src-referral{background:rgba(245,158,11,0.12);color:#b45309;}
+/* Status badges */
+.st-new{background:rgba(59,130,246,0.12);color:#1d4ed8;}
+.st-contacted{background:rgba(245,158,11,0.12);color:#b45309;}
+.st-visit_scheduled{background:rgba(249,115,22,0.12);color:#c2410c;}
+.st-visit_done{background:rgba(168,85,247,0.12);color:#7e22ce;}
+.st-negotiating{background:rgba(239,68,68,0.12);color:#b91c1c;}
+.st-closed{background:rgba(34,197,94,0.12);color:#15803d;}
+.st-lost{background:rgba(107,114,128,0.12);color:#374151;}
+/* ── VISIT CARDS ── */
+.sched-card{background:white;border:1px solid var(--border);border-radius:18px;padding:16px 18px;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;}
+.sched-card:hover{box-shadow:var(--shadow-soft);border-color:rgba(157,29,76,0.15);}
+.sched-date-block{width:52px;flex-shrink:0;text-align:center;background:var(--primary-soft);border-radius:12px;padding:8px 4px;}
+.sched-day{font-size:22px;font-family:var(--font-display);color:var(--primary);line-height:1;font-weight:600;}
+.sched-month{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--primary);opacity:0.7;}
+.sched-today{background:var(--primary);}
+.sched-today .sched-day,.sched-today .sched-month{color:white;}
+.sched-body{flex:1;}
+.sched-client{font-size:15px;font-weight:600;color:var(--foreground);margin-bottom:3px;}
+.sched-prop{font-size:13px;color:var(--muted-foreground);margin-bottom:6px;}
+.sched-time-badge{display:inline-flex;align-items:center;gap:5px;background:var(--secondary);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;color:var(--foreground);}
+.sched-done{background:rgba(34,197,94,0.12);color:#15803d;}
+.sched-cancelled{background:rgba(107,114,128,0.10);color:#6b7280;}
+.sched-no_show{background:rgba(239,68,68,0.10);color:#b91c1c;}
+/* ── PERFORMANCE ── */
+.team-card{background:white;border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:14px;}
+.team-card-top{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.team-av{width:44px;height:44px;border-radius:50%;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--primary);}
+.team-name{font-size:16px;font-weight:600;color:var(--foreground);}
+.team-email{font-size:12px;color:var(--muted-foreground);}
+.team-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.team-stat{text-align:center;background:var(--secondary);border-radius:14px;padding:12px 8px;}
+.team-stat-n{font-family:var(--font-display);font-size:26px;color:var(--primary);letter-spacing:-0.02em;line-height:1;}
+.team-stat-l{font-size:11px;color:var(--muted-foreground);margin-top:3px;}
+/* ── TIMELINE ── */
+.timeline-item{display:flex;gap:10px;align-items:flex-start;}
+.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;}
+.timeline-content{flex:1;background:var(--secondary);border-radius:12px;padding:10px 14px;}
+.timeline-note{font-size:13px;color:var(--foreground);line-height:1.5;}
+.timeline-meta{font-size:11px;color:var(--muted-foreground);margin-top:4px;}
+.timeline-status-change{display:inline-flex;background:var(--primary-soft);color:var(--primary);border-radius:999px;padding:2px 10px;font-size:10px;font-weight:700;margin-top:5px;}
+
 </style>
 </head>
 <body>
@@ -684,10 +742,13 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 <main class="main">
   <div class="page-eyebrow fade-up" id="page-eyebrow">YOUR LISTINGS</div>
   <h1 class="page-title fade-up fade-up-1" id="page-title">Manage properties</h1>
-  <p class="page-sub fade-up fade-up-2" id="page-sub">Submissions are reviewed by admin before going live.</p>
-  <div id="admin-tabs" style="display:none;display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;">
-    <button onclick="showTab('listings')" id="tab-listings" class="add-btn" style="margin-bottom:0;background:var(--primary);">🏠 Listings</button>
-    <button onclick="showTab('blogs')" id="tab-blogs" class="add-btn" style="margin-bottom:0;background:var(--secondary);color:var(--foreground);box-shadow:none;">✍️ Blog Posts</button>
+  <p class="page-sub fade-up fade-up-2" id="page-sub">Manage listings, track leads, and schedule site visits.</p>
+  <div id="admin-tabs" style="display:none;display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;">
+    <button onclick="showTab('listings')" id="tab-listings" class="tab-btn active-tab">🏠 Listings</button>
+    <button onclick="showTab('crm')" id="tab-crm" class="tab-btn">👥 CRM</button>
+    <button onclick="showTab('schedule')" id="tab-schedule" class="tab-btn">📅 Visits</button>
+    <button onclick="showTab('performance')" id="tab-performance" class="tab-btn" style="display:none;">📊 Performance</button>
+    <button onclick="showTab('blogs')" id="tab-blogs" class="tab-btn">✍️ Blog</button>
   </div>
 
   <div class="stat-grid" id="admin-stats" style="display:none;">
@@ -772,6 +833,82 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 </div>
 
 
+
+  <!-- ── CRM SECTION ── -->
+  <div id="crm-section" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">CLIENT CRM</div>
+        <div style="font-size:22px;font-family:var(--font-display);color:var(--foreground);">All Leads</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select class="fsel" id="crm-filter" onchange="loadLeads()" style="width:auto;padding:9px 14px;font-size:13px;">
+          <option value="all">All statuses</option>
+          <option value="new">🔵 New</option>
+          <option value="contacted">🟡 Contacted</option>
+          <option value="visit_scheduled">🟠 Visit Scheduled</option>
+          <option value="visit_done">🟣 Visit Done</option>
+          <option value="negotiating">🔴 Negotiating</option>
+          <option value="closed">🟢 Closed</option>
+          <option value="lost">⚫ Lost</option>
+        </select>
+        <button class="add-btn" style="margin-bottom:0;" onclick="openAddLead()">+ Add Lead</button>
+      </div>
+    </div>
+    <!-- CRM Stats -->
+    <div class="stat-grid" id="crm-stats" style="margin-bottom:20px;grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card"><div class="stat-n" id="cs-new" style="color:#3b82f6;">—</div><div class="stat-l">New</div></div>
+      <div class="stat-card"><div class="stat-n" id="cs-active" style="color:#f59e0b;">—</div><div class="stat-l">Active</div></div>
+      <div class="stat-card"><div class="stat-n" id="cs-closed" style="color:#22c55e;">—</div><div class="stat-l">Closed</div></div>
+      <div class="stat-card"><div class="stat-n" id="cs-total">—</div><div class="stat-l">Total Leads</div></div>
+    </div>
+    <div class="listing-list" id="crm-list">
+      <div class="empty"><div class="empty-icon">👥</div><p>No leads yet. Add your first lead or they'll appear automatically from site visit requests.</p></div>
+    </div>
+  </div>
+
+  <!-- ── SCHEDULE SECTION ── -->
+  <div id="schedule-section" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">SITE VISITS</div>
+        <div style="font-size:22px;font-family:var(--font-display);color:var(--foreground);">Visit Calendar</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <select class="fsel" id="sched-filter" onchange="loadScheduledVisits()" style="width:auto;padding:9px 14px;font-size:13px;">
+          <option value="upcoming">Upcoming</option>
+          <option value="all">All</option>
+          <option value="done">Done</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button class="add-btn" style="margin-bottom:0;" onclick="openScheduleVisit()">+ Schedule Visit</button>
+      </div>
+    </div>
+    <!-- Today/Upcoming split -->
+    <div id="today-visits" style="margin-bottom:24px;"></div>
+    <div class="listing-list" id="sched-list">
+      <div class="empty"><div class="empty-icon">📅</div><p>No visits scheduled. Click <strong>+ Schedule Visit</strong> to add one.</p></div>
+    </div>
+  </div>
+
+  <!-- ── PERFORMANCE SECTION (admin only) ── -->
+  <div id="performance-section" style="display:none;">
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">ADMIN</div>
+      <div style="font-size:22px;font-family:var(--font-display);color:var(--foreground);">Team Performance</div>
+    </div>
+    <!-- Overall stats -->
+    <div class="stat-grid" style="margin-bottom:28px;">
+      <div class="stat-card"><div class="stat-n" id="perf-listings">—</div><div class="stat-l">Total Listings</div></div>
+      <div class="stat-card"><div class="stat-n" id="perf-visits">—</div><div class="stat-l">Site Visits Logged</div></div>
+      <div class="stat-card"><div class="stat-n" id="perf-leads">—</div><div class="stat-l">Leads in CRM</div></div>
+      <div class="stat-card"><div class="stat-n" id="perf-closed" style="color:#22c55e;">—</div><div class="stat-l">Deals Closed</div></div>
+    </div>
+    <div id="team-grid" class="listing-list">
+      <div class="empty"><div class="empty-icon">📊</div><p>Loading team data…</p></div>
+    </div>
+  </div>
+
 <!-- VISIT LOG MODAL -->
 <div class="vlog-overlay" id="vlog-overlay" onclick="if(event.target===this)closeVisitLog()">
   <div class="vlog-modal">
@@ -821,6 +958,105 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   </div>
 </div>
 
+
+
+<!-- ── ADD LEAD MODAL ── -->
+<div class="overlay" id="lead-overlay" onclick="if(event.target===this)closeLeadModal()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="lead-modal-title">Add Lead</div>
+    <div class="form-err" id="lead-err" style="opacity:0;"></div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div><label class="fl">Name *</label><input class="fi" id="lead-name" placeholder="Client name"/></div>
+        <div><label class="fl">Phone *</label><input class="fi" id="lead-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
+      </div>
+      <div class="form-row">
+        <div><label class="fl">Email</label><input class="fi" id="lead-email" type="email" placeholder="optional"/></div>
+        <div><label class="fl">Source</label><select class="fsel" id="lead-source"><option value="manual">Manual</option><option value="whatsapp">WhatsApp</option><option value="visit_form">Visit Form</option><option value="consultation">Consultation Form</option><option value="referral">Referral</option></select></div>
+      </div>
+      <div class="form-row">
+        <div><label class="fl">Budget</label><input class="fi" id="lead-budget" placeholder="e.g. ₹50L–1Cr"/></div>
+        <div><label class="fl">Property Type</label><select class="fsel" id="lead-proptype"><option value="">Any</option><option value="plot">Plot</option><option value="apartment">Apartment</option><option value="farmhouse">Farmhouse</option><option value="villa">Villa</option><option value="land">Land</option></select></div>
+      </div>
+      <div><label class="fl">Preferred Location</label><input class="fi" id="lead-location" placeholder="e.g. Jagatpura, Mansarovar"/></div>
+      <div><label class="fl">Status</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="lead-status-pills">
+          <button class="status-pill active" data-status="new" onclick="setLeadStatus('new')">🔵 New</button>
+          <button class="status-pill" data-status="contacted" onclick="setLeadStatus('contacted')">🟡 Contacted</button>
+          <button class="status-pill" data-status="visit_scheduled" onclick="setLeadStatus('visit_scheduled')">🟠 Visit Sched.</button>
+          <button class="status-pill" data-status="visit_done" onclick="setLeadStatus('visit_done')">🟣 Visit Done</button>
+          <button class="status-pill" data-status="negotiating" onclick="setLeadStatus('negotiating')">🔴 Negotiating</button>
+          <button class="status-pill" data-status="closed" onclick="setLeadStatus('closed')">🟢 Closed</button>
+          <button class="status-pill" data-status="lost" onclick="setLeadStatus('lost')">⚫ Lost</button>
+        </div>
+      </div>
+      <div><label class="fl">Notes</label><textarea class="ftextarea" id="lead-notes" placeholder="Any details about this lead…" style="min-height:80px;"></textarea></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-ghost" onclick="closeLeadModal()" style="flex:0 0 auto;">Cancel</button>
+        <button class="btn-submit" id="lead-save-btn" onclick="saveLead()" style="flex:1;">Save Lead</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── LEAD DETAIL MODAL ── -->
+<div class="overlay" id="lead-detail-overlay" onclick="if(event.target===this)closeLeadDetail()">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;">
+      <div>
+        <div class="modal-title" id="ld-name" style="margin-bottom:4px;font-size:24px;"></div>
+        <div id="ld-meta" style="font-size:13px;color:var(--muted-foreground);"></div>
+      </div>
+      <div id="ld-status-badge" class="badge"></div>
+    </div>
+    <!-- Status updater -->
+    <div style="margin-bottom:20px;">
+      <div class="fl" style="margin-bottom:8px;">Update Status</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="ld-status-pills"></div>
+    </div>
+    <!-- Add note -->
+    <div style="margin-bottom:20px;">
+      <div class="fl" style="margin-bottom:8px;">Add Note</div>
+      <textarea class="ftextarea" id="ld-note-input" placeholder="What happened? Next steps?" style="min-height:72px;margin-bottom:8px;"></textarea>
+      <button class="btn-primary" onclick="addLeadNote()" style="border:none;cursor:pointer;padding:10px 20px;font-size:13px;">Save note</button>
+    </div>
+    <!-- Timeline -->
+    <div class="fl" style="margin-bottom:10px;">Activity Timeline</div>
+    <div id="ld-timeline" style="display:flex;flex-direction:column;gap:10px;max-height:260px;overflow-y:auto;"></div>
+    <div style="display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <button class="btn-ghost" onclick="openEditLead(currentLeadId)" style="flex:0 0 auto;">✎ Edit</button>
+      <button class="btn-del" onclick="deleteLead(currentLeadId)">Delete</button>
+      <button class="btn-ghost" onclick="closeLeadDetail()" style="margin-left:auto;flex:0 0 auto;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHEDULE VISIT MODAL ── -->
+<div class="overlay" id="sched-overlay" onclick="if(event.target===this)closeSchedModal()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="sched-modal-title">Schedule Site Visit</div>
+    <div class="form-err" id="sched-err" style="opacity:0;"></div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div><label class="fl">Client Name *</label><input class="fi" id="sv-client" placeholder="Client name"/></div>
+        <div><label class="fl">Client Phone</label><input class="fi" id="sv-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
+      </div>
+      <div><label class="fl">Property / Listing</label><input class="fi" id="sv-listing" placeholder="Property name or address"/></div>
+      <div class="form-row">
+        <div><label class="fl">Visit Date *</label><input class="fi" id="sv-date" type="date"/></div>
+        <div><label class="fl">Time Slot *</label><select class="fsel" id="sv-time"><option>9–11 AM</option><option>11 AM–1 PM</option><option>2–4 PM</option><option>4–6 PM</option><option>Evening</option></select></div>
+      </div>
+      <div><label class="fl">Notes</label><textarea class="ftextarea" id="sv-notes" placeholder="Any special instructions…" style="min-height:70px;"></textarea></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-ghost" onclick="closeSchedModal()" style="flex:0 0 auto;">Cancel</button>
+        <button class="btn-submit" id="sv-save-btn" onclick="saveScheduledVisit()" style="flex:1;">Schedule Visit</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- BLOG EDITOR MODAL -->
 <div class="blog-editor-overlay" id="blog-editor-overlay" onclick="if(event.target===this)closeBlogEditor()">
@@ -926,6 +1162,10 @@ sb.auth.onAuthStateChange(async (event, session) => {
     document.getElementById("admin-stats").style.display = "grid";
     loadAdminListings();
   } else {
+    // Team members get CRM + Schedule tabs too
+    document.getElementById('admin-tabs').style.display = 'flex';
+    document.getElementById('listings').style.display = 'flex';
+    document.getElementById('tab-performance').style.display = 'none'; // admin only
     loadTeamListings();
   }
 });
@@ -1274,17 +1514,32 @@ window.closeVisitLog = () => {
 let blogEditId = null, blogStatus = 'draft', blogFeatured = false;
 
 window.showTab = function(tab) {
-  const isListings = tab === 'listings';
-  document.getElementById('listings').style.display = isListings ? 'flex' : 'none';
-  document.getElementById('add-btn').style.display = isListings ? 'inline-flex' : 'none';
-  document.getElementById('blog-section').style.display = isListings ? 'none' : 'block';
-  document.getElementById('tab-listings').style.background = isListings ? 'var(--primary)' : 'var(--secondary)';
-  document.getElementById('tab-listings').style.color = isListings ? 'white' : 'var(--foreground)';
-  document.getElementById('tab-listings').style.boxShadow = isListings ? '' : 'none';
-  document.getElementById('tab-blogs').style.background = !isListings ? 'var(--primary)' : 'var(--secondary)';
-  document.getElementById('tab-blogs').style.color = !isListings ? 'white' : 'var(--foreground)';
-  document.getElementById('tab-blogs').style.boxShadow = !isListings ? '' : 'none';
-  if (!isListings) loadBlogPosts();
+  // Hide all sections
+  ['listings','blog-section','crm-section','schedule-section','performance-section'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.style.display='none';
+  });
+  document.getElementById('add-btn').style.display = 'none';
+  // Deactivate all tabs
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active-tab'); });
+
+  if(tab==='listings'){
+    document.getElementById('listings').style.display='flex';
+    document.getElementById('add-btn').style.display='inline-flex';
+  } else if(tab==='blogs'){
+    document.getElementById('blog-section').style.display='block';
+    loadBlogPosts();
+  } else if(tab==='crm'){
+    document.getElementById('crm-section').style.display='block';
+    loadLeads();
+  } else if(tab==='schedule'){
+    document.getElementById('schedule-section').style.display='block';
+    loadScheduledVisits();
+  } else if(tab==='performance'){
+    document.getElementById('performance-section').style.display='block';
+    loadPerformance();
+  }
+  var activeBtn = document.getElementById('tab-'+tab);
+  if(activeBtn) activeBtn.classList.add('active-tab');
 };
 
 window.loadBlogPosts = async function() {
@@ -1463,6 +1718,390 @@ window.deleteBlogPost = async function(id) {
 window.closeBlogEditor = function() {
   document.getElementById("blog-editor-overlay").classList.remove("on");
   document.body.style.overflow = "";
+};
+
+
+// ════════════════════════════════════════════════
+// CRM — LEADS
+// ════════════════════════════════════════════════
+let currentLeadStatus = 'new', currentLeadId = null, editLeadId = null;
+
+const STATUS_LABELS = {
+  new:'🔵 New', contacted:'🟡 Contacted', visit_scheduled:'🟠 Visit Sched.',
+  visit_done:'🟣 Visit Done', negotiating:'🔴 Negotiating', closed:'🟢 Closed', lost:'⚫ Lost'
+};
+const SOURCE_LABELS = {
+  whatsapp:'WhatsApp', visit_form:'Visit Form', consultation:'Consultation',
+  manual:'Manual', referral:'Referral'
+};
+
+window.loadLeads = async function() {
+  const filter = document.getElementById('crm-filter').value;
+  let q = sb.from('leads').select('*').order('created_at',{ascending:false});
+  if (filter !== 'all') q = q.eq('status', filter);
+  if (!isAdmin) q = q.eq('created_by', currentUser.id);
+  const { data } = await q;
+  const leads = data || [];
+
+  // Stats
+  document.getElementById('cs-new').textContent = leads.filter(l=>l.status==='new').length;
+  document.getElementById('cs-active').textContent = leads.filter(l=>!['closed','lost','new'].includes(l.status)).length;
+  document.getElementById('cs-closed').textContent = leads.filter(l=>l.status==='closed').length;
+  document.getElementById('cs-total').textContent = leads.length;
+
+  const el = document.getElementById('crm-list');
+  if (!leads.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><p>No leads found. Add your first lead or adjust the filter.</p></div>';
+    return;
+  }
+  el.innerHTML = leads.map(function(l) {
+    const initials = (l.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    const srcCls = 'src-' + (l.source||'manual');
+    const stCls  = 'st-' + (l.status||'new');
+    const dateStr = new Date(l.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    return '<div class="lead-card" data-lid="'+l.id+'" onclick="openLeadDetail(this.dataset.lid)">'
+      + '<div class="lead-av">'+initials+'</div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div class="lead-name">'+l.name+'</div>'
+      + '<div class="lead-meta">'+l.phone+(l.budget?' · '+l.budget:'')+(l.preferred_location?' · '+l.preferred_location:'')+'</div>'
+      + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
+      + '<span class="badge '+stCls+'">'+( STATUS_LABELS[l.status]||l.status)+'</span>'
+      + '<span class="lead-source-tag '+srcCls+'">'+(SOURCE_LABELS[l.source]||l.source)+'</span>'
+      + '</div></div>'
+      + '<div style="font-size:11px;color:var(--muted-foreground);flex-shrink:0;">'+dateStr+'</div>'
+      + '</div>';
+  }).join('');
+};
+
+window.openAddLead = function() {
+  editLeadId = null; currentLeadStatus = 'new';
+  ['lead-name','lead-phone','lead-email','lead-budget','lead-location','lead-notes'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('lead-source').value = 'manual';
+  document.getElementById('lead-proptype').value = '';
+  setLeadStatus('new');
+  document.getElementById('lead-modal-title').textContent = 'Add Lead';
+  document.getElementById('lead-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+window.openEditLead = async function(id) {
+  const { data } = await sb.from('leads').select('*').eq('id',id).maybeSingle();
+  if (!data) return;
+  editLeadId = id;
+  document.getElementById('lead-name').value = data.name||'';
+  document.getElementById('lead-phone').value = data.phone||'';
+  document.getElementById('lead-email').value = data.email||'';
+  document.getElementById('lead-budget').value = data.budget||'';
+  document.getElementById('lead-location').value = data.preferred_location||'';
+  document.getElementById('lead-notes').value = data.notes||'';
+  document.getElementById('lead-source').value = data.source||'manual';
+  document.getElementById('lead-proptype').value = data.property_type||'';
+  setLeadStatus(data.status||'new');
+  document.getElementById('lead-modal-title').textContent = 'Edit Lead';
+  document.getElementById('lead-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+  closeLeadDetail();
+};
+
+window.setLeadStatus = function(status) {
+  currentLeadStatus = status;
+  document.querySelectorAll('#lead-status-pills .status-pill').forEach(function(p){
+    p.classList.toggle('active', p.dataset.status === status);
+  });
+};
+
+window.saveLead = async function() {
+  const name = document.getElementById('lead-name').value.trim();
+  const phone = document.getElementById('lead-phone').value.trim();
+  if (!name||!phone) {
+    const e=document.getElementById('lead-err');e.textContent='Name and phone are required.';e.style.opacity='1';
+    setTimeout(function(){e.style.opacity='0';},3000); return;
+  }
+  const btn = document.getElementById('lead-save-btn');
+  btn.textContent='Saving…'; btn.disabled=true;
+  const payload = {
+    name, phone,
+    email: document.getElementById('lead-email').value.trim()||null,
+    budget: document.getElementById('lead-budget').value.trim()||null,
+    preferred_location: document.getElementById('lead-location').value.trim()||null,
+    notes: document.getElementById('lead-notes').value.trim()||null,
+    source: document.getElementById('lead-source').value,
+    property_type: document.getElementById('lead-proptype').value||null,
+    status: currentLeadStatus,
+    updated_at: new Date().toISOString(),
+    created_by: currentUser.id,
+    created_by_name: currentUser.user_metadata.full_name || currentUser.user_metadata.name || currentUser.email,
+  };
+  try {
+    if (editLeadId) {
+      const {error} = await sb.from('leads').update(payload).eq('id',editLeadId);
+      if(error) throw error;
+      toast('✓ Lead updated!');
+    } else {
+      payload.created_at = new Date().toISOString();
+      const {error} = await sb.from('leads').insert(payload);
+      if(error) throw error;
+      toast('✓ Lead added!');
+    }
+    closeLeadModal(); loadLeads();
+  } catch(e) {
+    const el=document.getElementById('lead-err');el.textContent='Error: '+(e.message||'Could not save.');el.style.opacity='1';
+  } finally { btn.textContent='Save Lead'; btn.disabled=false; }
+};
+
+window.openLeadDetail = async function(id) {
+  currentLeadId = id;
+  const { data: l } = await sb.from('leads').select('*').eq('id',id).maybeSingle();
+  if (!l) return;
+  document.getElementById('ld-name').textContent = l.name;
+  document.getElementById('ld-meta').textContent = [l.phone, l.email, l.budget, l.preferred_location].filter(Boolean).join(' · ');
+  const stBadge = document.getElementById('ld-status-badge');
+  stBadge.className = 'badge st-'+(l.status||'new');
+  stBadge.textContent = STATUS_LABELS[l.status]||l.status;
+
+  // Status pills
+  document.getElementById('ld-status-pills').onclick = function(e){ var b=e.target.closest('.ld-status-pill'); if(b) updateLeadStatus(b.dataset.lid, b.dataset.st); };
+  document.getElementById('ld-status-pills').innerHTML = Object.keys(STATUS_LABELS).map(function(s){
+    return '<button class="status-pill'+(l.status===s?' active':'')+' ld-status-pill" data-lid="'+id+'" data-st="'+s+'">'+(STATUS_LABELS[s])+'</button>';
+  }).join('');
+
+  // Load timeline
+  await refreshTimeline(id);
+  document.getElementById('lead-detail-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+async function refreshTimeline(id) {
+  const { data } = await sb.from('lead_notes').select('*').eq('lead_id',id).order('created_at',{ascending:false});
+  const el = document.getElementById('ld-timeline');
+  if (!data||!data.length) { el.innerHTML='<div style="font-size:13px;color:var(--muted-foreground);padding:8px 0;">No activity yet. Add a note above.</div>'; return; }
+  el.innerHTML = data.map(function(n){
+    const d = new Date(n.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content">'
+      +(n.status_change?'<div class="timeline-status-change">Status → '+n.status_change+'</div>':'')
+      +'<div class="timeline-note">'+n.note+'</div>'
+      +'<div class="timeline-meta">'+n.created_by_name+' · '+d+'</div>'
+      +'</div></div>';
+  }).join('');
+}
+
+window.updateLeadStatus = async function(id, status) {
+  const oldData = await sb.from('leads').select('status').eq('id',id).maybeSingle();
+  await sb.from('leads').update({status, updated_at:new Date().toISOString()}).eq('id',id);
+  // Auto-note the status change
+  await sb.from('lead_notes').insert({
+    lead_id: id,
+    note: 'Status changed to ' + (STATUS_LABELS[status]||status),
+    status_change: STATUS_LABELS[status]||status,
+    created_by: currentUser.id,
+    created_by_name: currentUser.user_metadata.full_name||currentUser.user_metadata.name||currentUser.email,
+    created_at: new Date().toISOString()
+  });
+  // Update UI
+  document.querySelectorAll('#ld-status-pills .status-pill').forEach(function(p){
+    p.classList.toggle('active', p.textContent === (STATUS_LABELS[status]||status));
+  });
+  const stBadge = document.getElementById('ld-status-badge');
+  stBadge.className = 'badge st-'+status;
+  stBadge.textContent = STATUS_LABELS[status]||status;
+  await refreshTimeline(id);
+  loadLeads();
+  toast('✓ Status updated!');
+};
+
+window.addLeadNote = async function() {
+  const note = document.getElementById('ld-note-input').value.trim();
+  if (!note) return;
+  await sb.from('lead_notes').insert({
+    lead_id: currentLeadId,
+    note,
+    created_by: currentUser.id,
+    created_by_name: currentUser.user_metadata.full_name||currentUser.user_metadata.name||currentUser.email,
+    created_at: new Date().toISOString()
+  });
+  document.getElementById('ld-note-input').value = '';
+  await refreshTimeline(currentLeadId);
+  toast('✓ Note saved!');
+};
+
+window.deleteLead = async function(id) {
+  if (!confirm('Delete this lead and all its notes?')) return;
+  await sb.from('lead_notes').delete().eq('lead_id',id);
+  await sb.from('leads').delete().eq('id',id);
+  closeLeadDetail(); loadLeads(); toast('Lead deleted.');
+};
+
+window.closeLeadModal = function() { document.getElementById('lead-overlay').classList.remove('on'); document.body.style.overflow=''; };
+window.closeLeadDetail = function() { document.getElementById('lead-detail-overlay').classList.remove('on'); document.body.style.overflow=''; };
+
+// ════════════════════════════════════════════════
+// SITE VISIT SCHEDULER
+// ════════════════════════════════════════════════
+let editSchedId = null;
+
+window.loadScheduledVisits = async function() {
+  const filter = document.getElementById('sched-filter').value;
+  const today = new Date().toISOString().split('T')[0];
+  let q = sb.from('scheduled_visits').select('*').order('visit_date',{ascending:true}).order('visit_time',{ascending:true});
+  if (filter === 'upcoming') q = q.gte('visit_date', today).in('status',['scheduled']);
+  else if (filter === 'done') q = q.eq('status','done');
+  else if (filter === 'cancelled') q = q.in('status',['cancelled','no_show']);
+  if (!isAdmin) q = q.eq('created_by', currentUser.id);
+  const { data } = await q;
+  const visits = data || [];
+
+  // Today's visits
+  const todayVisits = visits.filter(function(v){ return v.visit_date === today && v.status === 'scheduled'; });
+  const todayEl = document.getElementById('today-visits');
+  if (todayVisits.length) {
+    todayEl.innerHTML = '<div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:12px;">TODAY — '+todayVisits.length+' visit'+(todayVisits.length>1?'s':'')+'</div>'
+      + todayVisits.map(function(v){ return renderSchedCard(v, true); }).join('');
+  } else {
+    todayEl.innerHTML = '';
+  }
+
+  const rest = filter === 'upcoming' ? visits.filter(function(v){ return v.visit_date !== today; }) : visits.filter(function(v){ return v.visit_date !== today; });
+  const el = document.getElementById('sched-list');
+  if (!rest.length && !todayVisits.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><p>No visits found.</p></div>';
+    return;
+  }
+  el.innerHTML = rest.length ? rest.map(function(v){ return renderSchedCard(v, false); }).join('') : '';
+};
+
+function renderSchedCard(v, isToday) {
+  const d = new Date(v.visit_date + 'T00:00:00');
+  const day = d.getDate();
+  const mon = d.toLocaleDateString('en-IN',{month:'short'}).toUpperCase();
+  const stClass = v.status==='done'?'sched-done':v.status==='cancelled'?'sched-cancelled':v.status==='no_show'?'sched-no_show':'';
+  const stLabel = v.status==='done'?'✓ Done':v.status==='cancelled'?'Cancelled':v.status==='no_show'?'No Show':'Scheduled';
+  return '<div class="sched-card" style="margin-bottom:10px;">'
+    + '<div class="sched-date-block'+(isToday?' sched-today':'')+'"><div class="sched-day">'+day+'</div><div class="sched-month">'+mon+'</div></div>'
+    + '<div class="sched-body">'
+    + '<div class="sched-client">'+v.client_name+(v.client_phone?' · '+v.client_phone:'')+'</div>'
+    + '<div class="sched-prop">'+(v.listing_title||'—')+'</div>'
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">'
+    + '<span class="sched-time-badge">🕐 '+v.visit_time+'</span>'
+    + (stClass?'<span class="badge '+stClass+'">'+stLabel+'</span>':'')
+    + (v.notes?'<span style="font-size:12px;color:var(--muted-foreground);">'+v.notes+'</span>':'')
+    + '</div></div>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">'
+    + (v.status==='scheduled'?'<button class="btn-approve" data-vid="'+v.id+'" onclick="markVisitDone(this.dataset.vid)">✓ Done</button><button class="btn-del" data-vid="'+v.id+'" onclick="cancelVisit(this.dataset.vid)">Cancel</button>':'')
+    + '</div></div>';
+}
+
+window.openScheduleVisit = function() {
+  editSchedId = null;
+  ['sv-client','sv-phone','sv-listing','sv-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  document.getElementById('sv-date').value = tomorrow.toISOString().split('T')[0];
+  document.getElementById('sv-date').min = new Date().toISOString().split('T')[0];
+  document.getElementById('sched-modal-title').textContent = 'Schedule Site Visit';
+  document.getElementById('sched-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+window.saveScheduledVisit = async function() {
+  const client = document.getElementById('sv-client').value.trim();
+  const date   = document.getElementById('sv-date').value;
+  const time   = document.getElementById('sv-time').value;
+  if (!client||!date) {
+    const e=document.getElementById('sched-err');e.textContent='Client name and date are required.';e.style.opacity='1';
+    setTimeout(function(){e.style.opacity='0';},3000); return;
+  }
+  const btn = document.getElementById('sv-save-btn');
+  btn.textContent='Saving…'; btn.disabled=true;
+  const meta = currentUser.user_metadata;
+  const payload = {
+    client_name: client,
+    client_phone: document.getElementById('sv-phone').value.trim()||null,
+    listing_title: document.getElementById('sv-listing').value.trim()||null,
+    visit_date: date,
+    visit_time: time,
+    notes: document.getElementById('sv-notes').value.trim()||null,
+    status: 'scheduled',
+    created_by: currentUser.id,
+    created_by_name: meta.full_name||meta.name||currentUser.email,
+    assigned_to: currentUser.id,
+    assigned_name: meta.full_name||meta.name||currentUser.email,
+    updated_at: new Date().toISOString(),
+  };
+  try {
+    const {error} = await sb.from('scheduled_visits').insert({...payload, created_at:new Date().toISOString()});
+    if(error) throw error;
+    toast('✓ Visit scheduled!');
+    closeSchedModal(); loadScheduledVisits();
+  } catch(e) {
+    const el=document.getElementById('sched-err');el.textContent='Error: '+(e.message||'Could not save.');el.style.opacity='1';
+  } finally { btn.textContent='Schedule Visit'; btn.disabled=false; }
+};
+
+window.markVisitDone = async function(id) {
+  await sb.from('scheduled_visits').update({status:'done',updated_at:new Date().toISOString()}).eq('id',id);
+  toast('✓ Marked as done!'); loadScheduledVisits();
+};
+window.cancelVisit = async function(id) {
+  if(!confirm('Cancel this visit?')) return;
+  await sb.from('scheduled_visits').update({status:'cancelled',updated_at:new Date().toISOString()}).eq('id',id);
+  toast('Visit cancelled.'); loadScheduledVisits();
+};
+window.closeSchedModal = function() { document.getElementById('sched-overlay').classList.remove('on'); document.body.style.overflow=''; };
+
+// ════════════════════════════════════════════════
+// TEAM PERFORMANCE (admin only)
+// ════════════════════════════════════════════════
+window.loadPerformance = async function() {
+  const [listingsRes, visitsRes, leadsRes, profilesRes] = await Promise.all([
+    sb.from('listings').select('uid,submitter_name,status'),
+    sb.from('visits').select('logged_by,logged_by_name'),
+    sb.from('leads').select('created_by,created_by_name,status'),
+    sb.from('profiles').select('id,full_name,email,role'),
+  ]);
+
+  const listings = listingsRes.data||[];
+  const visits   = visitsRes.data||[];
+  const leads    = leadsRes.data||[];
+  const profiles = profilesRes.data||[];
+
+  // Overall stats
+  document.getElementById('perf-listings').textContent = listings.length;
+  document.getElementById('perf-visits').textContent = visits.length;
+  document.getElementById('perf-leads').textContent = leads.length;
+  document.getElementById('perf-closed').textContent = leads.filter(function(l){return l.status==='closed';}).length;
+
+  // Per-member breakdown
+  const members = {};
+  profiles.filter(function(p){return p.role !== 'admin';}).forEach(function(p){
+    members[p.id] = {name:p.full_name||p.email, email:p.email, listings:0, visits:0, leads:0, closed:0};
+  });
+  // Also add members who have activity but no profile
+  listings.forEach(function(l){ if(l.uid && !members[l.uid]) members[l.uid]={name:l.submitter_name||'Team',email:'',listings:0,visits:0,leads:0,closed:0}; });
+
+  listings.forEach(function(l){ if(members[l.uid]) members[l.uid].listings++; });
+  visits.forEach(function(v){ if(members[v.logged_by]) members[v.logged_by].visits++; });
+  leads.forEach(function(l){
+    if(members[l.created_by]) {
+      members[l.created_by].leads++;
+      if(l.status==='closed') members[l.created_by].closed++;
+    }
+  });
+
+  const memberList = Object.entries(members).sort(function(a,b){ return (b[1].listings+b[1].visits+b[1].leads)-(a[1].listings+a[1].visits+a[1].leads); });
+  const el = document.getElementById('team-grid');
+  if (!memberList.length) { el.innerHTML='<div class="empty"><div class="empty-icon">👥</div><p>No team members yet.</p></div>'; return; }
+  el.innerHTML = memberList.map(function(entry){
+    const m = entry[1];
+    const initials = (m.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    return '<div class="team-card">'
+      +'<div class="team-card-top"><div class="team-av">'+initials+'</div><div><div class="team-name">'+m.name+'</div><div class="team-email">'+m.email+'</div></div></div>'
+      +'<div class="team-stats">'
+      +'<div class="team-stat"><div class="team-stat-n">'+m.listings+'</div><div class="team-stat-l">Listings</div></div>'
+      +'<div class="team-stat"><div class="team-stat-n">'+m.visits+'</div><div class="team-stat-l">Site Visits</div></div>'
+      +'<div class="team-stat"><div class="team-stat-n" style="color:#22c55e;">'+m.closed+'</div><div class="team-stat-l">Deals Closed</div></div>'
+      +'</div></div>';
+  }).join('');
 };
 
 </script>

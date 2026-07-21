@@ -1816,7 +1816,17 @@ async function submitC(){
   const name=document.getElementById('f-name').value.trim(),phone=document.getElementById('f-phone').value.trim(),email=document.getElementById('f-email').value.trim(),budget=document.getElementById('f-budget').value,propertyType=document.getElementById('f-type').value,location=document.getElementById('f-loc2').value.trim();
   if(!name||!phone){showToast('Please fill in your name and phone.');return;}
   const btn=document.querySelector('#cform .btn-submit');const orig=btn.textContent;btn.textContent='Saving…';btn.disabled=true;
-  const data={name,phone,email,budget,propertyType,location};await pcSave('consultation',data);
+  const data={name,phone,email,budget,propertyType,location};
+  // Save to Supabase CRM leads table
+  try {
+    await sb.from('leads').insert({
+      name,phone,email:email||null,budget:budget||null,
+      property_type:propertyType||null,preferred_location:location||null,
+      source:'consultation',status:'new',
+      created_at:new Date().toISOString(),updated_at:new Date().toISOString()
+    });
+  } catch(e){ console.log('Lead save:',e); }
+  await pcSave('consultation',data);
   btn.textContent=orig;btn.disabled=false;
   showToast('✓ Opening WhatsApp…');
   document.getElementById('cform').querySelectorAll('input,select').forEach(el=>el.value='');
@@ -1825,7 +1835,17 @@ async function submitC(){
 async function submitL(){
   const name=document.getElementById('l-name').value.trim(),phone=document.getElementById('l-phone').value.trim(),propertyType=document.getElementById('l-type').value,location=document.getElementById('l-loc').value.trim(),price=document.getElementById('l-price').value.trim();
   if(!name||!phone){showToast('Please fill in your name and phone.');return;}
-  const data={name,phone,propertyType,location,price};await pcSave('listing',data);
+  const data={name,phone,propertyType,location,price};
+  // Save to Supabase CRM as a lead (seller/lister)
+  try {
+    await sb.from('leads').insert({
+      name,phone,property_type:propertyType||null,preferred_location:location||null,
+      budget:price||null,source:'whatsapp',status:'new',
+      notes:'Submitted a listing: '+propertyType+(location?' in '+location:'')+(price?' at '+price:''),
+      created_at:new Date().toISOString(),updated_at:new Date().toISOString()
+    });
+  } catch(e){ console.log('Lead save:',e); }
+  await pcSave('listing',data);
   showToast('✓ Opening WhatsApp…');
   document.querySelectorAll('#list input,#list select').forEach(el=>el.value='');
   setTimeout(()=>pcWA('listing',data),500);

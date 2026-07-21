@@ -853,6 +853,20 @@ window.submitVisit = async () => {
   const prop    = listingData ? `${listingData.title} (${listingData.price}) — ${listingData.area}` : window.location.href;
   const dateStr = new Date(date).toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   try {
+    // Save to CRM leads
+    try {
+      await sb.from('leads').insert({
+        name, phone,
+        source: 'visit_form',
+        status: 'visit_scheduled',
+        preferred_location: listingData ? listingData.area : null,
+        related_listing_title: listingData ? listingData.title : null,
+        notes: 'Visit requested: '+dateStr+', '+selectedTime+(msg?' — '+msg:''),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+    } catch(e){ console.log('Lead CRM save:', e); }
+
     await fetch("https://formspree.io/f/xzzbbkop", {
       method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({
