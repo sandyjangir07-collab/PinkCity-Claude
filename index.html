@@ -1270,6 +1270,576 @@ a:focus:not(:focus-visible) { outline: none !important; }
   color: var(--foreground);
 }
 
+
+/* ════════════════════════════════════════════════════════
+   PINKCITY — PREMIUM ENHANCEMENT LAYER
+   Lighter headlines · Richer graphics · Refined depth
+════════════════════════════════════════════════════════ */
+
+/* ── 1. HEADLINE WEIGHT REDUCTION ── */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400 !important;
+}
+.hero h1 {
+  font-weight: 300 !important;
+  letter-spacing: -0.04em !important;
+  line-height: 0.92 !important;
+}
+.hero h1 em {
+  font-weight: 200 !important;
+  letter-spacing: -0.03em !important;
+  color: color-mix(in oklab, var(--foreground) 55%, transparent) !important;
+}
+.section-header h2 {
+  font-weight: 300 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 0.97 !important;
+}
+.section-header h2 em {
+  font-weight: 200 !important;
+}
+.steps-panel h3 {
+  font-weight: 300 !important;
+  letter-spacing: -0.03em !important;
+}
+.value-title {
+  font-weight: 400 !important;
+  letter-spacing: -0.015em !important;
+}
+.prop-location-name {
+  font-weight: 300 !important;
+  letter-spacing: -0.02em !important;
+}
+.footer-brand-name {
+  font-weight: 300 !important;
+}
+.modal-title {
+  font-weight: 300 !important;
+  letter-spacing: -0.025em !important;
+}
+.blog-featured-title, .blog-card-title {
+  font-weight: 300 !important;
+}
+.visit-title, .addvisit-title {
+  font-weight: 300 !important;
+}
+
+/* ── 2. PREMIUM BODY TEXTURE ── */
+body {
+  background-image:
+    radial-gradient(ellipse 90% 60% at 10% -10%, color-mix(in oklab, var(--primary) 7%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 70% 50% at 90% 110%, color-mix(in oklab, var(--gold) 9%, transparent) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, color-mix(in oklab, var(--primary) 2%, transparent) 0%, transparent 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* ── 3. HERO RICHER GRADIENTS ── */
+.hero-bg > div:first-child {
+  background: linear-gradient(145deg,
+    oklch(0.96 0.025 72) 0%,
+    oklch(0.93 0.03 60) 40%,
+    oklch(0.90 0.04 45) 100%) !important;
+}
+.hero-bg-overlay-1 {
+  background: linear-gradient(
+    180deg,
+    rgba(247,243,236,0.3) 0%,
+    rgba(247,243,236,0.55) 50%,
+    oklch(0.975 0.012 82) 100%) !important;
+}
+.hero-orb-1 {
+  width: 680px !important;
+  height: 680px !important;
+  background: radial-gradient(circle, rgba(157,29,76,0.14) 0%, rgba(157,29,76,0.04) 60%, transparent 100%) !important;
+  filter: blur(80px) !important;
+}
+.hero-orb-2 {
+  width: 520px !important;
+  height: 520px !important;
+  background: radial-gradient(circle, oklch(0.85 0.09 78 / 0.18) 0%, transparent 70%) !important;
+  filter: blur(90px) !important;
+}
+.hero-orb-3 {
+  width: 360px !important;
+  height: 360px !important;
+  background: radial-gradient(circle, rgba(157,29,76,0.10) 0%, transparent 70%) !important;
+  filter: blur(70px) !important;
+}
+
+/* ── 4. HERO PILL — Etched glass ── */
+.hero-pill {
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(255,255,255,0.75) !important;
+  box-shadow: 0 1px 3px rgba(20,16,18,0.06), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+  letter-spacing: 0.10em !important;
+  padding: 8px 18px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  color: color-mix(in oklab, var(--foreground) 70%, transparent) !important;
+}
+
+/* ── 5. NAV — Ultra-refined pill ── */
+.nav.scrolled {
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.8),
+    0 4px 24px -8px rgba(20,16,18,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+.nav:not(.scrolled) {
+  border: 1px solid rgba(255,255,255,0.50) !important;
+  box-shadow: 0 2px 12px rgba(20,16,18,0.04), inset 0 1px 0 rgba(255,255,255,0.7) !important;
+}
+.nav-logo {
+  box-shadow:
+    0 2px 8px rgba(157,29,76,0.35),
+    0 0 0 1px rgba(157,29,76,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.25) !important;
+}
+
+/* ── 6. SEARCH CARD — Etched glass premium ── */
+.search-card {
+  background: rgba(255,255,255,0.62) !important;
+  border: 1px solid rgba(255,255,255,0.80) !important;
+  box-shadow:
+    0 2px 4px rgba(20,16,18,0.03),
+    0 20px 60px -20px rgba(20,16,18,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.95) !important;
+}
+.search-field {
+  background: rgba(255,255,255,0.70) !important;
+  border: 1px solid rgba(255,255,255,0.60) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+.search-field:hover {
+  background: rgba(255,255,255,0.95) !important;
+  border-color: rgba(157,29,76,0.15) !important;
+  box-shadow: 0 4px 20px rgba(20,16,18,0.06), inset 0 1px 0 rgba(255,255,255,1) !important;
+}
+.btn-search {
+  background: oklch(0.16 0.010 25) !important;
+  letter-spacing: 0.02em !important;
+  font-weight: 600 !important;
+}
+.btn-search:hover {
+  background: var(--primary) !important;
+  box-shadow: 0 8px 32px rgba(157,29,76,0.45) !important;
+}
+
+/* ── 7. STATS — Optical elegance ── */
+.stats-grid {
+  border-top: 1px solid rgba(20,16,18,0.06) !important;
+  opacity: 0.75 !important;
+}
+.stat-num {
+  font-variant-numeric: tabular-nums !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.04em !important;
+  line-height: 1 !important;
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.62 0.20 15) 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+.stat-lab {
+  font-weight: 400 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.02em !important;
+  color: color-mix(in oklab, var(--muted-foreground) 80%, transparent) !important;
+}
+
+/* ── 8. PROPERTY CARDS — Museum-quality ── */
+.prop-card {
+  background: rgba(255,255,255,0.92) !important;
+  box-shadow:
+    0 1px 2px rgba(20,16,18,0.04),
+    0 4px 16px rgba(20,16,18,0.05),
+    0 0 0 1px rgba(20,16,18,0.04) !important;
+  border: none !important;
+  transition: transform 0.55s cubic-bezier(0.22,1,0.36,1), box-shadow 0.55s cubic-bezier(0.22,1,0.36,1) !important;
+}
+.prop-card:hover {
+  transform: translateY(-8px) scale(1.01) !important;
+  box-shadow:
+    0 2px 4px rgba(20,16,18,0.03),
+    0 20px 60px -12px rgba(20,16,18,0.16),
+    0 0 0 1px rgba(157,29,76,0.10) !important;
+}
+.prop-img-wrap {
+  aspect-ratio: 3/4 !important;
+  overflow: hidden !important;
+}
+.prop-img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 40%,
+    rgba(20,16,18,0.08) 70%,
+    rgba(20,16,18,0.55) 100%
+  );
+  pointer-events: none;
+}
+.prop-type-badge {
+  background: rgba(255,255,255,0.92) !important;
+  backdrop-filter: saturate(200%) blur(20px) !important;
+  box-shadow: 0 1px 8px rgba(20,16,18,0.10), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  font-weight: 700 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+.prop-verified-badge {
+  background: rgba(20,20,18,0.78) !important;
+  backdrop-filter: saturate(200%) blur(20px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  font-size: 10px !important;
+}
+.prop-price {
+  font-weight: 300 !important;
+  letter-spacing: -0.03em !important;
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.55 0.22 12) 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+.prop-location-area {
+  font-weight: 600 !important;
+  letter-spacing: 0.10em !important;
+  font-size: 9.5px !important;
+  text-transform: uppercase !important;
+  opacity: 0.75 !important;
+}
+.prop-location-name {
+  font-size: 19px !important;
+  line-height: 1.2 !important;
+}
+
+/* ── 9. CATEGORY CARDS — Premium material ── */
+.cat-card {
+  background: rgba(255,255,255,0.85) !important;
+  box-shadow: 0 1px 3px rgba(20,16,18,0.04), 0 8px 24px -8px rgba(20,16,18,0.08), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(255,255,255,0.70) !important;
+  transition: transform 0.45s cubic-bezier(0.22,1,0.36,1), box-shadow 0.45s cubic-bezier(0.22,1,0.36,1) !important;
+}
+.cat-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 2px 4px rgba(20,16,18,0.03), 0 24px 56px -16px rgba(20,16,18,0.14), inset 0 1px 0 rgba(255,255,255,1) !important;
+}
+.cat-name {
+  font-weight: 300 !important;
+  letter-spacing: -0.02em !important;
+}
+.cat-icon-wrap {
+  box-shadow: 0 2px 12px rgba(20,16,18,0.08), inset 0 1px 0 rgba(255,255,255,1) !important;
+}
+
+/* ── 10. SECTIONS — Alternating premium surfaces ── */
+#properties {
+  background: linear-gradient(180deg, var(--background) 0%, rgba(247,243,236,0.6) 100%) !important;
+}
+.why-how {
+  background:
+    radial-gradient(ellipse 80% 60% at 0% 50%, color-mix(in oklab, var(--primary) 4%, transparent) 0%, transparent 70%),
+    color-mix(in oklab, var(--muted) 25%, var(--background)) !important;
+}
+.verified-section {
+  background:
+    radial-gradient(ellipse 60% 80% at 100% 50%, color-mix(in oklab, var(--gold) 8%, transparent) 0%, transparent 65%),
+    linear-gradient(180deg, var(--secondary) 0%, color-mix(in oklab, var(--secondary) 80%, var(--muted)) 100%) !important;
+}
+
+/* ── 11. VALUE ROWS — Refined lines ── */
+.values-panel {
+  box-shadow: 0 1px 3px rgba(20,16,18,0.03), 0 12px 40px -12px rgba(20,16,18,0.08), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+.value-row::before {
+  background: linear-gradient(90deg, rgba(157,29,76,0.06), transparent) !important;
+}
+.value-icon {
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.45 0.20 8) 100%) !important;
+  box-shadow: 0 4px 14px rgba(157,29,76,0.32), inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+/* ── 12. STEPS PANEL — Richer dark surface ── */
+.steps-panel {
+  background: linear-gradient(145deg, oklch(0.16 0.010 25) 0%, oklch(0.12 0.007 20) 100%) !important;
+  box-shadow:
+    0 1px 3px rgba(20,16,18,0.08),
+    0 24px 64px -20px rgba(20,16,18,0.32),
+    inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+.step-num {
+  color: color-mix(in oklab, var(--primary) 80%, white) !important;
+  font-weight: 700 !important;
+}
+.step-line {
+  background: linear-gradient(180deg, rgba(157,29,76,0.30) 0%, transparent 100%) !important;
+}
+
+/* ── 13. VERIFIED CHECKLIST — Elevated dark card ── */
+.check-list {
+  background: oklch(0.15 0.009 22) !important;
+  box-shadow: 0 8px 48px rgba(20,16,18,0.22), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+.check-num {
+  color: oklch(0.65 0.14 8) !important;
+  font-weight: 800 !important;
+}
+.badge-ring {
+  box-shadow:
+    0 8px 40px rgba(157,29,76,0.18),
+    0 0 0 1px rgba(157,29,76,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+/* ── 14. CORRIDOR / INVESTMENT CARDS ── */
+.corridor-card {
+  background: rgba(255,255,255,0.92) !important;
+  box-shadow: 0 1px 3px rgba(20,16,18,0.04), 0 12px 36px -12px rgba(20,16,18,0.09), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(255,255,255,0.65) !important;
+}
+.cc-yoy {
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.55 0.22 12) 100%) !important;
+  box-shadow: 0 2px 8px rgba(157,29,76,0.28) !important;
+  font-weight: 700 !important;
+}
+.corridor-card h3 {
+  font-weight: 300 !important;
+}
+.cc-label {
+  letter-spacing: 0.14em !important;
+  font-weight: 700 !important;
+  opacity: 0.5 !important;
+}
+
+/* ── 15. TESTIMONIAL CARDS — Warm glass ── */
+.tcard {
+  background: rgba(255,255,255,0.88) !important;
+  box-shadow: 0 1px 3px rgba(20,16,18,0.04), 0 8px 28px -8px rgba(20,16,18,0.08), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(255,255,255,0.65) !important;
+}
+.tcard:hover {
+  box-shadow: 0 2px 4px rgba(20,16,18,0.03), 0 24px 60px -16px rgba(20,16,18,0.14), inset 0 1px 0 rgba(255,255,255,1) !important;
+}
+.tquote {
+  font-weight: 200 !important;
+  line-height: 0.8 !important;
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.68 0.18 10) 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  opacity: 0.6 !important;
+}
+.ttext {
+  font-weight: 300 !important;
+  line-height: 1.80 !important;
+  color: color-mix(in oklab, var(--foreground) 80%, transparent) !important;
+}
+.tname {
+  font-weight: 600 !important;
+  letter-spacing: 0.005em !important;
+}
+.tav {
+  background: linear-gradient(135deg, var(--primary-soft) 0%, oklch(0.88 0.06 8) 100%) !important;
+  box-shadow: 0 2px 10px rgba(157,29,76,0.14) !important;
+}
+
+/* ── 16. CALCULATOR — Elevated surfaces ── */
+.calc-panel {
+  background: rgba(255,255,255,0.88) !important;
+  box-shadow: 0 1px 3px rgba(20,16,18,0.04), 0 12px 36px -12px rgba(20,16,18,0.09), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(255,255,255,0.65) !important;
+  border-radius: 24px !important;
+}
+.calc-emi-card {
+  background: linear-gradient(145deg, oklch(0.16 0.010 25) 0%, oklch(0.12 0.007 20) 100%) !important;
+  box-shadow: 0 8px 40px rgba(20,16,18,0.22), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+.calc-emi-value {
+  font-weight: 200 !important;
+  letter-spacing: -0.04em !important;
+}
+.calc-track-fill {
+  background: linear-gradient(90deg, var(--primary) 0%, oklch(0.62 0.20 15) 100%) !important;
+  border-radius: 3px !important;
+}
+.cost-row.total .cost-value {
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.55 0.22 12) 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* ── 17. FORM WRAP — Premium card ── */
+.form-wrap {
+  background: rgba(255,255,255,0.92) !important;
+  box-shadow: 0 2px 4px rgba(20,16,18,0.03), 0 20px 60px -16px rgba(20,16,18,0.12), inset 0 1px 0 rgba(255,255,255,1) !important;
+  border: 1px solid rgba(255,255,255,0.80) !important;
+}
+
+/* ── 18. CONSULT CTA BLOCK ── */
+.adv-row {
+  background: rgba(255,255,255,0.85) !important;
+  box-shadow: 0 2px 12px rgba(20,16,18,0.06), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(255,255,255,0.70) !important;
+  border-radius: 20px !important;
+}
+.trust-check {
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.45 0.20 8) 100%) !important;
+  box-shadow: 0 2px 10px rgba(157,29,76,0.28), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+
+/* ── 19. FOOTER — Deep premium dark ── */
+footer {
+  background: oklch(0.13 0.008 22) !important;
+}
+.footer-orb {
+  background: radial-gradient(circle, rgba(157,29,76,0.20) 0%, transparent 70%) !important;
+  filter: blur(100px) !important;
+}
+.footer-logo {
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.40 0.18 8) 100%) !important;
+  box-shadow: 0 4px 16px rgba(157,29,76,0.40), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.07) !important;
+}
+
+/* ── 20. BUTTONS — Richer depth ── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.45 0.20 10) 100%) !important;
+  box-shadow:
+    0 1px 2px rgba(20,16,18,0.12),
+    0 6px 20px rgba(157,29,76,0.36),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+.btn-primary:hover {
+  box-shadow:
+    0 1px 2px rgba(20,16,18,0.10),
+    0 16px 48px rgba(157,29,76,0.52),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+.nav-cta {
+  background: linear-gradient(135deg, var(--primary) 0%, oklch(0.45 0.20 10) 100%) !important;
+  box-shadow: 0 1px 2px rgba(20,16,18,0.12), 0 4px 16px rgba(157,29,76,0.32), inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+/* ── 21. WA FAB — Premium float ── */
+.wa-fab {
+  background: linear-gradient(135deg, #25d366 0%, #1ebe5d 100%) !important;
+  box-shadow: 0 4px 16px rgba(37,211,102,0.35), 0 1px 3px rgba(20,16,18,0.12), inset 0 1px 0 rgba(255,255,255,0.20) !important;
+}
+
+/* ── 22. MOBILE MENU — Glass premium ── */
+.mobile-menu {
+  background: rgba(252,249,245,0.88) !important;
+  backdrop-filter: saturate(200%) blur(40px) !important;
+  -webkit-backdrop-filter: saturate(200%) blur(40px) !important;
+  box-shadow: 0 2px 4px rgba(20,16,18,0.04), 0 24px 64px -16px rgba(20,16,18,0.18), 0 0 0 1px rgba(255,255,255,0.80) !important;
+}
+
+/* ── 23. EXPLORE MORE TEASERS ── */
+#explore-more .cat-card, [href="why.html"][style*="border-radius"],
+a[href$=".html"][style*="card"] {
+  box-shadow: 0 1px 3px rgba(20,16,18,0.04), 0 8px 24px -8px rgba(20,16,18,0.07), inset 0 1px 0 rgba(255,255,255,0.85) !important;
+}
+
+/* ── 24. SCROLL PROGRESS — Brand gradient ── */
+.scroll-progress-bar {
+  background: linear-gradient(90deg,
+    var(--primary) 0%,
+    oklch(0.60 0.22 15) 40%,
+    oklch(0.72 0.14 60) 70%,
+    var(--gold) 100%) !important;
+  box-shadow: 0 0 8px rgba(157,29,76,0.40) !important;
+}
+
+/* ── 25. EYEBROW — Gradient text ── */
+.eyebrow {
+  background: linear-gradient(90deg, var(--primary) 0%, oklch(0.60 0.20 15) 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.22em !important;
+  font-size: 10px !important;
+}
+
+/* ── 26. OVERLAY MODAL — Silkier ── */
+.overlay {
+  background: rgba(20,16,18,0.40) !important;
+  backdrop-filter: saturate(160%) blur(24px) !important;
+}
+.modal {
+  background: oklch(0.975 0.010 80) !important;
+  box-shadow: 0 24px 80px rgba(20,16,18,0.22), inset 0 1px 0 rgba(255,255,255,0.85) !important;
+}
+.mopt {
+  background: rgba(255,255,255,0.80) !important;
+  border: 1px solid rgba(255,255,255,0.60) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  transition: all 0.2s !important;
+}
+.mopt:hover {
+  background: white !important;
+  border-color: rgba(157,29,76,0.15) !important;
+  transform: translateX(3px) !important;
+}
+
+/* ── 27. PREMIUM NOISE TEXTURE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.018;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+body > * { position: relative; z-index: 1; }
+.scroll-progress { z-index: 200 !important; }
+
+/* ── 28. ANIMATED GRADIENT BORDER on hero pill ── */
+@keyframes shimmer-border {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ── 29. PROP CARD IMAGE SHIMMER LOADING ── */
+.prop-img-wrap {
+  background: linear-gradient(135deg, oklch(0.93 0.015 78), oklch(0.88 0.02 72)) !important;
+}
+
+/* ── 30. SECTION DIVIDERS — Finer ── */
+section { border-top: 1px solid rgba(20,16,18,0.055) !important; }
+#properties { border-top: 1px solid rgba(20,16,18,0.055) !important; }
+
+/* ── 31. SPARKLINES — Richer fill ── */
+.sparkline polygon {
+  fill: linear-gradient(180deg, rgba(157,29,76,0.22) 0%, rgba(157,29,76,0) 100%) !important;
+}
+
+/* ── 32. TRUST ITEMS ── */
+.trust-item {
+  font-weight: 300 !important;
+  line-height: 1.6 !important;
+}
+
+/* ── 33. BADGE FLOAT ANIMATION — Smoother ── */
+@keyframes badge-float {
+  0%,100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-12px) rotate(1deg); }
+}
+.float-slow {
+  animation: badge-float 5s cubic-bezier(0.45,0,0.55,1) infinite !important;
+}
+
 </style>
 </head>
 <body>
@@ -1374,7 +1944,12 @@ a:focus:not(:focus-visible) { outline: none !important; }
           </button>
         </div>
       </div>
-      <div class="stats-grid">
+      <div style="display:flex;align-items:center;gap:16px;margin-top:48px;margin-bottom:0;opacity:0.35;" class="hero-fade hero-fade-4">
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);"></div>
+      <div style="width:4px;height:4px;border-radius:50%;background:var(--primary);opacity:0.6;"></div>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);"></div>
+    </div>
+    <div class="stats-grid">
         <div><div class="stat-num" data-target="2400" data-suffix="+">2,400+</div><div class="stat-lab">Verified listings</div></div>
         <div><div class="stat-num" data-prefix="₹ " data-target="380" data-suffix=" Cr">₹ 380 Cr</div><div class="stat-lab">Deals facilitated</div></div>
         <div><div class="stat-num" data-target="98" data-suffix="%">98%</div><div class="stat-lab">Document accuracy</div></div>
