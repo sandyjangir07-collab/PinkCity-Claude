@@ -644,16 +644,12 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
         </div>
       </div>
 
-      <a href="#loan-offer" class="btn-calc-cta reveal" style="text-decoration:none;display:block;text-align:center;">Get a personalised loan offer →</a>
-      <div class="calc-cta-sub">Compare pre-approved offers from 15+ PinkCity banking partners</div>
     </div>
   </div>
 </div>
 
 <div id="loan-offer" class="sub-content" style="padding-top:0;">
   <div class="form-wrap reveal" style="max-width:640px;margin:0 auto;">
-    <div class="calc-eyebrow" style="margin-bottom:6px;">Get a Personalised Loan Offer</div>
-    <p style="font-size:13.5px;color:var(--muted-foreground);margin-bottom:22px;line-height:1.6;">Share a few details and a loan advisor will call you within 24 hours with pre-approved offers.</p>
     <div class="form-grid" id="loanform">
       <div class="form-row">
         <div><label class="fl">Your Name</label><input class="fi" id="lo-name" type="text" placeholder="Rahul Verma"/></div>
@@ -667,7 +663,8 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
         <div><label class="fl">Monthly Salary (₹)</label><input class="fi" id="lo-salary" type="text" inputmode="numeric" placeholder="e.g. 85,000"/></div>
         <div><label class="fl">Loan Amount Required (₹)</label><input class="fi" id="lo-loan-amt" type="text" inputmode="numeric" placeholder="e.g. 54,40,000" oninput="loanAmtTouched=true;"/></div>
       </div>
-      <button class="btn-submit" onclick="submitLoanOffer()">Get my personalised offer →</button>
+      <button class="btn-submit" onclick="submitLoanOffer()">Get a personalised loan offer →</button>
+      <div class="calc-cta-sub">Compare pre-approved offers from 15+ PinkCity banking partners</div>
     </div>
   </div>
 </div>
