@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>PinkCity — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -517,7 +517,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .listing-phone-row{font-size:12px;color:var(--muted-foreground);padding:6px 10px;background:oklch(0.18 0.012 30);color:rgba(255,255,255,0.7);border-radius:8px;display:inline-flex;align-items:center;gap:6px;margin-top:4px}
 
 /* ── NAV ── */
-.topnav{position:sticky;top:0;z-index:100;padding:12px 16px;background:transparent;}
+.topnav{position:sticky;top:0;z-index:100;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;background:transparent;}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;background:color-mix(in oklab,white 78%,transparent);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);border:1px solid color-mix(in oklab,white 65%,transparent);border-radius:999px;padding:8px 12px;box-shadow:0 1px 2px rgba(20,16,18,0.025),0 4px 14px -6px rgba(20,16,18,0.06);}
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
 .nav-logo{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#9d1d4c);display:flex;align-items:center;justify-content:center;padding:4px;overflow:hidden;flex-shrink:0;}
@@ -531,6 +531,12 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 @media(min-width:640px){.nav-uname{display:block}.nav-tag{display:inline-flex;}}
 .nav-signout{background:none;border:none;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--muted-foreground);cursor:pointer;padding:0;transition:color 0.18s;}
 .nav-signout:hover{color:var(--primary);}
+@media(max-width:479px){
+  .nav-actions{gap:6px;}
+  .nav-btn-label{display:none;}
+  #alerts-btn{background:var(--secondary);border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;margin-right:0!important;}
+  .nav-tag{padding:4px 9px;font-size:10px;}
+}
 /* ── MAIN ── */
 .main{max-width:1200px;margin:0 auto;padding:40px 20px 100px;}
 @media(min-width:640px){.main{padding:40px 32px 100px;}}
@@ -689,6 +695,21 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .st-negotiating{background:rgba(239,68,68,0.12);color:#b91c1c;}
 .st-closed{background:rgba(34,197,94,0.12);color:#15803d;}
 .st-lost{background:rgba(107,114,128,0.12);color:#374151;}
+
+/* ── CRM POLISH ── */
+.badge-stale{background:rgba(245,158,11,0.16);color:#92400e;}
+.badge-duplicate{background:rgba(239,68,68,0.14);color:#991b1b;}
+.crm-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.crm-search-wrap{position:relative;flex:1 1 220px;min-width:0;}
+.crm-search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted-foreground);}
+.crm-search-wrap .fi{width:100%;padding-left:38px;text-overflow:ellipsis;}
+#crm-filter{flex:0 0 auto;min-width:0;}
+.lead-actions{display:flex;gap:6px;}
+.lead-icon-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--secondary);text-decoration:none;font-size:15px;transition:all 0.18s;flex-shrink:0;}
+.lead-icon-btn:hover{background:rgba(157,29,76,0.12);transform:translateY(-1px);}
+.lead-icon-btn:active{transform:scale(0.92);}
+.lead-card:active{transform:scale(0.985);}
+#crm-list .lead-card{animation:fade-up 0.45s cubic-bezier(0.22,1,0.36,1) both;}
 /* ── VISIT CARDS ── */
 .sched-card{background:white;border:1px solid var(--border);border-radius:18px;padding:16px 18px;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;}
 .sched-card:hover{box-shadow:var(--shadow-soft);border-color:rgba(157,29,76,0.15);}
@@ -748,10 +769,10 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     </a>
     <div class="nav-actions">
       <div class="nav-tag" id="admin-tag" style="display:none;">⚡ Admin</div>
-      <button class="nav-signout" id="alerts-btn" onclick="enablePushNotifications(['new_leads','verification_needed','lead_followup','visit_reminder','new_visit_scheduled'], currentUser.id)" style="margin-right:8px;">🔔 Enable alerts</button>
+      <button class="nav-signout" id="alerts-btn" onclick="enablePushNotifications(['new_leads','verification_needed','lead_followup','visit_reminder','new_visit_scheduled'], currentUser.id)" style="margin-right:8px;">🔔<span class="nav-btn-label"> Enable alerts</span></button>
       <div class="nav-avatar" id="uavatar"></div>
       <span class="nav-uname" id="uname"></span>
-      <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
+      <button class="nav-signout" onclick="handleSignOut()">🚪<span class="nav-btn-label"> Sign out</span></button>
     </div>
   </div>
 </div>
@@ -760,7 +781,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   <div class="page-eyebrow fade-up" id="page-eyebrow">YOUR LISTINGS</div>
   <h1 class="page-title fade-up fade-up-1" id="page-title">Manage properties</h1>
   <p class="page-sub fade-up fade-up-2" id="page-sub">Manage listings, track leads, and schedule site visits.</p>
-  <div id="admin-tabs" style="display:none;display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;">
+  <div id="admin-tabs" style="display:none;gap:8px;margin-bottom:28px;flex-wrap:wrap;">
     <button onclick="showTab('listings')" id="tab-listings" class="tab-btn active-tab">🏠 Listings</button>
     <button onclick="showTab('crm')" id="tab-crm" class="tab-btn">👥 CRM</button>
     <button onclick="showTab('schedule')" id="tab-schedule" class="tab-btn">📅 Visits</button>
@@ -858,8 +879,11 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">CLIENT CRM</div>
         <div style="font-size:22px;font-family:var(--font-display);color:var(--foreground);">All Leads</div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <input class="fi" id="crm-search" placeholder="Search name, phone, location…" oninput="loadLeads()" style="width:200px;padding:9px 14px;font-size:13px;"/>
+      <div class="crm-toolbar">
+        <div class="crm-search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="fi" id="crm-search" placeholder="Search name, phone, location…" oninput="loadLeads()" style="padding-top:9px;padding-bottom:9px;font-size:13px;"/>
+        </div>
         <select class="fsel" id="crm-filter" onchange="loadLeads()" style="width:auto;padding:9px 14px;font-size:13px;">
           <option value="all">All statuses</option>
           <option value="new">🔵 New</option>
@@ -1791,8 +1815,8 @@ window.loadLeads = async function() {
       && l.updated_at && (Date.now() - new Date(l.updated_at).getTime()) > 3*24*60*60*1000;
     const badges = '<span class="badge '+stCls+'">'+( STATUS_LABELS[l.status]||l.status)+'</span>'
       + '<span class="lead-source-tag '+srcCls+'">'+(SOURCE_LABELS[l.source]||l.source)+'</span>'
-      + (isStale ? '<span class="badge" style="background:#fde68a;color:#92400e;">⏰ Stale</span>' : '')
-      + (l.possible_duplicate_of ? '<span class="badge" style="background:#fecaca;color:#991b1b;">⚠️ Possible duplicate</span>' : '');
+      + (isStale ? '<span class="badge badge-stale">⏰ Stale</span>' : '')
+      + (l.possible_duplicate_of ? '<span class="badge badge-duplicate">⚠️ Possible duplicate</span>' : '');
     return '<div class="lead-card" data-lid="'+l.id+'" onclick="openLeadDetail(this.dataset.lid)">'
       + '<div class="lead-av">'+initials+'</div>'
       + '<div style="flex:1;min-width:0;">'
@@ -1801,11 +1825,11 @@ window.loadLeads = async function() {
       + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
       + badges
       + '</div></div>'
-      + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">'
+      + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">'
       + '<div style="font-size:11px;color:var(--muted-foreground);">'+dateStr+'</div>'
-      + '<div style="display:flex;gap:8px;" onclick="event.stopPropagation()">'
-      + '<a href="tel:'+l.phone+'" title="Call" style="text-decoration:none;font-size:16px;">📞</a>'
-      + '<a href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp" style="text-decoration:none;font-size:16px;">💬</a>'
+      + '<div class="lead-actions" onclick="event.stopPropagation()">'
+      + '<a class="lead-icon-btn" href="tel:'+l.phone+'" title="Call">📞</a>'
+      + '<a class="lead-icon-btn" href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp">💬</a>'
       + '</div></div>'
       + '</div>';
   }).join('');
