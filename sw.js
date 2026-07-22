@@ -19,8 +19,8 @@ const PRECACHE_URLS = [
   '/calculator.html',
   '/investment.html',
   '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  '/icon-192.png',
+  '/icon-512.png',
 ];
 
 // Never cache these (always fresh)
@@ -129,12 +129,12 @@ self.addEventListener('push', event => {
   const title = data.title || 'PinkCity Properties';
   const options = {
     body: data.body || 'You have a new notification',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-72.png',
+    icon: '/icon-192.png',
+    badge: '/icon-72.png',
     vibrate: [100, 50, 100],
     data: { url: data.url || '/' },
     actions: [
-      { action: 'open', title: 'View', icon: '/icons/icon-72.png' },
+      { action: 'open', title: 'View', icon: '/icon-72.png' },
       { action: 'close', title: 'Dismiss' }
     ]
   };
