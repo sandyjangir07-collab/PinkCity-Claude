@@ -857,6 +857,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <div style="font-size:22px;font-family:var(--font-display);color:var(--foreground);">All Leads</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input class="fi" id="crm-search" placeholder="Search name, phone, location…" oninput="loadLeads()" style="width:200px;padding:9px 14px;font-size:13px;"/>
         <select class="fsel" id="crm-filter" onchange="loadLeads()" style="width:auto;padding:9px 14px;font-size:13px;">
           <option value="all">All statuses</option>
           <option value="new">🔵 New</option>
@@ -1756,7 +1757,15 @@ window.loadLeads = async function() {
   if (filter !== 'all') q = q.eq('status', filter);
   if (!isAdmin) q = q.eq('created_by', currentUser.id);
   const { data } = await q;
-  const leads = data || [];
+  const searchTerm = (document.getElementById('crm-search')?.value||'').trim().toLowerCase();
+  let leads = data || [];
+  if (searchTerm) {
+    leads = leads.filter(function(l){
+      return (l.name||'').toLowerCase().includes(searchTerm)
+        || (l.phone||'').toLowerCase().includes(searchTerm)
+        || (l.preferred_location||'').toLowerCase().includes(searchTerm);
+    });
+  }
 
   // Stats
   document.getElementById('cs-new').textContent = leads.filter(l=>l.status==='new').length;
@@ -1774,16 +1783,28 @@ window.loadLeads = async function() {
     const srcCls = 'src-' + (l.source||'manual');
     const stCls  = 'st-' + (l.status||'new');
     const dateStr = new Date(l.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const digits = (l.phone||'').replace(/\D/g,'');
+    const waNum = digits.length===10 ? '91'+digits : digits;
+    const isStale = ['contacted','visit_scheduled','visit_done','negotiating'].includes(l.status)
+      && l.updated_at && (Date.now() - new Date(l.updated_at).getTime()) > 3*24*60*60*1000;
+    const badges = '<span class="badge '+stCls+'">'+( STATUS_LABELS[l.status]||l.status)+'</span>'
+      + '<span class="lead-source-tag '+srcCls+'">'+(SOURCE_LABELS[l.source]||l.source)+'</span>'
+      + (isStale ? '<span class="badge" style="background:#fde68a;color:#92400e;">⏰ Stale</span>' : '')
+      + (l.possible_duplicate_of ? '<span class="badge" style="background:#fecaca;color:#991b1b;">⚠️ Possible duplicate</span>' : '');
     return '<div class="lead-card" data-lid="'+l.id+'" onclick="openLeadDetail(this.dataset.lid)">'
       + '<div class="lead-av">'+initials+'</div>'
       + '<div style="flex:1;min-width:0;">'
       + '<div class="lead-name">'+l.name+'</div>'
       + '<div class="lead-meta">'+l.phone+(l.budget?' · '+l.budget:'')+(l.preferred_location?' · '+l.preferred_location:'')+'</div>'
       + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
-      + '<span class="badge '+stCls+'">'+( STATUS_LABELS[l.status]||l.status)+'</span>'
-      + '<span class="lead-source-tag '+srcCls+'">'+(SOURCE_LABELS[l.source]||l.source)+'</span>'
+      + badges
       + '</div></div>'
-      + '<div style="font-size:11px;color:var(--muted-foreground);flex-shrink:0;">'+dateStr+'</div>'
+      + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">'
+      + '<div style="font-size:11px;color:var(--muted-foreground);">'+dateStr+'</div>'
+      + '<div style="display:flex;gap:8px;" onclick="event.stopPropagation()">'
+      + '<a href="tel:'+l.phone+'" title="Call" style="text-decoration:none;font-size:16px;">📞</a>'
+      + '<a href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp" style="text-decoration:none;font-size:16px;">💬</a>'
+      + '</div></div>'
       + '</div>';
   }).join('');
 };
