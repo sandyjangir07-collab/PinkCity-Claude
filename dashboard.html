@@ -4,6 +4,7 @@
 <title>PinkCity — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="push-subscribe.js"></script>
 <style>
 
 /* ── DESIGN TOKENS (from Lovable styles.css) ── */
@@ -747,6 +748,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     </a>
     <div class="nav-actions">
       <div class="nav-tag" id="admin-tag" style="display:none;">⚡ Admin</div>
+      <button class="nav-signout" id="alerts-btn" onclick="enablePushNotifications(['new_leads','verification_needed','lead_followup','visit_reminder','new_visit_scheduled'], currentUser.id)" style="margin-right:8px;">🔔 Enable alerts</button>
       <div class="nav-avatar" id="uavatar"></div>
       <span class="nav-uname" id="uname"></span>
       <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
