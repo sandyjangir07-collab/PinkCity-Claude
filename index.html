@@ -260,6 +260,7 @@ section { padding:112px 0; }
 .prop-body { padding:24px; }
 .prop-price-row { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
 .prop-price { font-family:var(--font-display); font-size:26px; letter-spacing:-0.02em; }
+.prop-size { display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:500; color:var(--muted-foreground); flex-shrink:0; }
 .prop-area { font-size:11px; color:var(--muted-foreground); letter-spacing:0.04em; }
 .prop-ctas { display:flex; gap:8px; margin-top:20px; }
 .prop-cta-wa { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:11px; font-weight:500; border-radius:999px; background:var(--foreground); color:var(--background); padding:10px 12px; text-decoration:none; transition:all 0.3s; }
@@ -1821,11 +1822,11 @@ footer::before {
       }));
     } else {
       // Fallback: listings table
-      let res2 = await sb.from('listings').select('id,title,type,area,price,image_url,verified').eq('status','active').order('created_at',{ascending:false}).limit(60);
+      let res2 = await sb.from('listings').select('id,title,type,area,price,size,image_url,verified').eq('status','active').order('created_at',{ascending:false}).limit(60);
       if(!res2.error && res2.data && res2.data.length){
         data = res2.data.map(p=>({
           id:p.id, title:p.title, type:p.type, area:p.area,
-          price:p.price, image:p.image_url, verified:p.verified,
+          price:p.price, size:p.size, image:p.image_url, verified:p.verified,
           detailUrl:'listing.html?id='+p.id
         }));
       }
@@ -1871,6 +1872,7 @@ footer::before {
         <div class="prop-body">
           <div class="prop-price-row">
             <div class="prop-price">${(p.price||'').replace(/₹/g,'<span style="font-family:var(--font-sans);">₹</span>')}</div>
+            ${p.size?`<div class="prop-size"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M3 15h6v6"/></svg>${p.size}</div>`:''}
           </div>
           <div class="prop-ctas">
             <a class="prop-cta-wa" href="https://wa.me/919358830405?text=${encodeURIComponent('Hi, I am interested in: '+p.title+' in '+p.area)}" target="_blank" onclick="event.stopPropagation()">WhatsApp</a>
