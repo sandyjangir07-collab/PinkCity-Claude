@@ -2,21 +2,29 @@
 <html lang="en-IN">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title id="page-title">Blog — PinkCity</title>
-<meta name="description" id="page-desc" content="Property insights from PinkCity."/>
-<meta property="og:title" id="og-title" content="PinkCity Blog"/>
-<meta property="og:description" id="og-desc" content=""/>
-<meta property="og:image" id="og-image" content=""/>
-<meta property="og:type" content="article"/>
-<meta property="article:publisher" content="https://pinkcityproperties.com"/>
-<link rel="canonical" id="canonical" href="https://pinkcityproperties.com/blog-post.html"/>
-<script type="application/ld+json" id="schema-ld"></script>
+<title>Our Founders — PinkCity Properties</title>
+<link rel="canonical" href="https://pinkcityproperties.com/founders.html"/>
+<meta name="description" content="It started with a simple belief: real estate doesn't have to be complicated. Meet the founders of PinkCity Properties, Jaipur."/>
+<meta property="og:title" content="Our Founders — PinkCity Properties"/>
+<meta property="og:description" content="It started with a simple belief: real estate doesn't have to be complicated."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://pinkcityproperties.com/founders.html"/>
+<meta property="og:image" content="https://pinkcityproperties.com/icon-512.png"/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://pinkcityproperties.com/"},
+    {"@type":"ListItem","position":2,"name":"Our Founders","item":"https://pinkcityproperties.com/founders.html"}
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
-
 /* ── DESIGN TOKENS (from Lovable styles.css) ── */
 :root {
   --radius: 1.125rem;
@@ -491,85 +499,87 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .mobile-menu.open{display:block;animation:fade-up 0.25s cubic-bezier(0.22,1,0.36,1)}
 .mobile-section{font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted-foreground);padding:12px 12px 6px;opacity:0.7}
 .mobile-link{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:14px;font-weight:500;color:var(--foreground);text-decoration:none;border-radius:16px;transition:all 0.2s}.mnav-ico{width:17px;height:17px;flex-shrink:0;color:var(--primary);opacity:0.82}
-.mobile-link:hover{color:var(--primary);background:rgba(157,29,76,0.06)}
+.mobile-link:hover,.mobile-link.active{color:var(--primary);background:rgba(157,29,76,0.06)}
 .mobile-cta{display:block;padding:13px 16px;font-size:14px;font-weight:500;background:var(--primary);color:var(--primary-foreground);border-radius:16px;text-align:center;text-decoration:none;transition:all 0.2s;box-shadow:0 2px 10px -2px rgba(157,29,76,0.35)}
 .mobile-cta:hover{background:#9d1d4c}
-
-
-
-.nav-link-active{color:var(--primary)!important}
-.mobile-menu{display:none;position:fixed;top:80px;left:12px;right:12px;z-index:49;border-radius:24px;padding:8px 8px 12px;box-shadow:var(--shadow-elev);max-width:440px;margin:0 auto;background:color-mix(in oklab,white 88%,transparent);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);border:1px solid color-mix(in oklab,white 70%,transparent)}
-.mobile-menu.open{display:block;}
-.mobile-section{font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted-foreground);padding:12px 12px 6px;opacity:0.7}
-.mobile-link{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:14px;font-weight:500;color:var(--foreground);text-decoration:none;border-radius:16px;transition:all 0.2s}
-.mobile-link:hover{color:var(--primary);background:rgba(157,29,76,0.06)}
-.mobile-cta{display:block;padding:13px 16px;font-size:14px;font-weight:500;background:var(--primary);color:var(--primary-foreground);border-radius:16px;text-align:center;text-decoration:none;}
-
-/* Article layout */
-.post-hero{padding:120px 0 0;background:var(--background);border-bottom:1px solid var(--border);}
-.post-hero-inner{max-width:760px;margin:0 auto;padding:0 20px 48px;}
-@media(min-width:640px){.post-hero-inner{padding:0 32px 56px;}}
-.post-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--muted-foreground);text-decoration:none;margin-bottom:28px;transition:color 0.2s;}
-.post-back:hover{color:var(--primary);}
-.post-tag{display:inline-flex;background:var(--primary-soft);color:var(--primary);border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:20px;}
-.post-title{font-family:var(--font-display);font-size:38px;color:var(--foreground);letter-spacing:-0.025em;line-height:1.1;margin-bottom:20px;}
-@media(min-width:640px){.post-title{font-size:52px;}}
-.post-meta{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted-foreground);flex-wrap:wrap;margin-bottom:32px;}
-.post-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--border);}
-.post-author{display:flex;align-items:center;gap:8px;}
-.post-author-av{width:32px;height:32px;border-radius:50%;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--primary);overflow:hidden;}
-.post-author-av img{width:100%;height:100%;object-fit:cover;}
-.post-cover{width:100%;max-height:480px;object-fit:cover;border-radius:0;display:block;}
-.post-cover-placeholder{width:100%;height:340px;display:flex;align-items:center;justify-content:center;font-size:80px;background:linear-gradient(135deg,oklch(0.93 0.05 8),oklch(0.88 0.08 20));}
-/* Article body */
-.post-body{max-width:760px;margin:0 auto;padding:48px 20px 80px;}
-@media(min-width:640px){.post-body{padding:56px 32px 100px;}}
-.post-content{font-family:var(--font-sans);font-size:17px;line-height:1.82;color:var(--foreground);}
-.post-content h2{font-family:var(--font-display);font-size:28px;letter-spacing:-0.02em;color:var(--foreground);margin:48px 0 16px;padding-top:8px;border-top:1px solid var(--border);}
-.post-content h3{font-family:var(--font-display);font-size:22px;letter-spacing:-0.01em;color:var(--foreground);margin:32px 0 12px;}
-.post-content p{margin-bottom:22px;}
-.post-content strong{font-weight:600;color:var(--foreground);}
-.post-content a{color:var(--primary);text-decoration:underline;text-underline-offset:3px;}
-.post-content ul,.post-content ol{margin:0 0 22px 22px;}
-.post-content li{margin-bottom:8px;line-height:1.7;}
-.post-content blockquote{border-left:3px solid var(--primary);margin:28px 0;padding:16px 20px;background:var(--primary-soft);border-radius:0 14px 14px 0;font-style:italic;color:var(--foreground);}
-.post-content img{width:100%;border-radius:16px;margin:24px 0;}
-/* Tags */
-.post-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:40px;padding-top:28px;border-top:1px solid var(--border);}
-.post-tag-pill{padding:6px 14px;border-radius:999px;border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--muted-foreground);text-decoration:none;transition:all 0.2s;}
-.post-tag-pill:hover{border-color:rgba(157,29,76,0.3);color:var(--primary);background:var(--primary-soft);}
-/* CTA */
-.post-cta{background:linear-gradient(135deg,oklch(0.18 0.012 30),oklch(0.14 0.009 20));border-radius:28px;padding:40px 32px;text-align:center;margin-top:40px;}
-.post-cta h3{font-family:var(--font-display);font-size:28px;color:white;margin-bottom:10px;letter-spacing:-0.02em;}
-.post-cta p{font-size:14px;color:rgba(255,255,255,0.55);margin-bottom:24px;line-height:1.7;}
-/* Share */
-.post-share{display:flex;align-items:center;gap:10px;margin-top:32px;}
-.share-label{font-size:13px;font-weight:600;color:var(--muted-foreground);}
-.share-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:white;cursor:pointer;transition:all 0.2s;text-decoration:none;}
-.share-btn:hover{border-color:rgba(157,29,76,0.3);transform:translateY(-2px);}
-/* Related */
-.related-wrap{max-width:760px;margin:0 auto;padding:0 20px 100px;}
-.related-title{font-family:var(--font-display);font-size:26px;color:var(--foreground);margin-bottom:20px;}
-.related-grid{display:grid;grid-template-columns:1fr;gap:14px;}
-@media(min-width:600px){.related-grid{grid-template-columns:1fr 1fr;}}
-.skel{background:linear-gradient(90deg,var(--secondary) 25%,color-mix(in oklab,var(--secondary) 50%,white) 50%,var(--secondary) 75%);background-size:200% 100%;animation:skel 1.4s ease-in-out infinite;border-radius:12px;}
-@keyframes skel{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
-
-.related-card {
-  text-decoration: none;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  overflow: hidden;
-  display: block;
-  transition: all 0.3s cubic-bezier(0.22,1,0.36,1);
+.subpage-hero{padding:140px 0 80px;background:var(--background);background-image:radial-gradient(at 15% 0%,color-mix(in oklab,var(--primary) 8%,transparent) 0px,transparent 50%),radial-gradient(at 85% 100%,color-mix(in oklab,var(--gold) 10%,transparent) 0px,transparent 55%);border-bottom:1px solid var(--border);text-align:center}
+.subpage-hero h1{font-size:48px;letter-spacing:-0.03em;line-height:1.0;max-width:16ch;margin:0 auto 20px}
+@media(min-width:640px){.subpage-hero h1{font-size:64px}}
+.subpage-hero p{font-size:16px;color:var(--muted-foreground);line-height:1.7;max-width:520px;margin:0 auto 32px}
+.sub-content{max-width:1200px;margin:0 auto;padding:80px 20px 120px}
+@media(min-width:640px){.sub-content{padding:80px 32px 120px}}
+/* ── FOUNDERS PAGE ── */
+@media(prefers-reduced-motion:no-preference){
+  .fh-reveal{opacity:0;transform:translateY(28px);transition:opacity 0.9s cubic-bezier(0.16,1,0.3,1),transform 0.9s cubic-bezier(0.16,1,0.3,1);}
+  .fh-reveal.in-view{opacity:1;transform:translateY(0);}
 }
-.related-card:hover {
-  box-shadow: var(--shadow-elev);
-  transform: translateY(-3px);
-  border-color: rgba(157,29,76,0.2);
+@media(prefers-reduced-motion:reduce){
+  .fh-reveal{opacity:1;transform:none;}
+  .fh-blob{animation:none!important;}
 }
 
+/* Hero */
+.fh-hero{position:relative;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:120px 24px 80px;}
+.fh-blob-field{position:absolute;inset:0;overflow:hidden;z-index:0;}
+.fh-blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.35;will-change:transform;}
+.fh-blob-1{width:520px;height:520px;background:radial-gradient(circle,var(--primary) 0%,transparent 70%);top:-160px;left:-120px;animation:fh-drift-1 22s ease-in-out infinite;}
+.fh-blob-2{width:420px;height:420px;background:radial-gradient(circle,var(--gold) 0%,transparent 70%);bottom:-140px;right:-100px;animation:fh-drift-2 26s ease-in-out infinite;}
+.fh-blob-3{width:340px;height:340px;background:radial-gradient(circle,var(--primary) 0%,transparent 70%);top:40%;left:60%;opacity:0.18;animation:fh-drift-3 30s ease-in-out infinite;}
+@keyframes fh-drift-1{0%,100%{transform:translate(0,0);}50%{transform:translate(60px,50px);}}
+@keyframes fh-drift-2{0%,100%{transform:translate(0,0);}50%{transform:translate(-50px,-40px);}}
+@keyframes fh-drift-3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-40px,30px) scale(1.1);}}
+.fh-eyebrow{position:relative;z-index:1;font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--primary);margin-bottom:28px;}
+.fh-hero h1{position:relative;z-index:1;font-family:var(--font-display);font-weight:400;font-size:clamp(38px,7vw,84px);line-height:1.08;letter-spacing:-0.03em;color:var(--foreground);max-width:960px;margin-bottom:26px;}
+.fh-hero-sub{position:relative;z-index:1;font-size:clamp(16px,2vw,21px);color:var(--muted-foreground);font-weight:400;max-width:520px;line-height:1.5;}
+.fh-scroll-cue{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:1;}
+.fh-scroll-cue span{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted-foreground);}
+.fh-scroll-line{width:1px;height:36px;background:linear-gradient(180deg,var(--muted-foreground),transparent);position:relative;overflow:hidden;}
+.fh-scroll-line::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:100%;background:var(--primary);animation:fh-scroll-run 2.2s ease-in-out infinite;}
+@keyframes fh-scroll-run{0%{top:-100%;}60%{top:100%;}100%{top:100%;}}
+
+/* Story */
+.fh-story{max-width:680px;margin:0 auto;padding:160px 24px;text-align:center;}
+.fh-story p{font-family:var(--font-display);font-weight:400;font-size:clamp(22px,3.4vw,34px);line-height:1.45;color:var(--foreground);letter-spacing:-0.01em;margin-bottom:36px;}
+.fh-story p:last-child{margin-bottom:0;color:var(--primary);}
+
+/* Principles */
+.fh-principles-wrap{max-width:1160px;margin:0 auto;padding:40px 24px 180px;}
+.fh-principles-head{text-align:center;margin-bottom:64px;}
+.fh-principles-grid{display:grid;grid-template-columns:1fr;gap:20px;}
+@media(min-width:860px){.fh-principles-grid{grid-template-columns:repeat(3,1fr);gap:24px;}}
+.fh-p-card{position:relative;background:color-mix(in oklab,var(--card) 88%,transparent);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid var(--border);border-radius:28px;padding:44px 32px;transition:all 0.5s cubic-bezier(0.16,1,0.3,1);overflow:hidden;}
+.fh-p-card::before{content:'';position:absolute;inset:0;border-radius:28px;background:radial-gradient(circle at 50% 0%,color-mix(in oklab,var(--primary) 10%,transparent),transparent 70%);opacity:0;transition:opacity 0.5s;}
+.fh-p-card:hover{transform:translateY(-6px);border-color:color-mix(in oklab,var(--primary) 30%,transparent);box-shadow:var(--shadow-elev);}
+.fh-p-card:hover::before{opacity:1;}
+.fh-p-icon{width:46px;height:46px;border-radius:14px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;color:var(--primary);margin-bottom:26px;position:relative;z-index:1;}
+.fh-p-num{position:absolute;top:32px;right:32px;font-family:var(--font-display);font-size:13px;color:var(--muted-foreground);opacity:0.5;}
+.fh-p-card h3{position:relative;z-index:1;font-family:var(--font-display);font-weight:400;font-size:23px;letter-spacing:-0.01em;color:var(--foreground);margin-bottom:14px;}
+.fh-p-card p{position:relative;z-index:1;font-size:14.5px;line-height:1.7;color:var(--muted-foreground);}
+
+/* Statement */
+.fh-statement{position:relative;background:linear-gradient(165deg,oklch(0.18 0.012 30) 0%,oklch(0.13 0.009 20) 100%);padding:200px 24px;text-align:center;overflow:hidden;}
+.fh-statement-inner{position:relative;z-index:1;max-width:960px;margin:0 auto;}
+.fh-statement h2{font-family:var(--font-display);font-weight:400;font-size:clamp(32px,6.5vw,72px);line-height:1.12;letter-spacing:-0.02em;color:white;margin-bottom:36px;}
+.fh-statement h2 em{font-style:italic;color:var(--gold);}
+.fh-statement-sub{font-size:clamp(16px,2.2vw,22px);color:rgba(255,255,255,0.6);max-width:600px;margin:0 auto;line-height:1.6;font-weight:400;}
+.fh-statement-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,color-mix(in oklab,var(--primary) 30%,transparent) 0%,transparent 70%);filter:blur(80px);pointer-events:none;}
+
+/* Closing */
+.fh-closing{max-width:900px;margin:0 auto;padding:180px 24px 60px;text-align:center;}
+.fh-closing-lead{font-family:var(--font-display);font-weight:400;font-size:clamp(20px,3vw,28px);line-height:1.6;color:var(--foreground);letter-spacing:-0.01em;max-width:680px;margin:0 auto 120px;}
+.fh-founders-row{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin-bottom:56px;}
+.fh-founder{display:flex;flex-direction:column;align-items:center;padding:0 36px;}
+.fh-portrait-wrap{perspective:800px;margin-bottom:22px;}
+.fh-portrait{width:132px;height:132px;border-radius:50%;background:linear-gradient(150deg,var(--primary),#7d1740);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:44px;color:white;box-shadow:var(--shadow-elev);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);position:relative;}
+.fh-portrait::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid color-mix(in oklab,var(--primary) 35%,transparent);opacity:0;transition:opacity 0.35s,transform 0.35s;transform:scale(0.9);}
+.fh-founder:hover .fh-portrait::after{opacity:1;transform:scale(1);}
+.fh-founder-name{font-family:var(--font-display);font-size:21px;color:var(--foreground);margin-bottom:4px;letter-spacing:-0.01em;}
+.fh-founder-role{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);font-weight:600;}
+.fh-connector{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--border) 20%,var(--primary) 50%,var(--border) 80%,transparent);position:relative;top:-46px;flex-shrink:0;}
+@media(max-width:640px){.fh-connector{display:none;}.fh-founders-row{flex-direction:column;gap:48px;}}
+.fh-signature{display:flex;align-items:center;justify-content:center;gap:16px;color:var(--muted-foreground);}
+.fh-signature-line{width:44px;height:1px;background:var(--border);}
+.fh-signature-mark{font-family:var(--font-display);font-style:italic;font-size:15px;color:var(--primary);letter-spacing:0.02em;}
 </style>
 
   <!-- PWA -->
@@ -590,219 +600,189 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 <body>
 
 <div class="scroll-progress"><div class="scroll-progress-bar" id="sp-bar"></div></div>
-<div class="nav-wrap"><nav class="nav" id="main-nav">
-  <a href="index.html" class="nav-brand">
-    <div class="nav-logo"><img src="/logo.png" alt="PinkCity"/></div>
-    <span class="nav-brand-name">PinkCity<em>.</em></span>
-  </a>
-  <div class="nav-links">
-    <a href="why.html" class="nav-link">Why PinkCity</a>
-    <a href="verified.html" class="nav-link">Verified™</a>
-    <a href="blog.html" class="nav-link nav-link-active">Blog</a>
-    <a href="calculator.html" class="nav-link">Calculator</a>
+<div class="nav-wrap">
+  <nav class="nav" id="main-nav">
+    <a href="index.html" class="nav-brand logo-badge">
+      <div class="nav-logo"><img src="/logo.png" alt="PinkCity"/></div>
+      <span class="nav-brand-name">PinkCity<em>.</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="why.html" class="nav-link">Why PinkCity</a>
+      <a href="verified.html" class="nav-link">Verified™</a>
+      <a href="reviews.html" class="nav-link">Reviews</a>
+      <a href="calculator.html" class="nav-link">Calculator</a>
+      <a href="investment.html" class="nav-link">Investment</a>
       <a href="areas.html" class="nav-link">Explore Areas</a>
-    <a href="investment.html" class="nav-link">Investment</a>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <a href="login.html" class="nav-cta">List Property<div class="nav-cta-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div></a>
-    <button class="mobile-menu-btn" onclick="toggleMenu()" aria-label="Menu">
-      <svg id="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-  </div>
-</nav></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a href="login.html" class="nav-cta">List Property<div class="nav-cta-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div></a>
+      <button class="mobile-menu-btn" onclick="toggleMenu()" aria-label="Menu">
+        <svg id="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </nav>
+</div>
 <div class="mobile-menu" id="mobile-menu">
   <div class="mobile-section">Explore</div>
   <a href="index.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg></span>Home</a>
-  <a href="blog.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>Blog</a>
+  <a href="index.html#properties" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.35-4.35"/></svg></span>Browse Properties</a>
   <div class="mobile-section">Learn</div>
-  <a href="why.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg></span>Why PinkCity</a>
   <a href="verified.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3 7.5 7.5 9 4.5-1.5 7.5-4.5 7.5-9V6Z"/><path d="m9 12 2 2 4-4"/></svg></span>Verified™</a>
-  <a href="reviews.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 17l-5.6 3.1 1.4-6.3L3 9.5l6.4-.6Z"/></svg></span>Reviews</a>
-  <a href="calculator.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M8 16h.01"/><path d="M12 16h.01"/><path d="M16 16h.01"/></svg></span>Calculator</a>
-  <a href="areas.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4-4-7-7.5-7-11a7 7 0 0 1 14 0c0 3.5-3 7-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></span>Explore Areas</a>
-  <div style="padding:8px 4px 4px;"><a href="login.html" class="mobile-cta">List Property →</a></div>
-</div>
+<a href="reviews.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 17l-5.6 3.1 1.4-6.3L3 9.5l6.4-.6Z"/></svg></span>Reviews</a>
+<a href="calculator.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M8 16h.01"/><path d="M12 16h.01"/><path d="M16 16h.01"/></svg></span>Calculator</a>
+<a href="why.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg></span>Why PinkCity</a>
+<a href="investment.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 16 5.5-6 4 4L20 6"/><path d="M14 6h6v6"/></svg></span>Investment</a>
+<a href="areas.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4-4-7-7.5-7-11a7 7 0 0 1 14 0c0 3.5-3 7-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></span>Explore Areas</a>
+<a href="login.html" class="mobile-link" onclick="toggleMenu()"><span class="mnav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8"/><path d="M16 7l2 2"/><path d="M19 4l1 1"/></svg></span>Team Login</a>
 
-<!-- SKELETON -->
-<div id="skeleton" style="padding:120px 20px 60px;max-width:760px;margin:0 auto;">
-  <div class="skel" style="height:18px;width:30%;margin-bottom:24px;border-radius:999px;"></div>
-  <div class="skel" style="height:52px;width:90%;margin-bottom:12px;"></div>
-  <div class="skel" style="height:52px;width:70%;margin-bottom:24px;"></div>
-  <div class="skel" style="height:360px;width:100%;border-radius:16px;margin-bottom:32px;"></div>
-  <div class="skel" style="height:18px;width:100%;margin-bottom:10px;"></div>
-  <div class="skel" style="height:18px;width:95%;margin-bottom:10px;"></div>
-  <div class="skel" style="height:18px;width:80%;"></div>
-</div>
-
-<!-- POST CONTENT -->
-<div id="post-wrap" style="display:none;">
-  <div class="post-hero">
-    <div class="post-hero-inner">
-      <a href="blog.html" class="post-back">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        All articles
-      </a>
-      <div class="post-tag" id="post-cat"></div>
-      <h1 class="post-title" id="post-title"></h1>
-      <div class="post-meta">
-        <div class="post-author">
-          <div class="post-author-av" id="post-av"></div>
-          <span id="post-author-name"></span>
-        </div>
-        <span class="post-meta-dot"></span>
-        <span id="post-date"></span>
-        <span class="post-meta-dot"></span>
-        <span id="post-read"></span>
-      </div>
-    </div>
-    <div id="post-cover-wrap"></div>
-  </div>
-
-  <div class="post-body">
-    <div class="post-content" id="post-content"></div>
-    <div class="post-tags" id="post-tags"></div>
-    <div class="post-share" id="post-share">
-      <span class="share-label">Share</span>
-      <a class="share-btn" id="share-wa" href="#" target="_blank" title="WhatsApp">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-      </a>
-      <a class="share-btn" id="share-tw" href="#" target="_blank" title="Twitter/X">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--foreground)"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.732-8.861-8.164-10.639h7.072l4.261 5.637zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      </a>
-      <button class="share-btn" onclick="copyLink()" title="Copy link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-      </button>
-    </div>
-    <div class="post-cta">
-      <h3>Looking to buy or invest in Jaipur?</h3>
-      <p>Get free advice from our property experts. Zero commission for buyers. Verified listings only.</p>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-        <a href="index.html#consult" class="btn-primary" style="text-decoration:none;">Get free consultation →</a>
-        <a href="index.html#properties" style="color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);padding:14px 22px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;">Browse listings</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Related posts -->
-  <div class="related-wrap" id="related-wrap" style="display:none;">
-    <div class="related-title">More from PinkCity</div>
-    <div class="related-grid" id="related-grid"></div>
+  <div style="padding:8px 4px 4px;">
+    <a href="login.html" class="mobile-cta">List Property →</a>
   </div>
 </div>
 
-<a href="https://wa.me/919358830405" target="_blank" class="wa-fab" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" fill="white"/></svg></a>
+<section class="fh-hero">
+  <div class="fh-blob-field" aria-hidden="true">
+    <div class="fh-blob fh-blob-1"></div>
+    <div class="fh-blob fh-blob-2"></div>
+    <div class="fh-blob fh-blob-3"></div>
+  </div>
+  <div class="fh-eyebrow fh-reveal">Our Story</div>
+  <h1 class="fh-reveal" style="transition-delay:0.08s;">It Started With a Simple Belief</h1>
+  <p class="fh-hero-sub fh-reveal" style="transition-delay:0.18s;">Real estate doesn't have to be complicated.</p>
+  <div class="fh-scroll-cue" aria-hidden="true">
+    <span>Scroll</span>
+    <div class="fh-scroll-line"></div>
+  </div>
+</section>
 
+<section class="fh-story" aria-label="Our story">
+  <p class="fh-reveal">Too often, people make one of life's biggest financial decisions with incomplete information, unnecessary pressure, or uncertainty.</p>
+  <p class="fh-reveal">We believed there was a better way.</p>
+  <p class="fh-reveal">PinkCity Properties was built on three simple principles.</p>
+</section>
+
+<section class="fh-principles-wrap" aria-label="Our principles">
+  <div class="fh-principles-head fh-reveal">
+    <div class="fh-eyebrow" style="margin-bottom:16px;">What We Stand For</div>
+  </div>
+  <div class="fh-principles-grid">
+    <div class="fh-p-card fh-reveal">
+      <div class="fh-p-num">01</div>
+      <div class="fh-p-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+      <h3>Clarity over confusion</h3>
+      <p>Every buyer deserves honest guidance and complete transparency.</p>
+    </div>
+    <div class="fh-p-card fh-reveal" style="transition-delay:0.12s;">
+      <div class="fh-p-num">02</div>
+      <div class="fh-p-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3 7.5 7.5 9 4.5-1.5 7.5-4.5 7.5-9V6Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <h3>Trust over transactions</h3>
+      <p>Relationships are built long after the paperwork is signed.</p>
+    </div>
+    <div class="fh-p-card fh-reveal" style="transition-delay:0.24s;">
+      <div class="fh-p-num">03</div>
+      <div class="fh-p-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 16 5.5-6 4 4L20 6"/><path d="M14 6h6v6"/></svg></div>
+      <h3>Long-term value over quick sales</h3>
+      <p>A great investment isn't just about today — it's about the future it creates.</p>
+    </div>
+  </div>
+</section>
+
+<section class="fh-statement" id="fh-statement-section">
+  <div class="fh-statement-glow" id="fh-statement-glow" aria-hidden="true"></div>
+  <div class="fh-statement-inner">
+    <h2 class="fh-reveal">We don't just <em>sell property.</em></h2>
+    <p class="fh-statement-sub fh-reveal" style="transition-delay:0.15s;">We help people make one of life's biggest decisions with confidence.</p>
+  </div>
+</section>
+
+<section class="fh-closing" aria-label="Our founders">
+  <p class="fh-closing-lead fh-reveal">Everything we build begins with that belief, and every decision we make is guided by it.</p>
+  <div class="fh-founders-row">
+    <div class="fh-founder fh-reveal">
+      <div class="fh-portrait-wrap"><div class="fh-portrait" data-magnetic>SK</div></div>
+      <div class="fh-founder-name">Sandeep Kumar</div>
+      <div class="fh-founder-role">Co-Founder</div>
+    </div>
+    <div class="fh-connector" aria-hidden="true"></div>
+    <div class="fh-founder fh-reveal" style="transition-delay:0.12s;">
+      <div class="fh-portrait-wrap"><div class="fh-portrait" data-magnetic>AS</div></div>
+      <div class="fh-founder-name">Aashish Sharma</div>
+      <div class="fh-founder-role">Co-Founder</div>
+    </div>
+  </div>
+  <div class="fh-signature fh-reveal">
+    <div class="fh-signature-line"></div>
+    <div class="fh-signature-mark">PinkCity Properties</div>
+    <div class="fh-signature-line"></div>
+  </div>
+</section>
+
+
+<a href="https://wa.me/919358830405" target="_blank" class="wa-fab" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" fill="white"/></svg>
+</a>
 <script>
-const sb = window.supabase.createClient("https://mfpnndrszjygespcfdbo.supabase.co","sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf");
-const CAT_EMOJI = {"Market Insights":"📊","Investment":"📈","Legal & Docs":"📋","Home Buying":"🏠","NRI Guide":"✈️","Lifestyle":"🌿"};
+(function(){
+  const nav=document.getElementById('main-nav');
+  if(!nav)return;
+  window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>12);},{passive:true});
+})();
+(function(){
+  const bar=document.getElementById('sp-bar');
+  if(!bar)return;
+  window.addEventListener('scroll',()=>{bar.style.width=Math.min(window.scrollY/(document.body.scrollHeight-window.innerHeight)*100,100)+'%';},{passive:true});
+})();
+(function(){
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('reveal-in');obs.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+})();
 
-async function load() {
-  const slug = new URLSearchParams(window.location.search).get("slug");
-  if (!slug) { showErr("Post not found."); return; }
+// ── FOUNDERS PAGE MOTION ──
+(function(){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const { data, error } = await sb.from("blogs").select("*").eq("slug",slug).eq("status","published").maybeSingle();
-  if (error || !data) { showErr("Post not found or not yet published."); return; }
-  const p = data;
+  // Staggered scroll reveal for story/principles/statement/closing
+  const fhObs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('in-view'); fhObs.unobserve(e.target); }
+    });
+  }, {threshold:0.15, rootMargin:'0px 0px -60px 0px'});
+  document.querySelectorAll('.fh-reveal').forEach(el=>fhObs.observe(el));
 
-  // ── SEO ──
-  const seoTitle = p.seo_title || (p.title + " | PinkCity");
-  const seoDesc  = p.seo_description || p.excerpt || "";
-  document.getElementById("page-title").textContent = seoTitle;
-  document.getElementById("page-desc").content = seoDesc;
-  document.getElementById("og-title").content = seoTitle;
-  document.getElementById("og-desc").content = seoDesc;
-  if (p.cover_image) document.getElementById("og-image").content = p.cover_image;
-  document.getElementById("canonical").href = "https://pinkcityproperties.com/blog-post.html?slug=" + slug;
+  if (reduceMotion) return;
 
-  // ── Schema.org Article markup ──
-  document.getElementById("schema-ld").textContent = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": p.title,
-    "description": p.excerpt || "",
-    "image": p.cover_image || "",
-    "author": {"@type":"Person","name": p.author_name || "PinkCity Team"},
-    "publisher": {"@type":"Organization","name":"PinkCity Properties","logo":{"@type":"ImageObject","url":"https://pinkcityproperties.com/icon.png"}},
-    "datePublished": p.published_at,
-    "dateModified": p.updated_at || p.published_at,
-    "mainEntityOfPage": {"@type":"WebPage","@id":"https://pinkcityproperties.com/blog-post.html?slug="+slug}
+  // Subtle parallax on the statement section's ambient glow
+  const statementSection = document.getElementById('fh-statement-section');
+  const glow = document.getElementById('fh-statement-glow');
+  if (statementSection && glow) {
+    window.addEventListener('scroll', () => {
+      const rect = statementSection.getBoundingClientRect();
+      const progress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+      const offset = (progress - 0.5) * 60;
+      glow.style.transform = `translate(-50%, calc(-50% + ${offset}px))`;
+    }, {passive:true});
+  }
+
+  // Magnetic hover for founder portraits
+  document.querySelectorAll('[data-magnetic]').forEach(el=>{
+    el.addEventListener('mousemove', (e)=>{
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width/2) * 0.25;
+      const y = (e.clientY - r.top - r.height/2) * 0.25;
+      el.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    el.addEventListener('mouseleave', ()=>{ el.style.transform = 'translate(0,0)'; });
   });
+})();
 
-  // ── Render ──
-  const dateStr = new Date(p.published_at).toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
-  document.getElementById("post-cat").textContent = (CAT_EMOJI[p.category]||"📝") + " " + (p.category||"Article");
-  document.getElementById("post-title").textContent = p.title;
-  document.getElementById("post-author-name").textContent = p.author_name || "PinkCity Team";
-  document.getElementById("post-date").textContent = dateStr;
-  document.getElementById("post-read").textContent = (p.read_time_mins||3) + " min read";
-
-  const av = document.getElementById("post-av");
-  if (p.author_avatar) { av.innerHTML = '<img src="'+p.author_avatar+'" alt=""/>'; }
-  else { av.textContent = (p.author_name||"P")[0].toUpperCase(); }
-
-  // Cover
-  const coverWrap = document.getElementById("post-cover-wrap");
-  if (p.cover_image) {
-    coverWrap.innerHTML = '<img src="'+p.cover_image+'" alt="'+p.title+'" class="post-cover"/>';
-  } else {
-    coverWrap.innerHTML = '<div class="post-cover-placeholder">'+(CAT_EMOJI[p.category]||"📝")+'</div>';
-  }
-
-  // Content
-  document.getElementById("post-content").innerHTML = p.content || "";
-
-  // Tags
-  if (p.tags && p.tags.length) {
-    document.getElementById("post-tags").innerHTML = p.tags.map(t =>
-      '<a href="blog.html" class="post-tag-pill">#'+t+'</a>'
-    ).join("");
-  }
-
-  // Share links
-  const url = encodeURIComponent(window.location.href);
-  const title = encodeURIComponent(p.title);
-  document.getElementById("share-wa").href = "https://wa.me/?text="+encodeURIComponent(p.title+" — "+window.location.href);
-  document.getElementById("share-tw").href = "https://twitter.com/intent/tweet?text="+title+"&url="+url;
-
-  // Related posts
-  const { data: related } = await sb.from("blogs").select("slug,title,category,cover_image,read_time_mins,published_at").eq("status","published").neq("slug",slug).eq("category",p.category).limit(2);
-  if (related && related.length) {
-    document.getElementById("related-wrap").style.display = "block";
-    document.getElementById("related-grid").innerHTML = related.map(function(r) {
-      const em = CAT_EMOJI[r.category] || "📝";
-      const imgHtml = r.cover_image
-        ? '<img src="' + r.cover_image + '" style="width:100%;aspect-ratio:16/9;object-fit:cover;" alt=""/>'
-        : '<div style="aspect-ratio:16/9;background:linear-gradient(135deg,oklch(0.93 0.05 8),oklch(0.88 0.08 20));display:flex;align-items:center;justify-content:center;font-size:32px;">' + em + '</div>';
-      return '<a href="blog-post.html?slug=' + r.slug + '" class="related-card">' + imgHtml
-        + '<div style="padding:18px;"><div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">' + em + ' ' + r.category + '</div>'
-        + '<div style="font-family:var(--font-display);font-size:19px;color:var(--foreground);line-height:1.3;">' + r.title + '</div></div></a>';
-    }).join("");
-  }
-
-  document.getElementById("skeleton").style.display = "none";
-  document.getElementById("post-wrap").style.display = "block";
-}
-
-function copyLink() {
-  navigator.clipboard.writeText(window.location.href).then(() => {
-    const btn = event.currentTarget;
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2.5"><path d="m5 12 4 4L19 7"/></svg>';
-    setTimeout(() => { btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>'; }, 2000);
-  });
-}
-
-function showErr(msg) {
-  document.getElementById("skeleton").innerHTML = '<div style="text-align:center;padding:60px 24px;font-family:var(--font-sans);color:var(--muted-foreground);">'+msg+'<br><br><a href="blog.html" style="color:var(--primary);font-weight:500;">← Back to blog</a></div>';
-}
-
-
-(function(){const nav=document.getElementById('main-nav');if(!nav)return;window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>12);},{passive:true});})();
-(function(){const bar=document.getElementById('sp-bar');if(!bar)return;window.addEventListener('scroll',()=>{bar.style.width=Math.min(window.scrollY/(document.body.scrollHeight-window.innerHeight)*100,100)+'%';},{passive:true});})();
 let menuOpen=false;
-function toggleMenu(){menuOpen=!menuOpen;document.getElementById('mobile-menu').classList.toggle('open',menuOpen);const ic=document.getElementById('menu-icon');ic.innerHTML=menuOpen?'<path d="M6 6l12 12M6 18L18 6" stroke-linecap="round"/>':'<path d="M4 7h16M4 12h16M4 17h16"/>';}
+function toggleMenu(){
+  menuOpen=!menuOpen;
+  document.getElementById('mobile-menu').classList.toggle('open',menuOpen);
+  const ic=document.getElementById('menu-icon');
+  ic.innerHTML=menuOpen?'<path d="M6 6l12 12M6 18L18 6" stroke-linecap="round"/>':'<path d="M4 7h16M4 12h16M4 17h16"/>';
+}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){menuOpen=false;document.getElementById('mobile-menu')?.classList.remove('open');}});
-
-load();
 </script>
 <footer>
   <div class="footer-orb"></div>
