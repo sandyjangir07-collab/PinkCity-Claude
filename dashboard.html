@@ -728,15 +728,18 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .sched-cancelled{background:rgba(107,114,128,0.10);color:#6b7280;}
 .sched-no_show{background:rgba(239,68,68,0.10);color:#b91c1c;}
 /* ── PERFORMANCE ── */
-.team-card{background:white;border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:14px;}
+.team-card{background:white;border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:14px;transition:all 0.25s cubic-bezier(0.22,1,0.36,1);}
+.team-card:hover{box-shadow:var(--shadow-soft);border-color:rgba(157,29,76,0.2);transform:translateY(-2px);}
 .team-card-top{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
 .team-av{width:44px;height:44px;border-radius:50%;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--primary);}
 .team-name{font-size:16px;font-weight:600;color:var(--foreground);}
 .team-email{font-size:12px;color:var(--muted-foreground);}
-.team-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.team-stat{text-align:center;background:var(--secondary);border-radius:14px;padding:12px 8px;}
-.team-stat-n{font-family:var(--font-display);font-size:26px;color:var(--primary);letter-spacing:-0.02em;line-height:1;}
-.team-stat-l{font-size:11px;color:var(--muted-foreground);margin-top:3px;}
+.team-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.team-stat{text-align:center;background:var(--secondary);border-radius:14px;padding:12px 6px;}
+.team-stat-n{font-family:var(--font-display);font-size:22px;color:var(--primary);letter-spacing:-0.02em;line-height:1;}
+.team-stat-l{font-size:9.5px;color:var(--muted-foreground);margin-top:3px;text-transform:uppercase;letter-spacing:0.03em;}
+.team-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.team-detail-row:last-child{border-bottom:none;}
 /* ── TIMELINE ── */
 .timeline-item{display:flex;gap:10px;align-items:flex-start;}
 .timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;}
@@ -820,7 +823,6 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       <div class="empty"><div class="empty-icon">✍️</div><p>No blog posts yet.</p></div>
     </div>
   </div>
-</main>
 
 <!-- ADD/EDIT MODAL -->
 <div class="overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
@@ -1015,6 +1017,25 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       <div class="empty"><div class="empty-icon">📊</div><p>Loading team data…</p></div>
     </div>
   </div>
+</main>
+
+<!-- TEAM MEMBER DETAIL MODAL -->
+<div class="overlay" id="tmd-overlay" onclick="if(event.target===this)closeTeamMemberDetail()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+      <div>
+        <div id="tmd-name" class="modal-title" style="margin-bottom:2px;">—</div>
+        <div id="tmd-email" style="font-size:12px;color:var(--muted-foreground);">—</div>
+      </div>
+      <button class="btn-ghost" onclick="closeTeamMemberDetail()" style="flex:0 0 auto;">Close</button>
+    </div>
+    <div class="fl" style="margin-bottom:8px;">Leads</div>
+    <div id="tmd-leads" style="margin-bottom:24px;"></div>
+    <div class="fl" style="margin-bottom:8px;">Site Visits</div>
+    <div id="tmd-visits"></div>
+  </div>
+</div>
 
 <!-- VISIT LOG MODAL -->
 <div class="vlog-overlay" id="vlog-overlay" onclick="if(event.target===this)closeVisitLog()">
@@ -2291,8 +2312,8 @@ window.closeSchedModal = function() { document.getElementById('sched-overlay').c
 window.loadPerformance = async function() {
   const [listingsRes, visitsRes, leadsRes, profilesRes] = await Promise.all([
     sb.from('listings').select('uid,submitter_name,status'),
-    sb.from('visits').select('logged_by,logged_by_name'),
-    sb.from('leads').select('created_by,created_by_name,status'),
+    sb.from('visits').select('logged_by,logged_by_name,visitor_name,visitor_phone,listing_title,visit_date,visit_time'),
+    sb.from('leads').select('id,created_by,created_by_name,status,name,phone,preferred_location'),
     sb.from('profiles').select('id,full_name,email,role'),
   ]);
 
@@ -2310,35 +2331,66 @@ window.loadPerformance = async function() {
   // Per-member breakdown
   const members = {};
   profiles.filter(function(p){return p.role !== 'admin';}).forEach(function(p){
-    members[p.id] = {name:p.full_name||p.email, email:p.email, listings:0, visits:0, leads:0, closed:0};
+    members[p.id] = {name:p.full_name||p.email, email:p.email, listings:0, visits:0, leads:0, closed:0, leadList:[], visitList:[]};
   });
   // Also add members who have activity but no profile
-  listings.forEach(function(l){ if(l.uid && !members[l.uid]) members[l.uid]={name:l.submitter_name||'Team',email:'',listings:0,visits:0,leads:0,closed:0}; });
+  listings.forEach(function(l){ if(l.uid && !members[l.uid]) members[l.uid]={name:l.submitter_name||'Team',email:'',listings:0,visits:0,leads:0,closed:0,leadList:[],visitList:[]}; });
+  visits.forEach(function(v){ if(v.logged_by && !members[v.logged_by]) members[v.logged_by]={name:v.logged_by_name||'Team',email:'',listings:0,visits:0,leads:0,closed:0,leadList:[],visitList:[]}; });
+  leads.forEach(function(l){ if(l.created_by && !members[l.created_by]) members[l.created_by]={name:l.created_by_name||'Team',email:'',listings:0,visits:0,leads:0,closed:0,leadList:[],visitList:[]}; });
 
   listings.forEach(function(l){ if(members[l.uid]) members[l.uid].listings++; });
-  visits.forEach(function(v){ if(members[v.logged_by]) members[v.logged_by].visits++; });
+  visits.forEach(function(v){ if(members[v.logged_by]) { members[v.logged_by].visits++; members[v.logged_by].visitList.push(v); } });
   leads.forEach(function(l){
     if(members[l.created_by]) {
       members[l.created_by].leads++;
+      members[l.created_by].leadList.push(l);
       if(l.status==='closed') members[l.created_by].closed++;
     }
   });
 
+  window.__teamMembers = members;
   const memberList = Object.entries(members).sort(function(a,b){ return (b[1].listings+b[1].visits+b[1].leads)-(a[1].listings+a[1].visits+a[1].leads); });
   const el = document.getElementById('team-grid');
   if (!memberList.length) { el.innerHTML='<div class="empty"><div class="empty-icon">👥</div><p>No team members yet.</p></div>'; return; }
   el.innerHTML = memberList.map(function(entry){
+    const mid = entry[0];
     const m = entry[1];
     const initials = (m.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-    return '<div class="team-card">'
+    return '<div class="team-card" onclick="openTeamMemberDetail(\''+mid+'\')" style="cursor:pointer;">'
       +'<div class="team-card-top"><div class="team-av">'+initials+'</div><div><div class="team-name">'+m.name+'</div><div class="team-email">'+m.email+'</div></div></div>'
       +'<div class="team-stats">'
       +'<div class="team-stat"><div class="team-stat-n">'+m.listings+'</div><div class="team-stat-l">Listings</div></div>'
+      +'<div class="team-stat"><div class="team-stat-n">'+m.leads+'</div><div class="team-stat-l">Leads</div></div>'
       +'<div class="team-stat"><div class="team-stat-n">'+m.visits+'</div><div class="team-stat-l">Site Visits</div></div>'
-      +'<div class="team-stat"><div class="team-stat-n" style="color:#22c55e;">'+m.closed+'</div><div class="team-stat-l">Deals Closed</div></div>'
-      +'</div></div>';
+      +'<div class="team-stat"><div class="team-stat-n" style="color:#22c55e;">'+m.closed+'</div><div class="team-stat-l">Closed</div></div>'
+      +'</div><div style="text-align:center;font-size:11px;color:var(--primary);font-weight:600;margin-top:10px;">View leads &amp; visits →</div></div>';
   }).join('');
 };
+
+window.openTeamMemberDetail = function(memberId) {
+  const m = window.__teamMembers && window.__teamMembers[memberId];
+  if (!m) return;
+  document.getElementById('tmd-name').textContent = m.name;
+  document.getElementById('tmd-email').textContent = m.email || '';
+  const leadsEl = document.getElementById('tmd-leads');
+  leadsEl.innerHTML = m.leadList.length ? m.leadList.map(function(l){
+    return '<div class="team-detail-row">'
+      +'<div><div style="font-weight:600;font-size:13.5px;">'+(l.name||'—')+'</div><div style="font-size:12px;color:var(--muted-foreground);">'+[l.phone,l.preferred_location].filter(Boolean).join(' · ')+'</div></div>'
+      +'<span class="badge st-'+(l.status||'new')+'">'+(STATUS_LABELS[l.status]||l.status)+'</span>'
+      +'</div>';
+  }).join('') : '<div class="empty" style="padding:16px 0;"><p style="font-size:13px;">No leads yet.</p></div>';
+  const visitsEl = document.getElementById('tmd-visits');
+  visitsEl.innerHTML = m.visitList.length ? m.visitList.map(function(v){
+    const d = v.visit_date ? new Date(v.visit_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—';
+    return '<div class="team-detail-row">'
+      +'<div><div style="font-weight:600;font-size:13.5px;">'+(v.visitor_name||'—')+'</div><div style="font-size:12px;color:var(--muted-foreground);">'+[v.listing_title,v.visitor_phone].filter(Boolean).join(' · ')+'</div></div>'
+      +'<div style="font-size:12px;font-weight:600;color:var(--muted-foreground);text-align:right;">'+d+(v.visit_time?'<br>'+v.visit_time:'')+'</div>'
+      +'</div>';
+  }).join('') : '<div class="empty" style="padding:16px 0;"><p style="font-size:13px;">No visits logged yet.</p></div>';
+  document.getElementById('tmd-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+window.closeTeamMemberDetail = function() { document.getElementById('tmd-overlay').classList.remove('on'); document.body.style.overflow=''; };
 
 </script>
 
