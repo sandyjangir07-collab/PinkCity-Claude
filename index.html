@@ -1496,7 +1496,7 @@ footer::before {
             <div class="sf-label">Budget</div>
             <div class="sf-val" id="v-budget">₹ 25L — 2 Cr</div>
           </button>
-          <button class="btn-search" onclick="doSearch()">
+          <button class="btn-search" onclick="applyFilters()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
             Search
           </button>
@@ -1523,6 +1523,7 @@ footer::before {
     <div class="section-header reveal">
       <div class="eyebrow">Featured Properties</div>
       <h2>Hand-picked. Verified.<br><em style="font-style:italic;font-weight:300;color:color-mix(in oklab,var(--foreground) 70%,transparent)">Move-in ready.</em></h2>
+      <div id="prop-count" style="font-size:13px;color:var(--primary);font-weight:600;margin-top:10px;"></div>
     </div>
     <div class="prop-grid" id="prop-grid">
       <div class="prop-empty">Loading verified listings…</div>
@@ -1783,6 +1784,23 @@ footer::before {
   };
   const EMOJI = {villa:"🏯",plot:"🏜️",apartment:"🏢",farmhouse:"🌿",commercial:"🏗️",investment:"🌾"};
   const TYPE_LABEL = {villa:"Villa",plot:"Plot",apartment:"Apartment",farmhouse:"Farmhouse",commercial:"Commercial",investment:"Land"};
+  const TYPE_SLUG_MAP = {"Residential Plot":"plot","Farmhouse":"farmhouse","Luxury Villa":"villa","Apartment":"apartment","Investment Land":"investment"};
+  const BUDGET_BUCKETS = {
+    "Under ₹25L": lakh => lakh < 25,
+    "₹ 25L — 50L": lakh => lakh >= 25 && lakh <= 50,
+    "₹ 50L — 1 Cr": lakh => lakh >= 50 && lakh <= 100,
+    "₹ 1 Cr — 2 Cr": lakh => lakh >= 100 && lakh <= 200,
+    "Above ₹ 2 Cr": lakh => lakh > 200,
+  };
+  function parsePriceLakh(str){
+    if(!str) return null;
+    if(/\//.test(str)) return null; // a rate like "/Gaj" or "/sq yd", not a total price — never used to exclude a listing
+    const s = str.replace(/[₹,\s]/g,'').toLowerCase();
+    let m = s.match(/([\d.]+)\s*cr/); if(m) return parseFloat(m[1])*100;
+    m = s.match(/([\d.]+)\s*l(akh)?/); if(m) return parseFloat(m[1]);
+    m = s.match(/^(\d{5,})$/); if(m) return parseFloat(m[1])/100000;
+    return null;
+  }
 
   function fINR(n){
     if(n>=1e7) return '₹ '+(n/1e7).toFixed(2).replace(/\.00$/,'')+' Cr';
@@ -1794,7 +1812,7 @@ footer::before {
     const grid = document.getElementById('prop-grid');
     // Try properties table first (Lovable), fallback to listings
     let data = null;
-    let res = await sb.from('properties').select('id,title,property_type,location,price_inr,cover_image,featured,approval_status').eq('approval_status','approved').order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(8);
+    let res = await sb.from('properties').select('id,title,property_type,location,price_inr,cover_image,featured,approval_status').eq('approval_status','approved').order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(60);
     if(!res.error && res.data && res.data.length){
       data = res.data.map(p=>({
         id:p.id, title:p.title, type:p.property_type, area:p.location,
@@ -1803,7 +1821,7 @@ footer::before {
       }));
     } else {
       // Fallback: listings table
-      let res2 = await sb.from('listings').select('id,title,type,area,price,image_url,verified').eq('status','active').order('created_at',{ascending:false}).limit(8);
+      let res2 = await sb.from('listings').select('id,title,type,area,price,image_url,verified').eq('status','active').order('created_at',{ascending:false}).limit(60);
       if(!res2.error && res2.data && res2.data.length){
         data = res2.data.map(p=>({
           id:p.id, title:p.title, type:p.type, area:p.area,
@@ -1813,10 +1831,23 @@ footer::before {
       }
     }
 
+    window.__allProps = data || [];
+    renderPropGrid(window.__allProps);
+  }
+
+  function renderPropGrid(data, filterLabel){
+    const grid = document.getElementById('prop-grid');
+    const countEl = document.getElementById('prop-count');
+
     if(!data || !data.length){
-      grid.innerHTML = '<div class="prop-empty">No listings yet — check back soon.</div>';
+      grid.innerHTML = filterLabel
+        ? '<div class="prop-empty">No properties match those filters right now.<br><button class="btn-secondary" style="margin-top:16px;" onclick="clearFilters()">Clear filters</button></div>'
+        : '<div class="prop-empty">No listings yet — check back soon.</div>';
+      if(countEl) countEl.textContent = filterLabel ? '0 properties match your search' : '';
       return;
     }
+
+    if(countEl) countEl.textContent = filterLabel ? (data.length+' propert'+(data.length===1?'y':'ies')+' match your search') : '';
 
     grid.innerHTML = data.map(p=>{
       const g = GRADS[p.type]||GRADS.plot;
@@ -1851,6 +1882,38 @@ footer::before {
     // Trigger reveal
     document.querySelectorAll('#prop-grid .reveal').forEach(el=>el.classList.add('reveal-in'));
   }
+
+  window.applyFilters = function(){
+    const loc = document.getElementById('v-loc').textContent.trim();
+    const type = document.getElementById('v-type').textContent.trim();
+    const budget = document.getElementById('v-budget').textContent.trim();
+    const all = window.__allProps || [];
+
+    const locFilter = loc && loc !== 'Jaipur, Rajasthan' ? loc.split(',')[0].trim().toLowerCase() : null;
+    const typeSlug = TYPE_SLUG_MAP[type] || null;
+    const budgetTest = BUDGET_BUCKETS[budget] || null;
+    const isFiltered = !!(locFilter || typeSlug || budgetTest);
+
+    const filtered = all.filter(p => {
+      if (locFilter && !(p.area||'').toLowerCase().includes(locFilter)) return false;
+      if (typeSlug && p.type !== typeSlug) return false;
+      if (budgetTest) {
+        const lakh = parsePriceLakh(p.price);
+        if (lakh !== null && !budgetTest(lakh)) return false;
+      }
+      return true;
+    });
+
+    renderPropGrid(filtered, isFiltered ? 'filtered' : null);
+    document.getElementById('properties').scrollIntoView({behavior:'smooth'});
+  };
+
+  window.clearFilters = function(){
+    document.getElementById('v-loc').textContent = 'Jaipur, Rajasthan';
+    document.getElementById('v-type').textContent = 'Any type';
+    document.getElementById('v-budget').textContent = '₹ 25L — 2 Cr';
+    renderPropGrid(window.__allProps || []);
+  };
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',loadProperties);
   else loadProperties();
@@ -1928,7 +1991,6 @@ function toggleMenu(){
 function openM(id){document.getElementById('m-'+id).classList.add('on');document.body.style.overflow='hidden';}
 function closeM(id){document.getElementById(id).classList.remove('on');document.body.style.overflow='';}
 function setV(elId,val,modalId){document.getElementById(elId).textContent=val;closeM(modalId);}
-function doSearch(){const loc=document.getElementById('v-loc').textContent;const type=document.getElementById('v-type').textContent;showToast('Searching: '+type+' in '+loc);document.getElementById('properties').scrollIntoView({behavior:'smooth'});}
 
 // ── TOAST ──
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
