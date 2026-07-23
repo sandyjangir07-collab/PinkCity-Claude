@@ -1479,7 +1479,7 @@ footer::before {
         Explore properties
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
       </a>
-      <a href="#consult" class="btn-secondary">List your property</a>
+      <a href="login.html" class="btn-secondary">List your property</a>
     </div>
     <div class="search-wrap hero-fade hero-fade-4">
       <div class="search-card glass-strong">
@@ -1826,7 +1826,7 @@ footer::before {
         ? `<img src="${p.image}" alt="${p.title}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>`
         : `<div class="prop-img-emoji">${em}</div>`;
       const bgStyle = p.image ? '' : `style="background:${g};"`;
-      return `<a class="prop-card reveal" href="${p.detailUrl}">
+      return `<div class="prop-card reveal" role="link" tabindex="0" onclick="window.location.href='${p.detailUrl}'" onkeydown="if(event.key==='Enter')window.location.href='${p.detailUrl}'">
         <div class="prop-img-wrap" ${bgStyle}>
           ${imgHtml}
           <div class="prop-img-overlay"></div>
@@ -1843,10 +1843,10 @@ footer::before {
           </div>
           <div class="prop-ctas">
             <a class="prop-cta-wa" href="https://wa.me/919358830405?text=${encodeURIComponent('Hi, I am interested in: '+p.title+' in '+p.area)}" target="_blank" onclick="event.stopPropagation()">WhatsApp</a>
-            <span class="prop-cta-view">View details</span>
+            <a class="prop-cta-view" href="${p.detailUrl}" onclick="event.stopPropagation()">View details</a>
           </div>
         </div>
-      </a>`;
+      </div>`;
     }).join('');
     // Trigger reveal
     document.querySelectorAll('#prop-grid .reveal').forEach(el=>el.classList.add('reveal-in'));
