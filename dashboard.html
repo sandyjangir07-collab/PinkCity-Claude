@@ -1381,6 +1381,7 @@ window.removePending = (i) => { pendingFiles.splice(i, 1); renderImageGrid(); };
 
 async function uploadAllImages() {
   const uploaded = [...savedUrls];
+  const failed = [];
   for (const file of pendingFiles) {
     const ext = file.name.split(".").pop();
     const path = `listings/${currentUser.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -1388,7 +1389,13 @@ async function uploadAllImages() {
     if (!error) {
       const { data } = sb.storage.from("property-images").getPublicUrl(path);
       uploaded.push(data.publicUrl);
+    } else {
+      console.error("Image upload failed:", file.name, error);
+      failed.push(file.name + ": " + (error.message || "unknown error"));
     }
+  }
+  if (failed.length) {
+    throw new Error("Failed to upload " + failed.length + " photo(s) — " + failed.join("; "));
   }
   return uploaded;
 }
