@@ -838,6 +838,64 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <div><label class="fl">Price *</label><input class="fi" id="f-price" placeholder="e.g. ₹68 Lakh"/></div>
       </div>
       <div><label class="fl">Size</label><input class="fi" id="f-size" placeholder="e.g. 200 sq yd or 1100 sq ft"/></div>
+      <div class="form-row">
+        <div><label class="fl">Road Width</label><select class="fsel" id="f-road-width">
+          <option value="">Select</option>
+          <option value="30 Ft">30 Ft</option>
+          <option value="40 Ft">40 Ft</option>
+          <option value="60 Ft">60 Ft</option>
+          <option value="80 Ft">80 Ft</option>
+          <option value="100 Ft">100 Ft</option>
+          <option value="160 Ft">160 Ft</option>
+          <option value="200 Ft">200 Ft</option>
+        </select></div>
+        <div><label class="fl">Facing</label><select class="fsel" id="f-facing">
+          <option value="">Select</option>
+          <option value="North">North</option>
+          <option value="East">East</option>
+          <option value="West">West</option>
+          <option value="South">South</option>
+        </select></div>
+      </div>
+      <div class="form-row">
+        <div><label class="fl">Agreement Value</label><input class="fi" id="f-agreement-value" placeholder="e.g. ₹55 Lakh"/></div>
+        <div><label class="fl">Approval</label><select class="fsel" id="f-approval">
+          <option value="">Select</option>
+          <option value="JDA">JDA</option>
+          <option value="90A">90A</option>
+          <option value="Society Patta">Society Patta</option>
+        </select></div>
+      </div>
+      <div class="form-row">
+        <div><label class="fl">Plot Size</label>
+          <div style="position:relative;">
+            <input class="fi" id="f-plot-size" type="number" placeholder="e.g. 200" style="padding-right:46px;"/>
+            <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted-foreground);font-size:13px;pointer-events:none;">Yds</span>
+          </div>
+        </div>
+        <div><label class="fl">Plot Dimensions</label>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input class="fi" id="f-plot-length" type="number" placeholder="Length" style="min-width:0;"/>
+            <span style="color:var(--muted-foreground);font-weight:600;flex-shrink:0;">×</span>
+            <input class="fi" id="f-plot-width" type="number" placeholder="Width" style="min-width:0;"/>
+            <span style="color:var(--muted-foreground);font-size:13px;flex-shrink:0;">Ft</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="verified-row" style="margin-bottom:0;">
+          <input type="checkbox" id="f-corner-plot"/>
+          <label for="f-corner-plot">Corner Plot</label>
+        </div>
+        <div class="verified-row" style="margin-bottom:0;">
+          <input type="checkbox" id="f-park-facing"/>
+          <label for="f-park-facing">Park Facing</label>
+        </div>
+      </div>
+      <div class="verified-row">
+        <input type="checkbox" id="f-rera"/>
+        <label for="f-rera">RERA Approved</label>
+      </div>
       <div><label class="fl">Description</label><textarea class="ftextarea" id="f-desc" placeholder="Key highlights — road access, floor, facing, landmarks…"></textarea></div>
       <!-- PHONE — admin only note -->
       <div>
@@ -1334,8 +1392,14 @@ async function uploadAllImages() {
 window.openAdd = () => {
   editId = null; pendingFiles = []; savedUrls = [];
   document.getElementById("modal-title").textContent = "Add New Listing";
-  ["f-title","f-area","f-price","f-size","f-desc","f-phone"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  ["f-title","f-area","f-price","f-size","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   const ft=document.getElementById("f-type");if(ft)ft.selectedIndex=0;
+  const frw=document.getElementById("f-road-width");if(frw)frw.selectedIndex=0;
+  const ffc=document.getElementById("f-facing");if(ffc)ffc.selectedIndex=0;
+  const fap=document.getElementById("f-approval");if(fap)fap.selectedIndex=0;
+  const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=false;
+  const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=false;
+  const fr=document.getElementById("f-rera");if(fr)fr.checked=false;
   const fv=document.getElementById("f-verified");if(fv)fv.checked=false;
   renderImageGrid();
   document.getElementById("submit-btn").textContent="Submit for approval";
@@ -1356,6 +1420,16 @@ window.adminEdit = async (id) => {
   document.getElementById("f-size").value = data.size||"";
   document.getElementById("f-desc").value = data.desc||"";
   document.getElementById("f-phone").value = data.submitter_phone||"";
+  document.getElementById("f-road-width").value = data.road_width||"";
+  document.getElementById("f-facing").value = data.facing||"";
+  document.getElementById("f-agreement-value").value = data.agreement_value||"";
+  document.getElementById("f-approval").value = data.approval_type||"";
+  document.getElementById("f-plot-size").value = data.plot_size_yds||"";
+  document.getElementById("f-plot-length").value = data.plot_length||"";
+  document.getElementById("f-plot-width").value = data.plot_width||"";
+  const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=!!data.corner_plot;
+  const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=!!data.park_facing;
+  const fr=document.getElementById("f-rera");if(fr)fr.checked=!!data.rera_approved;
   const fv=document.getElementById("f-verified");if(fv)fv.checked=!!data.verified;
   renderImageGrid();
   document.getElementById("submit-btn").textContent="Save changes";
@@ -1377,6 +1451,16 @@ window.submitListing = async () => {
   const size  = document.getElementById("f-size").value.trim();
   const desc  = document.getElementById("f-desc").value.trim();
   const phone = document.getElementById("f-phone").value.trim();
+  const roadWidth = document.getElementById("f-road-width").value;
+  const facing = document.getElementById("f-facing").value;
+  const agreementValue = document.getElementById("f-agreement-value").value.trim();
+  const approvalType = document.getElementById("f-approval").value;
+  const plotSize = document.getElementById("f-plot-size").value.trim();
+  const plotLength = document.getElementById("f-plot-length").value.trim();
+  const plotWidth = document.getElementById("f-plot-width").value.trim();
+  const cornerPlot = document.getElementById("f-corner-plot")?.checked || false;
+  const parkFacing = document.getElementById("f-park-facing")?.checked || false;
+  const reraApproved = document.getElementById("f-rera")?.checked || false;
   const verified = document.getElementById("f-verified")?.checked || false;
   if (!title||!area||!price) { showFormErr("Please fill in Title, Area and Price."); return; }
   const btn = document.getElementById("submit-btn");
@@ -1387,6 +1471,10 @@ window.submitListing = async () => {
     if (editId) {
       const { error } = await sb.from("listings").update({
         title, type, area, price, size, desc, verified,
+        road_width: roadWidth, facing, agreement_value: agreementValue,
+        approval_type: approvalType, rera_approved: reraApproved,
+        plot_size_yds: plotSize, plot_length: plotLength, plot_width: plotWidth,
+        corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         submitter_phone: phone,
         updated_at: new Date().toISOString()
@@ -1396,6 +1484,10 @@ window.submitListing = async () => {
     } else {
       const { error } = await sb.from("listings").insert({
         title, type, area, price, size, desc, verified,
+        road_width: roadWidth, facing, agreement_value: agreementValue,
+        approval_type: approvalType, rera_approved: reraApproved,
+        plot_size_yds: plotSize, plot_length: plotLength, plot_width: plotWidth,
+        corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         status: "pending",
         uid: currentUser.id,

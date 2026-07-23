@@ -1839,7 +1839,7 @@ footer::before {
         </div>
         <div class="prop-body">
           <div class="prop-price-row">
-            <div class="prop-price">${p.price}</div>
+            <div class="prop-price">${(p.price||'').replace(/₹/g,'<span style="font-family:var(--font-sans);">₹</span>')}</div>
           </div>
           <div class="prop-ctas">
             <a class="prop-cta-wa" href="https://wa.me/919358830405?text=${encodeURIComponent('Hi, I am interested in: '+p.title+' in '+p.area)}" target="_blank" onclick="event.stopPropagation()">WhatsApp</a>

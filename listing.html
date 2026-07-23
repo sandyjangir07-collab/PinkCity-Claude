@@ -672,6 +672,26 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
     <div class="meta-grid">
       <div class="meta-card"><div class="meta-label">Location</div><div class="meta-val" id="listing-area">—</div></div>
       <div class="meta-card"><div class="meta-label">Size</div><div class="meta-val" id="listing-size">—</div></div>
+      <div class="meta-card" id="meta-plot-size" style="display:none;"><div class="meta-label">Plot Size</div><div class="meta-val" id="listing-plot-size">—</div></div>
+      <div class="meta-card" id="meta-plot-dims" style="display:none;"><div class="meta-label">Dimensions</div><div class="meta-val" id="listing-plot-dims">—</div></div>
+      <div class="meta-card" id="meta-road-width" style="display:none;"><div class="meta-label">Road Width</div><div class="meta-val" id="listing-road-width">—</div></div>
+      <div class="meta-card" id="meta-facing" style="display:none;"><div class="meta-label">Facing</div><div class="meta-val" id="listing-facing">—</div></div>
+      <div class="meta-card" id="meta-approval" style="display:none;"><div class="meta-label">Approval</div><div class="meta-val" id="listing-approval">—</div></div>
+      <div class="meta-card" id="meta-agreement-value" style="display:none;"><div class="meta-label">Agreement Value</div><div class="meta-val" id="listing-agreement-value">—</div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <div id="rera-badge" style="display:none;align-items:center;gap:7px;background:rgba(34,197,94,0.12);color:#15803d;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;width:fit-content;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3 7.5 7.5 9 4.5-1.5 7.5-4.5 7.5-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+        RERA Approved
+      </div>
+      <div id="corner-badge" style="display:none;align-items:center;gap:7px;background:var(--primary-soft, rgba(157,29,76,0.12));color:var(--primary);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;width:fit-content;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h6V3"/></svg>
+        Corner Plot
+      </div>
+      <div id="park-badge" style="display:none;align-items:center;gap:7px;background:rgba(34,197,94,0.12);color:#15803d;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;width:fit-content;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4.5 8-11a8 8 0 0 0-16 0c0 6.5 8 11 8 11Z"/><circle cx="12" cy="11" r="2.5"/></svg>
+        Park Facing
+      </div>
     </div>
     <a id="area-intel-banner" style="display:none;background:var(--primary-soft);border:1px solid rgba(157,29,76,0.18);border-radius:16px;padding:14px 18px;margin-bottom:20px;text-decoration:none;align-items:center;justify-content:space-between;gap:12px;">
       <div>
@@ -812,6 +832,15 @@ window.galGo = i => {
   }, {passive:true});
 })();
 
+function formatPriceHTML(text) {
+  if (!text) return '—';
+  const escaped = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Fraunces (--font-display) doesn't include the ₹ glyph, so it silently falls back to a
+  // mismatched system serif for just that character. Rendering it in the sans-serif font
+  // keeps the whole price visually consistent.
+  return escaped.replace(/₹/g, '<span style="font-family:var(--font-sans);">₹</span>');
+}
+
 async function load() {
   const id = new URLSearchParams(window.location.search).get("id");
   if (!id) { showErr("No listing ID provided."); return; }
@@ -843,10 +872,24 @@ async function load() {
     document.getElementById("verified-badge").style.display = "inline-flex";
     document.getElementById("verified-info-block").style.display = "block";
   }
-  document.getElementById("listing-price").textContent = data.price;
+  document.getElementById("listing-price").innerHTML = formatPriceHTML(data.price);
   document.getElementById("listing-title").textContent = data.title;
   document.getElementById("listing-area").textContent = (data.area||"") + ", Jaipur";
   document.getElementById("listing-size").textContent = data.size || "—";
+  function showMeta(cardId, valId, value) {
+    if (!value) return;
+    document.getElementById(cardId).style.display = "";
+    document.getElementById(valId).textContent = value;
+  }
+  showMeta("meta-road-width", "listing-road-width", data.road_width);
+  showMeta("meta-facing", "listing-facing", data.facing);
+  showMeta("meta-approval", "listing-approval", data.approval_type);
+  showMeta("meta-agreement-value", "listing-agreement-value", data.agreement_value);
+  if (data.plot_size_yds) showMeta("meta-plot-size", "listing-plot-size", data.plot_size_yds + " Yds");
+  if (data.plot_length && data.plot_width) showMeta("meta-plot-dims", "listing-plot-dims", data.plot_length + " × " + data.plot_width + " Ft");
+  if (data.rera_approved) document.getElementById("rera-badge").style.display = "inline-flex";
+  if (data.corner_plot) document.getElementById("corner-badge").style.display = "inline-flex";
+  if (data.park_facing) document.getElementById("park-badge").style.display = "inline-flex";
   document.getElementById("listing-desc").textContent = data.desc || data.description || "Contact us for full property details.";
   document.getElementById("wa-btn").href = `https://wa.me/919358830405?text=${encodeURIComponent("Hi, I am interested in: "+data.title+" ("+data.price+") in "+(data.area||""))}`;
   const today = new Date().toISOString().split("T")[0];
