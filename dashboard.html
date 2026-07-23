@@ -787,6 +787,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   <h1 class="page-title fade-up fade-up-1" id="page-title">Manage properties</h1>
   <p class="page-sub fade-up fade-up-2" id="page-sub">Manage listings, track leads, and schedule site visits.</p>
   <div id="admin-tabs" style="display:none;gap:8px;margin-bottom:28px;flex-wrap:wrap;">
+    <button onclick="showTab('today')" id="tab-today" class="tab-btn">☀️ Today</button>
     <button onclick="showTab('listings')" id="tab-listings" class="tab-btn active-tab">🏠 Listings</button>
     <button onclick="showTab('crm')" id="tab-crm" class="tab-btn">👥 CRM</button>
     <button onclick="showTab('schedule')" id="tab-schedule" class="tab-btn">📅 Visits</button>
@@ -938,6 +939,28 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 </div>
 
 
+
+  <!-- ── TODAY SECTION ── -->
+  <div id="today-section" style="display:none;">
+    <div id="today-greeting" style="margin-bottom:32px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">TODAY</div>
+      <div style="font-size:24px;font-family:var(--font-display);color:var(--foreground);" id="today-greeting-text">Good morning.</div>
+      <div style="font-size:13.5px;color:var(--muted-foreground);margin-top:4px;" id="today-greeting-sub">Here's how your day looks.</div>
+    </div>
+    <div class="stat-grid" style="margin-bottom:32px;">
+      <div class="stat-card"><div class="stat-n" id="today-followup-count" style="color:#b45309;">0</div><div class="stat-l">Follow-ups today</div></div>
+      <div class="stat-card"><div class="stat-n" id="today-overdue-count" style="color:#b91c1c;">0</div><div class="stat-l">Overdue</div></div>
+      <div class="stat-card"><div class="stat-n" id="today-visit-count" style="color:var(--primary);">0</div><div class="stat-l">Visits today</div></div>
+    </div>
+    <div style="margin-bottom:36px;">
+      <div style="font-size:16px;font-family:var(--font-display);color:var(--foreground);margin-bottom:14px;">Follow-ups</div>
+      <div id="today-followups-list"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
+    </div>
+    <div>
+      <div style="font-size:16px;font-family:var(--font-display);color:var(--foreground);margin-bottom:14px;">Site Visits Today</div>
+      <div id="today-visits-list"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
+    </div>
+  </div>
 
   <!-- ── CRM SECTION ── -->
   <div id="crm-section" style="display:none;">
@@ -1108,6 +1131,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <div><label class="fl">Property Type</label><select class="fsel" id="lead-proptype"><option value="">Any</option><option value="plot">Plot</option><option value="apartment">Apartment</option><option value="farmhouse">Farmhouse</option><option value="villa">Villa</option><option value="land">Land</option></select></div>
       </div>
       <div><label class="fl">Preferred Location</label><input class="fi" id="lead-location" placeholder="e.g. Jagatpura, Mansarovar"/></div>
+      <div><label class="fl">Follow-up Date</label><input class="fi" id="lead-followup" type="date"/></div>
       <div><label class="fl">Status</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;" id="lead-status-pills">
           <button class="status-pill active" data-status="new" onclick="setLeadStatus('new')">🔵 New</button>
@@ -1308,11 +1332,10 @@ sb.auth.onAuthStateChange(async (event, session) => {
     document.getElementById("tab-performance").style.display = "inline-flex";
     loadAdminListings();
   } else {
-    // Team members get CRM + Schedule tabs too
+    // Team members land on their personalized Today view instead of a raw listings dump
     document.getElementById('admin-tabs').style.display = 'flex';
-    document.getElementById('listings').style.display = 'flex';
     document.getElementById('tab-performance').style.display = 'none'; // admin only
-    loadTeamListings();
+    showTab('today');
   }
 });
 
@@ -1718,16 +1741,20 @@ let blogEditId = null, blogStatus = 'draft', blogFeatured = false;
 
 window.showTab = function(tab) {
   // Hide all sections
-  ['listings','blog-section','crm-section','schedule-section','performance-section'].forEach(function(id){
+  ['listings','blog-section','crm-section','schedule-section','performance-section','today-section'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.style.display='none';
   });
   document.getElementById('add-btn').style.display = 'none';
   // Deactivate all tabs
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active-tab'); });
 
-  if(tab==='listings'){
+  if(tab==='today'){
+    document.getElementById('today-section').style.display='block';
+    loadToday();
+  } else if(tab==='listings'){
     document.getElementById('listings').style.display='flex';
     document.getElementById('add-btn').style.display='inline-flex';
+    if (isAdmin) loadAdminListings(); else loadTeamListings();
   } else if(tab==='blogs'){
     document.getElementById('blog-section').style.display='block';
     loadBlogPosts();
@@ -1938,6 +1965,85 @@ const SOURCE_LABELS = {
   manual:'Manual', referral:'Referral', loan_calculator:'Loan Offer'
 };
 
+window.loadToday = async function() {
+  const meta = currentUser.user_metadata || {};
+  const firstName = (meta.full_name || meta.name || currentUser.email || '').split(' ')[0];
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('today-greeting-text').textContent = greeting + ', ' + firstName + '.';
+
+  const todayStr = new Date().toISOString().slice(0,10);
+
+  const { data: allFollowups } = await sb.from('leads').select('*')
+    .or('created_by.eq.'+currentUser.id+',assigned_to.eq.'+currentUser.id)
+    .not('status','in','(closed,lost)')
+    .lte('follow_up_date', todayStr)
+    .not('follow_up_date','is',null)
+    .order('follow_up_date',{ascending:true});
+
+  const { data: visits } = await sb.from('scheduled_visits').select('*')
+    .or('assigned_to.eq.'+currentUser.id+',created_by.eq.'+currentUser.id)
+    .eq('visit_date', todayStr)
+    .neq('status','cancelled')
+    .order('visit_time',{ascending:true});
+
+  const followups = allFollowups || [];
+  const dueToday = followups.filter(l => l.follow_up_date === todayStr);
+  const overdue = followups.filter(l => l.follow_up_date < todayStr);
+
+  document.getElementById('today-followup-count').textContent = dueToday.length;
+  document.getElementById('today-overdue-count').textContent = overdue.length;
+  document.getElementById('today-visit-count').textContent = (visits||[]).length;
+
+  document.getElementById('today-greeting-sub').textContent = followups.length===0 && (!visits||!visits.length)
+    ? "You're all caught up — nothing due today. 🎉"
+    : [dueToday.length?dueToday.length+' follow-up'+(dueToday.length===1?'':'s')+' due':'', overdue.length?overdue.length+' overdue':'', (visits&&visits.length)?visits.length+' visit'+(visits.length===1?'':'s')+' today':''].filter(Boolean).join(' · ');
+
+  const followupsEl = document.getElementById('today-followups-list');
+  if (!followups.length) {
+    followupsEl.innerHTML = '<div class="empty"><p style="font-size:13px;">No follow-ups due — nice and clear.</p></div>';
+  } else {
+    followupsEl.innerHTML = followups.map(function(l){
+      const digits = (l.phone||'').replace(/\D/g,'');
+      const waNum = digits.length===10 ? '91'+digits : digits;
+      const isOverdue = l.follow_up_date < todayStr;
+      return '<div class="lead-card" data-lid="'+l.id+'" onclick="openLeadDetail(this.dataset.lid)">'
+        + '<div class="lead-av">'+(l.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()+'</div>'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div class="lead-name">'+l.name+'</div>'
+        + '<div class="lead-meta">'+l.phone+(l.preferred_location?' · '+l.preferred_location:'')+'</div>'
+        + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
+        + '<span class="badge st-'+(l.status||'new')+'">'+(STATUS_LABELS[l.status]||l.status)+'</span>'
+        + (isOverdue?'<span class="badge" style="background:rgba(239,68,68,0.14);color:#991b1b;">⏰ Overdue since '+new Date(l.follow_up_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'})+'</span>':'')
+        + '</div></div>'
+        + '<div class="lead-actions" onclick="event.stopPropagation()">'
+        + '<a class="lead-icon-btn" href="tel:'+l.phone+'" title="Call">📞</a>'
+        + '<a class="lead-icon-btn" href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp">💬</a>'
+        + '</div></div>';
+    }).join('');
+  }
+
+  const visitsEl = document.getElementById('today-visits-list');
+  if (!visits || !visits.length) {
+    visitsEl.innerHTML = '<div class="empty"><p style="font-size:13px;">No visits scheduled for today.</p></div>';
+  } else {
+    visitsEl.innerHTML = visits.map(function(v){
+      const digits = (v.client_phone||'').replace(/\D/g,'');
+      const waNum = digits.length===10 ? '91'+digits : digits;
+      return '<div class="lead-card">'
+        + '<div class="lead-av">'+(v.client_name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()+'</div>'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div class="lead-name">'+v.client_name+'</div>'
+        + '<div class="lead-meta">'+(v.listing_title||'')+(v.visit_time?' · '+v.visit_time:'')+'</div>'
+        + '</div>'
+        + '<div class="lead-actions">'
+        + '<a class="lead-icon-btn" href="tel:'+v.client_phone+'" title="Call">📞</a>'
+        + '<a class="lead-icon-btn" href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp">💬</a>'
+        + '</div></div>';
+    }).join('');
+  }
+};
+
 window.loadLeads = async function() {
   const filter = document.getElementById('crm-filter').value;
   let q = sb.from('leads').select('*').order('created_at',{ascending:false});
@@ -1998,7 +2104,7 @@ window.loadLeads = async function() {
 
 window.openAddLead = function() {
   editLeadId = null; currentLeadStatus = 'new';
-  ['lead-name','lead-phone','lead-email','lead-budget','lead-location','lead-notes'].forEach(function(id){
+  ['lead-name','lead-phone','lead-email','lead-budget','lead-location','lead-notes','lead-followup'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.value = '';
   });
   document.getElementById('lead-source').value = 'manual';
@@ -2018,6 +2124,7 @@ window.openEditLead = async function(id) {
   document.getElementById('lead-email').value = data.email||'';
   document.getElementById('lead-budget').value = data.budget||'';
   document.getElementById('lead-location').value = data.preferred_location||'';
+  document.getElementById('lead-followup').value = data.follow_up_date||'';
   document.getElementById('lead-notes').value = data.notes||'';
   document.getElementById('lead-source').value = data.source||'manual';
   document.getElementById('lead-proptype').value = data.property_type||'';
@@ -2049,6 +2156,7 @@ window.saveLead = async function() {
     email: document.getElementById('lead-email').value.trim()||null,
     budget: document.getElementById('lead-budget').value.trim()||null,
     preferred_location: document.getElementById('lead-location').value.trim()||null,
+    follow_up_date: document.getElementById('lead-followup').value||null,
     notes: document.getElementById('lead-notes').value.trim()||null,
     source: document.getElementById('lead-source').value,
     property_type: document.getElementById('lead-proptype').value||null,
