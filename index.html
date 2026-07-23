@@ -1969,9 +1969,8 @@ async function submitC(){
   } catch(e){ console.log('Lead save:',e); }
   await pcSave('consultation',data);
   btn.textContent=orig;btn.disabled=false;
-  showToast('✓ Opening WhatsApp…');
+  showToast('✓ Thank you! Our team will reach out within 24 hours.');
   document.getElementById('cform').querySelectorAll('input,select').forEach(el=>el.value='');
-  setTimeout(()=>pcWA('consultation',data),500);
 }
 async function submitL(){
   const name=document.getElementById('l-name').value.trim(),phone=document.getElementById('l-phone').value.trim(),propertyType=document.getElementById('l-type').value,location=document.getElementById('l-loc').value.trim(),price=document.getElementById('l-price').value.trim();
@@ -1987,9 +1986,8 @@ async function submitL(){
     });
   } catch(e){ console.log('Lead save:',e); }
   await pcSave('listing',data);
-  showToast('✓ Opening WhatsApp…');
+  showToast('✓ Thank you! Our team will reach out within 24 hours.');
   document.querySelectorAll('#list input,#list select').forEach(el=>el.value='');
-  setTimeout(()=>pcWA('listing',data),500);
 }
 
 // ── TRUE COST CALCULATOR ──

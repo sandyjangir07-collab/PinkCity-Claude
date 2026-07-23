@@ -1118,6 +1118,14 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       </div>
       <div id="ld-status-badge" class="badge"></div>
     </div>
+    <div id="ld-visit-details" style="display:none;background:var(--primary-soft);border-radius:14px;padding:14px 16px;margin-bottom:20px;">
+      <div class="fl" style="margin-bottom:8px;">Scheduled Visit</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;">
+        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Date</div><div id="ld-visit-date" style="font-weight:600;">—</div></div>
+        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Time</div><div id="ld-visit-time" style="font-weight:600;">—</div></div>
+        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Property</div><div id="ld-visit-property" style="font-weight:600;">—</div></div>
+      </div>
+    </div>
     <div id="ld-loan-details" style="display:none;background:var(--secondary);border-radius:14px;padding:14px 16px;margin-bottom:20px;">
       <div class="fl" style="margin-bottom:8px;">Loan Details</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:13px;">
@@ -1897,7 +1905,7 @@ window.closeBlogEditor = function() {
 // ════════════════════════════════════════════════
 // CRM — LEADS
 // ════════════════════════════════════════════════
-let currentLeadStatus = 'new', currentLeadId = null, editLeadId = null;
+let currentLeadStatus = 'new', currentLeadId = null, currentLeadData = null, editLeadId = null;
 
 const STATUS_LABELS = {
   new:'🔵 New', contacted:'🟡 Contacted', visit_scheduled:'🟠 Visit Sched.',
@@ -2048,6 +2056,7 @@ window.openLeadDetail = async function(id) {
   currentLeadId = id;
   const { data: l } = await sb.from('leads').select('*').eq('id',id).maybeSingle();
   if (!l) return;
+  currentLeadData = l;
   document.getElementById('ld-name').textContent = l.name;
   document.getElementById('ld-meta').textContent = [l.phone, l.email, l.budget, l.preferred_location].filter(Boolean).join(' · ');
   const stBadge = document.getElementById('ld-status-badge');
@@ -2063,6 +2072,19 @@ window.openLeadDetail = async function(id) {
     document.getElementById('ld-loan-amount').textContent = l.loan_amount_required ? '₹'+l.loan_amount_required : '—';
   }
 
+  // Scheduled visit (most recent, upcoming preferred over past)
+  const { data: visits } = await sb.from('scheduled_visits').select('*').eq('lead_id', id).order('visit_date',{ascending:false}).order('created_at',{ascending:false});
+  const visitBlock = document.getElementById('ld-visit-details');
+  const visit = visits && visits.find(v => v.status === 'scheduled') || (visits && visits[0]);
+  if (visit) {
+    visitBlock.style.display = '';
+    document.getElementById('ld-visit-date').textContent = new Date(visit.visit_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    document.getElementById('ld-visit-time').textContent = visit.visit_time || '—';
+    document.getElementById('ld-visit-property').textContent = visit.listing_title || '—';
+  } else {
+    visitBlock.style.display = 'none';
+  }
+
   // Status pills
   document.getElementById('ld-status-pills').onclick = function(e){ var b=e.target.closest('.ld-status-pill'); if(b) updateLeadStatus(b.dataset.lid, b.dataset.st); };
   document.getElementById('ld-status-pills').innerHTML = Object.keys(STATUS_LABELS).map(function(s){
@@ -2070,16 +2092,28 @@ window.openLeadDetail = async function(id) {
   }).join('');
 
   // Load timeline
-  await refreshTimeline(id);
+  await refreshTimeline(id, l);
   document.getElementById('lead-detail-overlay').classList.add('on');
   document.body.style.overflow = 'hidden';
 };
 
-async function refreshTimeline(id) {
+async function refreshTimeline(id, lead) {
   const { data } = await sb.from('lead_notes').select('*').eq('lead_id',id).order('created_at',{ascending:false});
+  let entries = data || [];
+  // The initial note captured when the lead was created lives on leads.notes, not
+  // lead_notes — merge it in as the earliest entry so it isn't silently invisible.
+  if (lead && lead.notes) {
+    entries = entries.concat([{
+      note: lead.notes,
+      status_change: null,
+      created_by_name: lead.created_by_name || 'Initial note',
+      created_at: lead.created_at
+    }]);
+    entries.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  }
   const el = document.getElementById('ld-timeline');
-  if (!data||!data.length) { el.innerHTML='<div style="font-size:13px;color:var(--muted-foreground);padding:8px 0;">No activity yet. Add a note above.</div>'; return; }
-  el.innerHTML = data.map(function(n){
+  if (!entries.length) { el.innerHTML='<div style="font-size:13px;color:var(--muted-foreground);padding:8px 0;">No activity yet. Add a note above.</div>'; return; }
+  el.innerHTML = entries.map(function(n){
     const d = new Date(n.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content">'
       +(n.status_change?'<div class="timeline-status-change">Status → '+n.status_change+'</div>':'')
@@ -2108,7 +2142,7 @@ window.updateLeadStatus = async function(id, status) {
   const stBadge = document.getElementById('ld-status-badge');
   stBadge.className = 'badge st-'+status;
   stBadge.textContent = STATUS_LABELS[status]||status;
-  await refreshTimeline(id);
+  await refreshTimeline(id, currentLeadData);
   loadLeads();
   toast('✓ Status updated!');
 };
@@ -2124,7 +2158,7 @@ window.addLeadNote = async function() {
     created_at: new Date().toISOString()
   });
   document.getElementById('ld-note-input').value = '';
-  await refreshTimeline(currentLeadId);
+  await refreshTimeline(currentLeadId, currentLeadData);
   toast('✓ Note saved!');
 };
 
