@@ -837,7 +837,28 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <div><label class="fl">Area / Locality *</label><input class="fi" id="f-area" placeholder="e.g. Mansarovar, Jaipur"/></div>
         <div><label class="fl">Price *</label><input class="fi" id="f-price" placeholder="e.g. ₹68 Lakh"/></div>
       </div>
-      <div><label class="fl">Size</label><input class="fi" id="f-size" placeholder="e.g. 200 sq yd or 1100 sq ft"/></div>
+      <div class="form-row">
+        <div><label class="fl">Plot Size</label>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input class="fi" id="f-plot-size" type="number" placeholder="e.g. 200" style="min-width:0;"/>
+            <select class="fsel" id="f-plot-size-unit" style="flex:0 0 auto;width:auto;min-width:96px;">
+              <option value="Gaj">Gaj</option>
+              <option value="Sq Ft">Sq Ft</option>
+              <option value="Sq Mts">Sq Mts</option>
+              <option value="Bigha">Bigha</option>
+              <option value="Acres">Acres</option>
+            </select>
+          </div>
+        </div>
+        <div><label class="fl">Plot Dimensions</label>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input class="fi" id="f-plot-length" type="number" placeholder="Length" style="min-width:0;"/>
+            <span style="color:var(--muted-foreground);font-weight:600;flex-shrink:0;">×</span>
+            <input class="fi" id="f-plot-width" type="number" placeholder="Width" style="min-width:0;"/>
+            <span style="color:var(--muted-foreground);font-size:13px;flex-shrink:0;">Ft</span>
+          </div>
+        </div>
+      </div>
       <div class="form-row">
         <div><label class="fl">Road Width</label><select class="fsel" id="f-road-width">
           <option value="">Select</option>
@@ -865,22 +886,6 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
           <option value="90A">90A</option>
           <option value="Society Patta">Society Patta</option>
         </select></div>
-      </div>
-      <div class="form-row">
-        <div><label class="fl">Plot Size</label>
-          <div style="position:relative;">
-            <input class="fi" id="f-plot-size" type="number" placeholder="e.g. 200" style="padding-right:46px;"/>
-            <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted-foreground);font-size:13px;pointer-events:none;">Yds</span>
-          </div>
-        </div>
-        <div><label class="fl">Plot Dimensions</label>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <input class="fi" id="f-plot-length" type="number" placeholder="Length" style="min-width:0;"/>
-            <span style="color:var(--muted-foreground);font-weight:600;flex-shrink:0;">×</span>
-            <input class="fi" id="f-plot-width" type="number" placeholder="Width" style="min-width:0;"/>
-            <span style="color:var(--muted-foreground);font-size:13px;flex-shrink:0;">Ft</span>
-          </div>
-        </div>
       </div>
       <div class="form-row">
         <div class="verified-row" style="margin-bottom:0;">
@@ -917,8 +922,8 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
           </div>
         </div>
       </div>
-      <!-- VERIFIED -->
-      <div class="verified-row">
+      <!-- VERIFIED (admin only) -->
+      <div class="verified-row" id="verified-row">
         <input type="checkbox" id="f-verified"/>
         <label for="f-verified">Mark as PinkCity Verified™</label>
       </div>
@@ -1392,15 +1397,17 @@ async function uploadAllImages() {
 window.openAdd = () => {
   editId = null; pendingFiles = []; savedUrls = [];
   document.getElementById("modal-title").textContent = "Add New Listing";
-  ["f-title","f-area","f-price","f-size","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   const ft=document.getElementById("f-type");if(ft)ft.selectedIndex=0;
   const frw=document.getElementById("f-road-width");if(frw)frw.selectedIndex=0;
+  const fpu=document.getElementById("f-plot-size-unit");if(fpu)fpu.selectedIndex=0;
   const ffc=document.getElementById("f-facing");if(ffc)ffc.selectedIndex=0;
   const fap=document.getElementById("f-approval");if(fap)fap.selectedIndex=0;
   const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=false;
   const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=false;
   const fr=document.getElementById("f-rera");if(fr)fr.checked=false;
   const fv=document.getElementById("f-verified");if(fv)fv.checked=false;
+  const vr=document.getElementById("verified-row");if(vr)vr.style.display=isAdmin?"":"none";
   renderImageGrid();
   document.getElementById("submit-btn").textContent="Submit for approval";
   openModal();
@@ -1417,20 +1424,21 @@ window.adminEdit = async (id) => {
   document.getElementById("f-type").value = data.type||"plot";
   document.getElementById("f-area").value = data.area||"";
   document.getElementById("f-price").value = data.price||"";
-  document.getElementById("f-size").value = data.size||"";
   document.getElementById("f-desc").value = data.desc||"";
   document.getElementById("f-phone").value = data.submitter_phone||"";
   document.getElementById("f-road-width").value = data.road_width||"";
   document.getElementById("f-facing").value = data.facing||"";
   document.getElementById("f-agreement-value").value = data.agreement_value||"";
   document.getElementById("f-approval").value = data.approval_type||"";
-  document.getElementById("f-plot-size").value = data.plot_size_yds||"";
+  document.getElementById("f-plot-size").value = data.plot_size||"";
+  document.getElementById("f-plot-size-unit").value = data.plot_size_unit||"Gaj";
   document.getElementById("f-plot-length").value = data.plot_length||"";
   document.getElementById("f-plot-width").value = data.plot_width||"";
   const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=!!data.corner_plot;
   const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=!!data.park_facing;
   const fr=document.getElementById("f-rera");if(fr)fr.checked=!!data.rera_approved;
   const fv=document.getElementById("f-verified");if(fv)fv.checked=!!data.verified;
+  const vr=document.getElementById("verified-row");if(vr)vr.style.display=isAdmin?"":"none";
   renderImageGrid();
   document.getElementById("submit-btn").textContent="Save changes";
   openModal();
@@ -1448,7 +1456,6 @@ window.submitListing = async () => {
   const type  = document.getElementById("f-type").value;
   const area  = document.getElementById("f-area").value.trim();
   const price = document.getElementById("f-price").value.trim();
-  const size  = document.getElementById("f-size").value.trim();
   const desc  = document.getElementById("f-desc").value.trim();
   const phone = document.getElementById("f-phone").value.trim();
   const roadWidth = document.getElementById("f-road-width").value;
@@ -1456,8 +1463,10 @@ window.submitListing = async () => {
   const agreementValue = document.getElementById("f-agreement-value").value.trim();
   const approvalType = document.getElementById("f-approval").value;
   const plotSize = document.getElementById("f-plot-size").value.trim();
+  const plotSizeUnit = document.getElementById("f-plot-size-unit").value;
   const plotLength = document.getElementById("f-plot-length").value.trim();
   const plotWidth = document.getElementById("f-plot-width").value.trim();
+  const size = plotSize ? plotSize + " " + plotSizeUnit : "";
   const cornerPlot = document.getElementById("f-corner-plot")?.checked || false;
   const parkFacing = document.getElementById("f-park-facing")?.checked || false;
   const reraApproved = document.getElementById("f-rera")?.checked || false;
@@ -1473,7 +1482,7 @@ window.submitListing = async () => {
         title, type, area, price, size, desc, verified,
         road_width: roadWidth, facing, agreement_value: agreementValue,
         approval_type: approvalType, rera_approved: reraApproved,
-        plot_size_yds: plotSize, plot_length: plotLength, plot_width: plotWidth,
+        plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         submitter_phone: phone,
@@ -1486,7 +1495,7 @@ window.submitListing = async () => {
         title, type, area, price, size, desc, verified,
         road_width: roadWidth, facing, agreement_value: agreementValue,
         approval_type: approvalType, rera_approved: reraApproved,
-        plot_size_yds: plotSize, plot_length: plotLength, plot_width: plotWidth,
+        plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         status: "pending",

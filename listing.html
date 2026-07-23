@@ -885,7 +885,7 @@ async function load() {
   showMeta("meta-facing", "listing-facing", data.facing);
   showMeta("meta-approval", "listing-approval", data.approval_type);
   showMeta("meta-agreement-value", "listing-agreement-value", data.agreement_value);
-  if (data.plot_size_yds) showMeta("meta-plot-size", "listing-plot-size", data.plot_size_yds + " Yds");
+  if (data.plot_size) showMeta("meta-plot-size", "listing-plot-size", data.plot_size + " " + (data.plot_size_unit || "Gaj"));
   if (data.plot_length && data.plot_width) showMeta("meta-plot-dims", "listing-plot-dims", data.plot_length + " × " + data.plot_width + " Ft");
   if (data.rera_approved) document.getElementById("rera-badge").style.display = "inline-flex";
   if (data.corner_plot) document.getElementById("corner-badge").style.display = "inline-flex";
