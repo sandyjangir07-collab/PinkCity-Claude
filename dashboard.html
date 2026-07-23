@@ -1385,7 +1385,19 @@ async function uploadAllImages() {
   for (const file of pendingFiles) {
     const ext = file.name.split(".").pop();
     const path = `listings/${currentUser.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await sb.storage.from("property-images").upload(path, file, {cacheControl:"3600",upsert:false});
+    let error;
+    try {
+      // Read the bytes into memory explicitly rather than handing Supabase the raw File
+      // object — iOS Safari can hand out a File reference before its data is fully
+      // available (esp. iCloud-optimized photos), and any delay before upload can cause
+      // it to silently send an empty body ("No content provided"). Reading it ourselves
+      // forces the browser to materialize the bytes right now, at a known-good moment.
+      const buffer = await file.arrayBuffer();
+      if (!buffer.byteLength) throw new Error("Photo appears to be empty (0 bytes) — try selecting it again.");
+      ({ error } = await sb.storage.from("property-images").upload(path, buffer, {cacheControl:"3600",upsert:false,contentType:file.type || `image/${ext}`}));
+    } catch (readErr) {
+      error = readErr;
+    }
     if (!error) {
       const { data } = sb.storage.from("property-images").getPublicUrl(path);
       uploaded.push(data.publicUrl);
