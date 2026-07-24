@@ -1060,6 +1060,26 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   </div>
 </div>
 
+<!-- CALL OUTCOME PROMPT -->
+<div class="overlay" id="call-outcome-overlay" onclick="if(event.target===this)dismissCallOutcome()">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:6px;">How did the call with <span id="co-lead-name">—</span> go?</div>
+    <div style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:20px;">Takes 5 seconds — helps you pick up right where you left off next time.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      <button class="calc-pill" onclick="saveCallOutcome('Interested — following up')">🟢 Interested</button>
+      <button class="calc-pill" onclick="saveCallOutcome('Not interested')">🔴 Not interested</button>
+      <button class="calc-pill" onclick="saveCallOutcome('No answer')">⚪ No answer</button>
+      <button class="calc-pill" onclick="saveCallOutcome('Asked to call back later')">🟡 Call back later</button>
+    </div>
+    <textarea class="ftextarea" id="co-note" placeholder="Add more detail (optional)…" style="min-height:60px;margin-bottom:14px;"></textarea>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="dismissCallOutcome()" style="flex:0 0 auto;">Skip</button>
+      <button class="btn-submit" onclick="saveCallOutcome()" style="flex:1;">Save note</button>
+    </div>
+  </div>
+</div>
+
 <!-- VISIT LOG MODAL -->
 <div class="vlog-overlay" id="vlog-overlay" onclick="if(event.target===this)closeVisitLog()">
   <div class="vlog-modal">
@@ -1163,13 +1183,17 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       </div>
       <div id="ld-status-badge" class="badge"></div>
     </div>
-    <div id="ld-visit-details" style="display:none;background:var(--primary-soft);border-radius:14px;padding:14px 16px;margin-bottom:20px;">
-      <div class="fl" style="margin-bottom:8px;">Scheduled Visit</div>
-      <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;">
+    <div id="ld-visit-details" style="background:var(--primary-soft);border-radius:14px;padding:14px 16px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="fl" style="margin-bottom:0;">Site Visit</div>
+        <button class="btn-ghost" id="ld-visit-btn" onclick="openScheduleVisitFromLead()" style="padding:5px 12px;font-size:12px;">📅 Schedule Visit</button>
+      </div>
+      <div id="ld-visit-info" style="display:none;gap:20px;flex-wrap:wrap;font-size:13px;">
         <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Date</div><div id="ld-visit-date" style="font-weight:600;">—</div></div>
         <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Time</div><div id="ld-visit-time" style="font-weight:600;">—</div></div>
         <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Property</div><div id="ld-visit-property" style="font-weight:600;">—</div></div>
       </div>
+      <div id="ld-visit-empty" style="font-size:12.5px;color:var(--muted-foreground);">No visit scheduled yet.</div>
     </div>
     <div id="ld-loan-details" style="display:none;background:var(--secondary);border-radius:14px;padding:14px 16px;margin-bottom:20px;">
       <div class="fl" style="margin-bottom:8px;">Loan Details</div>
@@ -1954,7 +1978,7 @@ window.closeBlogEditor = function() {
 // ════════════════════════════════════════════════
 // CRM — LEADS
 // ════════════════════════════════════════════════
-let currentLeadStatus = 'new', currentLeadId = null, currentLeadData = null, editLeadId = null;
+let currentLeadStatus = 'new', currentLeadId = null, currentLeadData = null, currentLeadVisit = null, editLeadId = null;
 
 const STATUS_LABELS = {
   new:'🔵 New', contacted:'🟡 Contacted', visit_scheduled:'🟠 Visit Sched.',
@@ -1963,6 +1987,63 @@ const STATUS_LABELS = {
 const SOURCE_LABELS = {
   whatsapp:'WhatsApp', visit_form:'Visit Form', consultation:'Consultation',
   manual:'Manual', referral:'Referral', loan_calculator:'Loan Offer'
+};
+function timeAgo(dateStr){
+  if(!dateStr) return '';
+  const ms = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(ms/(24*60*60*1000));
+  if(days<=0) return 'Today';
+  if(days===1) return 'Yesterday';
+  if(days<30) return days+'d ago';
+  const months = Math.floor(days/30);
+  return months+'mo ago';
+}
+
+// ── CALL OUTCOME PROMPT ──
+// Detects a tap on a call button, then watches for the tab becoming visible
+// again (the user backgrounding the browser to make the call, then returning)
+// and prompts for the outcome at exactly that moment.
+let pendingCall = null;
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('a.lead-icon-btn[href^="tel:"][data-lead-id]');
+  if (!btn) return;
+  pendingCall = { id: btn.dataset.leadId, name: btn.dataset.leadName, at: Date.now() };
+});
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState !== 'visible' || !pendingCall) return;
+  const elapsed = Date.now() - pendingCall.at;
+  // Ignore near-instant returns (likely a misclick) and stale ones (tab was
+  // just reopened long after, unrelated to the call)
+  if (elapsed < 4000 || elapsed > 15*60*1000) { pendingCall = null; return; }
+  const call = pendingCall; pendingCall = null;
+  document.getElementById('co-lead-name').textContent = call.name || 'this lead';
+  document.getElementById('co-note').value = '';
+  document.getElementById('call-outcome-overlay').dataset.leadId = call.id;
+  document.getElementById('call-outcome-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+});
+window.dismissCallOutcome = function(){
+  document.getElementById('call-outcome-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+};
+window.saveCallOutcome = async function(preset){
+  const leadId = document.getElementById('call-outcome-overlay').dataset.leadId;
+  const typed = document.getElementById('co-note').value.trim();
+  const note = preset && typed ? preset + ' — ' + typed : (preset || typed);
+  if (!leadId || !note) { dismissCallOutcome(); return; }
+  try {
+    await sb.from('lead_notes').insert({
+      lead_id: leadId,
+      note: '📞 ' + note,
+      created_by: currentUser.id,
+      created_by_name: currentUser.user_metadata.full_name || currentUser.user_metadata.name || currentUser.email,
+      created_at: new Date().toISOString()
+    });
+    await sb.from('leads').update({ updated_at: new Date().toISOString() }).eq('id', leadId);
+    toast('✓ Logged');
+  } catch(e) { console.error('Call outcome save failed:', e); }
+  dismissCallOutcome();
+  if (typeof loadToday === 'function' && document.getElementById('today-section').style.display !== 'none') loadToday();
 };
 
 window.loadToday = async function() {
@@ -2015,9 +2096,11 @@ window.loadToday = async function() {
         + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
         + '<span class="badge st-'+(l.status||'new')+'">'+(STATUS_LABELS[l.status]||l.status)+'</span>'
         + (isOverdue?'<span class="badge" style="background:rgba(239,68,68,0.14);color:#991b1b;">⏰ Overdue since '+new Date(l.follow_up_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'})+'</span>':'')
-        + '</div></div>'
+        + '</div>'
+        + '<div style="font-size:11px;color:var(--muted-foreground);margin-top:5px;">Last contacted: '+timeAgo(l.updated_at||l.created_at)+'</div>'
+        + '</div>'
         + '<div class="lead-actions" onclick="event.stopPropagation()">'
-        + '<a class="lead-icon-btn" href="tel:'+l.phone+'" title="Call">📞</a>'
+        + '<a class="lead-icon-btn" href="tel:'+l.phone+'" data-lead-id="'+l.id+'" data-lead-name="'+(l.name||'').replace(/"/g,'&quot;')+'" title="Call">📞</a>'
         + '<a class="lead-icon-btn" href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp">💬</a>'
         + '</div></div>';
     }).join('');
@@ -2091,11 +2174,13 @@ window.loadLeads = async function() {
       + '<div class="lead-meta">'+l.phone+(l.budget?' · '+l.budget:'')+(l.preferred_location?' · '+l.preferred_location:'')+'</div>'
       + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
       + badges
-      + '</div></div>'
+      + '</div>'
+      + '<div style="font-size:11px;color:var(--muted-foreground);margin-top:5px;">Last contacted: '+timeAgo(l.updated_at||l.created_at)+'</div>'
+      + '</div>'
       + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">'
       + '<div style="font-size:11px;color:var(--muted-foreground);">'+dateStr+'</div>'
       + '<div class="lead-actions" onclick="event.stopPropagation()">'
-      + '<a class="lead-icon-btn" href="tel:'+l.phone+'" title="Call">📞</a>'
+      + '<a class="lead-icon-btn" href="tel:'+l.phone+'" data-lead-id="'+l.id+'" data-lead-name="'+(l.name||'').replace(/"/g,'&quot;')+'" title="Call">📞</a>'
       + '<a class="lead-icon-btn" href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp">💬</a>'
       + '</div></div>'
       + '</div>';
@@ -2170,13 +2255,17 @@ window.saveLead = async function() {
       const {error} = await sb.from('leads').update(payload).eq('id',editLeadId);
       if(error) throw error;
       toast('✓ Lead updated!');
+      closeLeadModal(); loadLeads();
     } else {
       payload.created_at = new Date().toISOString();
-      const {error} = await sb.from('leads').insert(payload);
+      const {data,error} = await sb.from('leads').insert(payload).select().single();
       if(error) throw error;
       toast('✓ Lead added!');
+      closeLeadModal(); loadLeads();
+      if (confirm(name + ' added! Schedule a site visit with them now?')) {
+        openScheduleVisitFromLeadQuick(data.id, name, phone);
+      }
     }
-    closeLeadModal(); loadLeads();
   } catch(e) {
     const el=document.getElementById('lead-err');el.textContent='Error: '+(e.message||'Could not save.');el.style.opacity='1';
   } finally { btn.textContent='Save Lead'; btn.disabled=false; }
@@ -2204,15 +2293,22 @@ window.openLeadDetail = async function(id) {
 
   // Scheduled visit (most recent, upcoming preferred over past)
   const { data: visits } = await sb.from('scheduled_visits').select('*').eq('lead_id', id).order('visit_date',{ascending:false}).order('created_at',{ascending:false});
-  const visitBlock = document.getElementById('ld-visit-details');
-  const visit = visits && visits.find(v => v.status === 'scheduled') || (visits && visits[0]);
-  if (visit) {
-    visitBlock.style.display = '';
+  const visit = (visits && visits.find(v => v.status === 'scheduled')) || (visits && visits[0]) || null;
+  currentLeadVisit = visit;
+  const infoEl = document.getElementById('ld-visit-info');
+  const emptyEl = document.getElementById('ld-visit-empty');
+  const btnEl = document.getElementById('ld-visit-btn');
+  if (visit && visit.status === 'scheduled') {
+    infoEl.style.display = 'flex';
+    emptyEl.style.display = 'none';
     document.getElementById('ld-visit-date').textContent = new Date(visit.visit_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
     document.getElementById('ld-visit-time').textContent = visit.visit_time || '—';
     document.getElementById('ld-visit-property').textContent = visit.listing_title || '—';
+    btnEl.textContent = '📅 Reschedule';
   } else {
-    visitBlock.style.display = 'none';
+    infoEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    btnEl.textContent = '📅 Schedule Visit';
   }
 
   // Status pills
@@ -2358,13 +2454,59 @@ function renderSchedCard(v, isToday) {
     + '</div></div>';
 }
 
+let pendingVisitLeadId = null;
+
 window.openScheduleVisit = function() {
   editSchedId = null;
+  pendingVisitLeadId = null;
   ['sv-client','sv-phone','sv-listing','sv-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
   document.getElementById('sv-date').value = tomorrow.toISOString().split('T')[0];
   document.getElementById('sv-date').min = new Date().toISOString().split('T')[0];
   document.getElementById('sched-modal-title').textContent = 'Schedule Site Visit';
+  document.getElementById('sv-save-btn').textContent = 'Schedule Visit';
+  document.getElementById('sched-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+// Opened from a lead's detail view — pre-fills from the lead, and from the
+// existing visit if one's already scheduled (reschedule) so date/time can be
+// changed at any point, not just when the lead is first created.
+window.openScheduleVisitFromLead = function() {
+  const l = currentLeadData;
+  const v = currentLeadVisit && currentLeadVisit.status === 'scheduled' ? currentLeadVisit : null;
+  editSchedId = v ? v.id : null;
+  pendingVisitLeadId = currentLeadId;
+  document.getElementById('sv-client').value = (v && v.client_name) || (l && l.name) || '';
+  document.getElementById('sv-phone').value = (v && v.client_phone) || (l && l.phone) || '';
+  document.getElementById('sv-listing').value = (v && v.listing_title) || '';
+  document.getElementById('sv-notes').value = (v && v.notes) || '';
+  document.getElementById('sv-date').min = new Date().toISOString().split('T')[0];
+  if (v && v.visit_date) {
+    document.getElementById('sv-date').value = v.visit_date;
+  } else {
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    document.getElementById('sv-date').value = tomorrow.toISOString().split('T')[0];
+  }
+  if (v && v.visit_time) document.getElementById('sv-time').value = v.visit_time;
+  document.getElementById('sched-modal-title').textContent = v ? 'Reschedule Visit' : 'Schedule Site Visit';
+  document.getElementById('sv-save-btn').textContent = v ? 'Save New Date & Time' : 'Schedule Visit';
+  document.getElementById('sched-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+window.openScheduleVisitFromLeadQuick = function(leadId, name, phone) {
+  editSchedId = null;
+  pendingVisitLeadId = leadId;
+  document.getElementById('sv-client').value = name || '';
+  document.getElementById('sv-phone').value = phone || '';
+  document.getElementById('sv-listing').value = '';
+  document.getElementById('sv-notes').value = '';
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  document.getElementById('sv-date').value = tomorrow.toISOString().split('T')[0];
+  document.getElementById('sv-date').min = new Date().toISOString().split('T')[0];
+  document.getElementById('sched-modal-title').textContent = 'Schedule Site Visit';
+  document.getElementById('sv-save-btn').textContent = 'Schedule Visit';
   document.getElementById('sched-overlay').classList.add('on');
   document.body.style.overflow = 'hidden';
 };
@@ -2378,6 +2520,7 @@ window.saveScheduledVisit = async function() {
     setTimeout(function(){e.style.opacity='0';},3000); return;
   }
   const btn = document.getElementById('sv-save-btn');
+  const origBtnText = btn.textContent;
   btn.textContent='Saving…'; btn.disabled=true;
   const meta = currentUser.user_metadata;
   const payload = {
@@ -2387,21 +2530,35 @@ window.saveScheduledVisit = async function() {
     visit_date: date,
     visit_time: time,
     notes: document.getElementById('sv-notes').value.trim()||null,
+    lead_id: pendingVisitLeadId || null,
     status: 'scheduled',
-    created_by: currentUser.id,
-    created_by_name: meta.full_name||meta.name||currentUser.email,
-    assigned_to: currentUser.id,
-    assigned_name: meta.full_name||meta.name||currentUser.email,
     updated_at: new Date().toISOString(),
   };
   try {
-    const {error} = await sb.from('scheduled_visits').insert({...payload, created_at:new Date().toISOString()});
-    if(error) throw error;
-    toast('✓ Visit scheduled!');
+    if (editSchedId) {
+      const {error} = await sb.from('scheduled_visits').update(payload).eq('id',editSchedId);
+      if(error) throw error;
+      toast('✓ Visit rescheduled!');
+    } else {
+      payload.created_by = currentUser.id;
+      payload.created_by_name = meta.full_name||meta.name||currentUser.email;
+      payload.assigned_to = currentUser.id;
+      payload.assigned_name = meta.full_name||meta.name||currentUser.email;
+      payload.created_at = new Date().toISOString();
+      const {error} = await sb.from('scheduled_visits').insert(payload);
+      if(error) throw error;
+      toast('✓ Visit scheduled!');
+    }
+    if (pendingVisitLeadId) {
+      await sb.from('leads').update({status:'visit_scheduled', updated_at:new Date().toISOString()}).eq('id', pendingVisitLeadId);
+    }
     closeSchedModal(); loadScheduledVisits();
+    if (pendingVisitLeadId && document.getElementById('lead-detail-overlay').classList.contains('on')) openLeadDetail(pendingVisitLeadId);
+    if (document.getElementById('crm-section').style.display !== 'none') loadLeads();
+    if (document.getElementById('today-section').style.display !== 'none') loadToday();
   } catch(e) {
     const el=document.getElementById('sched-err');el.textContent='Error: '+(e.message||'Could not save.');el.style.opacity='1';
-  } finally { btn.textContent='Schedule Visit'; btn.disabled=false; }
+  } finally { btn.textContent = origBtnText; btn.disabled=false; }
 };
 
 window.markVisitDone = async function(id) {
@@ -2483,9 +2640,9 @@ window.openTeamMemberDetail = function(memberId) {
   document.getElementById('tmd-email').textContent = m.email || '';
   const leadsEl = document.getElementById('tmd-leads');
   leadsEl.innerHTML = m.leadList.length ? m.leadList.map(function(l){
-    return '<div class="team-detail-row">'
+    return '<div class="team-detail-row" style="cursor:pointer;" onclick="closeTeamMemberDetail();openLeadDetail(\''+l.id+'\')">'
       +'<div><div style="font-weight:600;font-size:13.5px;">'+(l.name||'—')+'</div><div style="font-size:12px;color:var(--muted-foreground);">'+[l.phone,l.preferred_location].filter(Boolean).join(' · ')+'</div></div>'
-      +'<span class="badge st-'+(l.status||'new')+'">'+(STATUS_LABELS[l.status]||l.status)+'</span>'
+      +'<div style="display:flex;align-items:center;gap:8px;"><span class="badge st-'+(l.status||'new')+'">'+(STATUS_LABELS[l.status]||l.status)+'</span><span style="color:var(--muted-foreground);font-size:14px;">›</span></div>'
       +'</div>';
   }).join('') : '<div class="empty" style="padding:16px 0;"><p style="font-size:13px;">No leads yet.</p></div>';
   const visitsEl = document.getElementById('tmd-visits');
