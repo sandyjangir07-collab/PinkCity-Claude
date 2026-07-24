@@ -2450,7 +2450,7 @@ async function loadPdfFonts(doc){
   if (pdfFontsReady) return;
   async function fetchBase64(url){
     const res = await fetch(url);
-    if (!res.ok) throw new Error('Could not load ' + url + ' (HTTP ' + res.status + '). Make sure the /fonts/ folder was uploaded to your site alongside dashboard.html.');
+    if (!res.ok) throw new Error('Could not load ' + url + ' (HTTP ' + res.status + '). Make sure NotoSans-Regular.ttf, NotoSans-Bold.ttf, and Fraunces-Display.ttf were uploaded to your site\'s root folder.');
     const buf = await res.arrayBuffer();
     let binary = '';
     const bytes = new Uint8Array(buf);
@@ -2462,9 +2462,9 @@ async function loadPdfFonts(doc){
   // These are the site's actual typefaces: Fraunces for the brand name, Noto
   // Sans (which does include the Rupee sign) for everything else.
   const [notoRegular, notoBold, fraunces] = await Promise.all([
-    fetchBase64('/fonts/NotoSans-Regular.ttf'),
-    fetchBase64('/fonts/NotoSans-Bold.ttf'),
-    fetchBase64('/fonts/Fraunces-Display.ttf'),
+    fetchBase64('/NotoSans-Regular.ttf'),
+    fetchBase64('/NotoSans-Bold.ttf'),
+    fetchBase64('/Fraunces-Display.ttf'),
   ]);
   doc.addFileToVFS('NotoSans-Regular.ttf', notoRegular);
   doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
