@@ -700,8 +700,14 @@ async function load() {
   const slug = new URLSearchParams(window.location.search).get("slug");
   if (!slug) { showErr("Post not found."); return; }
 
-  const { data, error } = await sb.from("blogs").select("*").eq("slug",slug).eq("status","published").maybeSingle();
-  if (error || !data) { showErr("Post not found or not yet published."); return; }
+  const { data, error } = await sb.from("blogs").select("*").eq("slug",slug).maybeSingle();
+  if (error || !data) { showErr("Post not found."); return; }
+  if (data.status !== "published") {
+    const banner = document.createElement("div");
+    banner.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:999;background:#b45309;color:white;text-align:center;padding:10px;font-size:13px;font-weight:600;";
+    banner.textContent = "⚠️ Draft preview — this post is not live on your site yet.";
+    document.body.prepend(banner);
+  }
   const p = data;
 
   // ── SEO ──
