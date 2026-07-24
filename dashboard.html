@@ -2445,28 +2445,64 @@ async function getLogoDataUrl(){
   return logoDataUrl;
 }
 
+let pdfFontsReady = false;
+async function loadPdfFonts(doc){
+  if (pdfFontsReady) return;
+  async function fetchBase64(url){
+    const res = await fetch(url);
+    const buf = await res.arrayBuffer();
+    let binary = '';
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+  // Real font files (not jsPDF's built-in Helvetica/Times) — the standard PDF
+  // fonts have no ₹ glyph at all, which is why it rendered wrong before.
+  // These are the site's actual typefaces: Fraunces for the brand name, Noto
+  // Sans (which does include the Rupee sign) for everything else.
+  const [notoRegular, notoBold, fraunces] = await Promise.all([
+    fetchBase64('/fonts/NotoSans-Regular.ttf'),
+    fetchBase64('/fonts/NotoSans-Bold.ttf'),
+    fetchBase64('/fonts/Fraunces-Display.ttf'),
+  ]);
+  doc.addFileToVFS('NotoSans-Regular.ttf', notoRegular);
+  doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
+  doc.addFileToVFS('NotoSans-Bold.ttf', notoBold);
+  doc.addFont('NotoSans-Bold.ttf', 'NotoSans', 'bold');
+  doc.addFileToVFS('Fraunces-Display.ttf', fraunces);
+  doc.addFont('Fraunces-Display.ttf', 'Fraunces', 'normal');
+  pdfFontsReady = true;
+}
+
 window.downloadQuotationPDF = async function(q){
   if (!window.jspdf) { alert('PDF library is still loading — please try again in a moment.'); return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  await loadPdfFonts(doc);
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 50;
-  let y = 55;
+  let y = 66;
 
+  // Logo in its proper pink circle, matching the site's actual brand mark
   const logo = await getLogoDataUrl();
-  if (logo) { try { doc.addImage(logo, 'PNG', margin, y-26, 34, 34); } catch(e){} }
-  doc.setFont('times','normal'); doc.setFontSize(22); doc.setTextColor(157,29,76);
-  doc.text('PinkCity', margin + (logo?44:0), y);
-  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(140,140,140);
-  doc.text('PROPERTIES & CONSULTANTS', margin + (logo?44:0), y+13);
+  const circleR = 22;
+  doc.setFillColor(157,29,76);
+  doc.circle(margin+circleR, y-8, circleR, 'F');
+  if (logo) { try { doc.addImage(logo, 'PNG', margin+circleR-13, y-21, 26, 26); } catch(e){} }
+
+  const textX = margin + circleR*2 + 14;
+  doc.setFont('Fraunces','normal'); doc.setFontSize(24); doc.setTextColor(157,29,76);
+  doc.text('PinkCity', textX, y-2);
+  doc.setFont('NotoSans','normal'); doc.setFontSize(8); doc.setTextColor(140,140,140);
+  doc.text('PROPERTIES & CONSULTANTS', textX, y+12, { charSpace: 0.6 });
 
   doc.setDrawColor(230,220,210);
-  doc.line(margin, y+26, pageWidth-margin, y+26);
-  y += 56;
+  doc.line(margin, y+28, pageWidth-margin, y+28);
+  y += 62;
 
-  doc.setFontSize(16); doc.setTextColor(30,30,30); doc.setFont('helvetica','bold');
+  doc.setFontSize(16); doc.setTextColor(30,30,30); doc.setFont('NotoSans','bold');
   doc.text('Property Quotation', margin, y);
-  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(130,130,130);
+  doc.setFont('NotoSans','normal'); doc.setFontSize(10); doc.setTextColor(130,130,130);
   const quoteRef = q.quote_number ? ('PC-Q' + q.quote_number) : 'Draft';
   const dateStr = new Date(q.created_at || Date.now()).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
   doc.text('Ref: ' + quoteRef + '   ·   Date: ' + dateStr, margin, y+16);
@@ -2487,8 +2523,8 @@ window.downloadQuotationPDF = async function(q){
   ];
   doc.setFontSize(11);
   rows.forEach(function(r){
-    doc.setTextColor(130,130,130); doc.text(r[0], margin, y);
-    doc.setTextColor(30,30,30); doc.text(r[1], margin+170, y);
+    doc.setFont('NotoSans','normal'); doc.setTextColor(130,130,130); doc.text(r[0], margin, y);
+    doc.setFont('NotoSans','bold'); doc.setTextColor(30,30,30); doc.text(r[1], margin+170, y);
     y += 22;
   });
 
@@ -2496,7 +2532,7 @@ window.downloadQuotationPDF = async function(q){
   doc.setDrawColor(230,220,210); doc.line(margin, y, pageWidth-margin, y);
   y += 28;
 
-  doc.setFontSize(11); doc.setTextColor(90,90,90); doc.setFont('helvetica','normal');
+  doc.setFontSize(11); doc.setTextColor(90,90,90); doc.setFont('NotoSans','normal');
   doc.text('Base Price', margin, y); doc.text(fINRq(q.base_price), pageWidth-margin, y, {align:'right'});
   y += 20;
   if (q.corner_plot) { doc.text('Corner Plot Extra (5%)', margin, y); doc.text('+' + fINRq(q.corner_extra), pageWidth-margin, y, {align:'right'}); y += 20; }
@@ -2505,22 +2541,22 @@ window.downloadQuotationPDF = async function(q){
   y += 10;
   doc.setFillColor(250,240,244);
   doc.rect(margin-10, y-18, pageWidth-2*margin+20, 36, 'F');
-  doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(157,29,76);
+  doc.setFontSize(14); doc.setFont('NotoSans','bold'); doc.setTextColor(157,29,76);
   doc.text('Total Quoted Price', margin, y+4);
   doc.text(fINRq(q.total_price), pageWidth-margin, y+4, {align:'right'});
   y += 56;
 
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(160,160,160);
+  doc.setFont('NotoSans','normal'); doc.setFontSize(8.5); doc.setTextColor(160,160,160);
   doc.text('This is an indicative quotation, subject to verification and availability. Not a final offer or booking confirmation.', margin, y, {maxWidth: pageWidth-2*margin});
   y += 34;
 
   doc.setDrawColor(230,220,210); doc.line(margin, y, pageWidth-margin, y);
   y += 20;
   const meta = currentUser.user_metadata || {};
-  doc.setFontSize(10); doc.setTextColor(90,90,90);
+  doc.setFont('NotoSans','normal'); doc.setFontSize(10); doc.setTextColor(90,90,90);
   doc.text('Prepared by: ' + (q.created_by_name || meta.full_name || meta.name || currentUser.email), margin, y);
   y += 15;
-  doc.text('PinkCity Properties  ·  +91 9358830405  ·  pinkcityproperties.com', margin, y);
+  doc.text('PinkCity Properties  ·  pinkcityproperties.com', margin, y);
 
   doc.save('Quotation-' + (q.plot_no||'plot') + '.pdf');
 };
