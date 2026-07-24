@@ -792,7 +792,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <button onclick="showTab('crm')" id="tab-crm" class="tab-btn">👥 CRM</button>
     <button onclick="showTab('schedule')" id="tab-schedule" class="tab-btn">📅 Visits</button>
     <button onclick="showTab('performance')" id="tab-performance" class="tab-btn" style="display:none;">📊 Performance</button>
-    <button onclick="showTab('blogs')" id="tab-blogs" class="tab-btn">✍️ Blog</button>
+    <button onclick="showTab('blogs')" id="tab-blogs" class="tab-btn" style="display:none;">✍️ Blog</button>
   </div>
 
   <div class="stat-grid" id="admin-stats" style="display:none;">
@@ -1354,11 +1354,13 @@ sb.auth.onAuthStateChange(async (event, session) => {
     document.getElementById("listings").style.display = "flex";
     document.getElementById("admin-stats").style.display = "grid";
     document.getElementById("tab-performance").style.display = "inline-flex";
+    document.getElementById("tab-blogs").style.display = "inline-flex";
     loadAdminListings();
   } else {
     // Team members land on their personalized Today view instead of a raw listings dump
     document.getElementById('admin-tabs').style.display = 'flex';
     document.getElementById('tab-performance').style.display = 'none'; // admin only
+    document.getElementById('tab-blogs').style.display = 'none'; // admin only
     showTab('today');
   }
 });
