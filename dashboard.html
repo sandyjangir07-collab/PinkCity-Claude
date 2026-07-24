@@ -2450,6 +2450,7 @@ async function loadPdfFonts(doc){
   if (pdfFontsReady) return;
   async function fetchBase64(url){
     const res = await fetch(url);
+    if (!res.ok) throw new Error('Could not load ' + url + ' (HTTP ' + res.status + '). Make sure the /fonts/ folder was uploaded to your site alongside dashboard.html.');
     const buf = await res.arrayBuffer();
     let binary = '';
     const bytes = new Uint8Array(buf);
@@ -2478,7 +2479,12 @@ window.downloadQuotationPDF = async function(q){
   if (!window.jspdf) { alert('PDF library is still loading — please try again in a moment.'); return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-  await loadPdfFonts(doc);
+  try {
+    await loadPdfFonts(doc);
+  } catch(e) {
+    alert('Could not generate PDF: ' + e.message);
+    return;
+  }
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 50;
   let y = 66;
@@ -2486,15 +2492,27 @@ window.downloadQuotationPDF = async function(q){
   // Logo in its proper pink circle, matching the site's actual brand mark
   const logo = await getLogoDataUrl();
   const circleR = 22;
-  doc.setFillColor(157,29,76);
+  const brandPink = [157,29,76];
+  doc.setFillColor(brandPink[0],brandPink[1],brandPink[2]);
   doc.circle(margin+circleR, y-8, circleR, 'F');
   if (logo) { try { doc.addImage(logo, 'PNG', margin+circleR-13, y-21, 26, 26); } catch(e){} }
 
+  // Brand lockup: "PinkCity" in black, "PROPERTIES" / "CONSULTANTS" in grey,
+  // and "&" in the same pink as the logo circle — matches the site's actual mark.
   const textX = margin + circleR*2 + 14;
-  doc.setFont('Fraunces','normal'); doc.setFontSize(24); doc.setTextColor(157,29,76);
+  doc.setFont('Fraunces','normal'); doc.setFontSize(24); doc.setTextColor(20,20,20);
   doc.text('PinkCity', textX, y-2);
-  doc.setFont('NotoSans','normal'); doc.setFontSize(8); doc.setTextColor(140,140,140);
-  doc.text('PROPERTIES & CONSULTANTS', textX, y+12, { charSpace: 0.6 });
+
+  doc.setFont('NotoSans','normal'); doc.setFontSize(8);
+  let sx = textX;
+  const seg = function(str, color){
+    doc.setTextColor(color[0],color[1],color[2]);
+    doc.text(str, sx, y+12, { charSpace: 0.6 });
+    sx += doc.getTextWidth(str) + (str.length * 0.6);
+  };
+  seg('PROPERTIES ', [140,140,140]);
+  seg('&', brandPink);
+  seg(' CONSULTANTS', [140,140,140]);
 
   doc.setDrawColor(230,220,210);
   doc.line(margin, y+28, pageWidth-margin, y+28);
