@@ -5,6 +5,7 @@
 <meta name="robots" content="noindex, nofollow"/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="push-subscribe.js"></script>
 <style>
 
@@ -788,9 +789,11 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   <p class="page-sub fade-up fade-up-2" id="page-sub">Manage listings, track leads, and schedule site visits.</p>
   <div id="admin-tabs" style="display:none;gap:8px;margin-bottom:28px;flex-wrap:wrap;">
     <button onclick="showTab('today')" id="tab-today" class="tab-btn">☀️ Today</button>
+    <button onclick="showTab('attendance')" id="tab-attendance" class="tab-btn">📍 Attendance</button>
     <button onclick="showTab('listings')" id="tab-listings" class="tab-btn active-tab">🏠 Listings</button>
     <button onclick="showTab('crm')" id="tab-crm" class="tab-btn">👥 CRM</button>
     <button onclick="showTab('schedule')" id="tab-schedule" class="tab-btn">📅 Visits</button>
+    <button onclick="showTab('quotation')" id="tab-quotation" class="tab-btn">🧾 Quotation</button>
     <button onclick="showTab('performance')" id="tab-performance" class="tab-btn" style="display:none;">📊 Performance</button>
     <button onclick="showTab('blogs')" id="tab-blogs" class="tab-btn" style="display:none;">✍️ Blog</button>
   </div>
@@ -947,6 +950,13 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       <div style="font-size:24px;font-family:var(--font-display);color:var(--foreground);" id="today-greeting-text">Good morning.</div>
       <div style="font-size:13.5px;color:var(--muted-foreground);margin-top:4px;" id="today-greeting-sub">Here's how your day looks.</div>
     </div>
+    <div id="attendance-widget" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:10px;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Attendance</div>
+        <div id="attendance-status" style="font-size:14px;font-weight:600;">Loading…</div>
+      </div>
+      <button id="attendance-btn" class="btn-submit" style="flex:0 0 auto;padding:10px 22px;width:auto;" onclick="handleAttendanceAction()">—</button>
+    </div>
     <div class="stat-grid" style="margin-bottom:32px;">
       <div class="stat-card"><div class="stat-n" id="today-followup-count" style="color:#b45309;">0</div><div class="stat-l">Follow-ups today</div></div>
       <div class="stat-card"><div class="stat-n" id="today-overdue-count" style="color:#b91c1c;">0</div><div class="stat-l">Overdue</div></div>
@@ -960,6 +970,91 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       <div style="font-size:16px;font-family:var(--font-display);color:var(--foreground);margin-bottom:14px;">Site Visits Today</div>
       <div id="today-visits-list"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
     </div>
+  </div>
+
+  <!-- ── ATTENDANCE SECTION ── -->
+  <div id="attendance-section" style="display:none;">
+    <div style="margin-bottom:28px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">ATTENDANCE</div>
+      <div style="font-size:22px;font-family:var(--font-display);color:var(--foreground);">Check-in history</div>
+    </div>
+
+    <div id="office-setup-panel" style="display:none;background:var(--secondary);border-radius:16px;padding:18px;margin-bottom:28px;">
+      <div class="fl" style="margin-bottom:10px;">Office Location <span style="font-weight:400;text-transform:none;letter-spacing:0;">— sets the geofence everyone checks in against</span></div>
+      <div id="office-current" style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:12px;">Loading…</div>
+      <div class="form-row">
+        <div><label class="fl">Radius (meters)</label><input class="fi" id="office-radius" type="number" value="200"/></div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="btn-ghost" style="width:100%;padding:14px;" onclick="captureOfficeLocation()" id="office-capture-btn">📍 Use My Current Location</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <div style="font-size:11px;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.04em;">or enter coordinates directly</div>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+      <div class="form-row">
+        <div><label class="fl">Latitude</label><input class="fi" id="office-lat-manual" type="number" step="any" placeholder="e.g. 26.912434"/></div>
+        <div><label class="fl">Longitude</label><input class="fi" id="office-lng-manual" type="number" step="any" placeholder="e.g. 75.787270"/></div>
+      </div>
+      <button class="btn-ghost" style="width:100%;margin-top:10px;" onclick="useManualCoordinates()">Use These Coordinates</button>
+      <div id="office-pending" style="display:none;font-size:12.5px;color:var(--primary);margin-top:8px;"></div>
+      <button class="btn-submit" style="margin-top:12px;" onclick="saveOfficeLocation()" id="office-save-btn" disabled>Save Office Location</button>
+    </div>
+
+    <div id="team-attendance-today" style="margin-bottom:28px;"></div>
+
+    <div class="fl" style="margin-bottom:10px;">Your Recent Attendance</div>
+    <div id="my-attendance-list"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
+  </div>
+
+  <!-- ── QUOTATION BUILDER ── -->
+  <div id="quotation-section" style="display:none;">
+    <div style="margin-bottom:28px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">TEAM ONLY</div>
+      <div style="font-size:22px;font-family:var(--font-display);color:var(--foreground);">Quotation Builder</div>
+    </div>
+
+    <div class="calc-panel" style="margin-bottom:28px;">
+      <div class="form-row">
+        <div><label class="fl">Plot No.</label><input class="fi" id="qb-plot-no" placeholder="e.g. A-14"/></div>
+        <div><label class="fl">Client Name <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted-foreground);">(optional)</span></label><input class="fi" id="qb-client" placeholder="e.g. Rahul Verma"/></div>
+      </div>
+      <div class="form-row">
+        <div><label class="fl">Plot Size (Gaj)</label><input class="fi" id="qb-size" type="number" placeholder="e.g. 200" oninput="updateQuotation()"/></div>
+        <div><label class="fl">Rate (₹ per Gaj)</label><input class="fi" id="qb-rate" type="number" placeholder="e.g. 26500" oninput="updateQuotation()"/></div>
+      </div>
+      <div class="form-row">
+        <div class="verified-row" style="margin-bottom:0;">
+          <input type="checkbox" id="qb-corner" onchange="updateQuotation()"/>
+          <label for="qb-corner">Corner Plot <span style="color:var(--muted-foreground);font-weight:400;">(+5%)</span></label>
+        </div>
+        <div class="verified-row" style="margin-bottom:0;">
+          <input type="checkbox" id="qb-park" onchange="updateQuotation()"/>
+          <label for="qb-park">Park Facing <span style="color:var(--muted-foreground);font-weight:400;">(+5%)</span></label>
+        </div>
+      </div>
+
+      <div class="calc-emi-card" style="margin-top:24px;">
+        <div class="calc-emi-label">Total Quoted Price</div>
+        <div class="calc-emi-value"><span id="qb-total">₹0</span></div>
+        <div class="calc-emi-meta">
+          <div><div class="calc-emi-meta-label">Base price</div><div class="calc-emi-meta-val" id="qb-base">₹0</div></div>
+          <div><div class="calc-emi-meta-label">Corner extra</div><div class="calc-emi-meta-val" id="qb-corner-val">—</div></div>
+          <div><div class="calc-emi-meta-label">Park facing extra</div><div class="calc-emi-meta-val" id="qb-park-val">—</div></div>
+        </div>
+      </div>
+
+      <div id="qb-err" style="color:#b91c1c;font-size:13px;margin-top:12px;opacity:0;transition:opacity 0.2s;"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn-ghost" onclick="clearQuotationForm()" style="flex:0 0 auto;">Clear</button>
+        <button class="btn-ghost" onclick="downloadLiveQuotationPDF()" style="flex:0 0 auto;">📄 PDF</button>
+        <button class="btn-submit" id="qb-save-btn" onclick="saveQuotation()" style="flex:1;">Save Quotation</button>
+      </div>
+    </div>
+
+    <div class="fl" style="margin-bottom:12px;">Your Recent Quotations</div>
+    <div id="qb-history"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
   </div>
 
   <!-- ── CRM SECTION ── -->
@@ -1767,7 +1862,7 @@ let blogEditId = null, blogStatus = 'draft', blogFeatured = false;
 
 window.showTab = function(tab) {
   // Hide all sections
-  ['listings','blog-section','crm-section','schedule-section','performance-section','today-section'].forEach(function(id){
+  ['listings','blog-section','crm-section','schedule-section','performance-section','today-section','attendance-section','quotation-section'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.style.display='none';
   });
   document.getElementById('add-btn').style.display = 'none';
@@ -1777,6 +1872,12 @@ window.showTab = function(tab) {
   if(tab==='today'){
     document.getElementById('today-section').style.display='block';
     loadToday();
+  } else if(tab==='attendance'){
+    document.getElementById('attendance-section').style.display='block';
+    loadAttendanceSection();
+  } else if(tab==='quotation'){
+    document.getElementById('quotation-section').style.display='block';
+    loadMyQuotations();
   } else if(tab==='listings'){
     document.getElementById('listings').style.display='flex';
     document.getElementById('add-btn').style.display='inline-flex';
@@ -2049,6 +2150,7 @@ window.saveCallOutcome = async function(preset){
 };
 
 window.loadToday = async function() {
+  loadAttendanceWidget();
   const meta = currentUser.user_metadata || {};
   const firstName = (meta.full_name || meta.name || currentUser.email || '').split(' ')[0];
   const hour = new Date().getHours();
@@ -2127,6 +2229,407 @@ window.loadToday = async function() {
         + '</div></div>';
     }).join('');
   }
+};
+
+// ── ATTENDANCE ──
+function fmtTime(iso){ return iso ? new Date(iso).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}) : ''; }
+function fmtHours(inIso,outIso){
+  if(!inIso||!outIso) return '';
+  const ms = new Date(outIso) - new Date(inIso);
+  const h = Math.floor(ms/3600000), m = Math.round((ms%3600000)/60000);
+  return h+'h '+m+'m';
+}
+function getLocation(){
+  return new Promise(function(resolve,reject){
+    if(!navigator.geolocation){ reject(new Error('Location services are not available on this device or browser.')); return; }
+    navigator.geolocation.getCurrentPosition(
+      function(pos){ resolve(pos.coords); },
+      function(){ reject(new Error('Could not get your location. Please enable location access in your browser/phone settings and try again.')); },
+      { enableHighAccuracy:true, timeout:15000 }
+    );
+  });
+}
+let todayAttendance = null;
+
+window.loadAttendanceWidget = async function(){
+  const todayStr = new Date().toISOString().slice(0,10);
+  const { data } = await sb.from('attendance').select('*').eq('user_id',currentUser.id).eq('date',todayStr).maybeSingle();
+  todayAttendance = data || null;
+  const statusEl = document.getElementById('attendance-status');
+  const btn = document.getElementById('attendance-btn');
+  btn.disabled = false;
+  if (!todayAttendance) {
+    statusEl.textContent = 'Not checked in yet';
+    btn.textContent = '📍 Check In';
+  } else if (!todayAttendance.check_out_at) {
+    statusEl.textContent = 'Checked in at ' + fmtTime(todayAttendance.check_in_at);
+    btn.textContent = '📍 Check Out';
+  } else {
+    statusEl.textContent = '✓ ' + fmtTime(todayAttendance.check_in_at) + ' – ' + fmtTime(todayAttendance.check_out_at) + ' · ' + fmtHours(todayAttendance.check_in_at, todayAttendance.check_out_at);
+    btn.textContent = 'Done for today';
+    btn.disabled = true;
+  }
+};
+
+window.handleAttendanceAction = async function(){
+  const btn = document.getElementById('attendance-btn');
+  const orig = btn.textContent;
+  btn.textContent = 'Getting location…'; btn.disabled = true;
+  try {
+    const coords = await getLocation();
+    const meta = currentUser.user_metadata;
+    if (!todayAttendance) {
+      const { error } = await sb.from('attendance').insert({
+        user_id: currentUser.id,
+        user_name: meta.full_name||meta.name||currentUser.email,
+        check_in_at: new Date().toISOString(),
+        check_in_lat: coords.latitude,
+        check_in_lng: coords.longitude,
+      });
+      if (error) throw error;
+      toast('✓ Checked in!');
+    } else {
+      const { error } = await sb.from('attendance').update({
+        check_out_at: new Date().toISOString(),
+        check_out_lat: coords.latitude,
+        check_out_lng: coords.longitude,
+      }).eq('id', todayAttendance.id);
+      if (error) throw error;
+      toast('✓ Checked out!');
+    }
+    await loadAttendanceWidget();
+  } catch(e) {
+    alert(e.message && e.message.includes('meters from the office')
+      ? "You're too far from the office to check in.\n\n" + e.message
+      : (e.message || 'Something went wrong — please try again.'));
+    btn.textContent = orig; btn.disabled = false;
+  }
+};
+
+window.loadAttendanceSection = async function(){
+  const officePanel = document.getElementById('office-setup-panel');
+  if (isAdmin) {
+    officePanel.style.display = 'block';
+    loadOfficeSetup();
+    loadTeamAttendanceToday();
+  } else {
+    officePanel.style.display = 'none';
+    document.getElementById('team-attendance-today').innerHTML = '';
+  }
+  loadMyAttendanceHistory();
+};
+
+let capturedOfficeCoords = null;
+window.useManualCoordinates = function(){
+  const lat = parseFloat(document.getElementById('office-lat-manual').value);
+  const lng = parseFloat(document.getElementById('office-lng-manual').value);
+  if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    alert('Please enter valid coordinates — latitude between -90 and 90, longitude between -180 and 180.');
+    return;
+  }
+  capturedOfficeCoords = { latitude: lat, longitude: lng };
+  document.getElementById('office-pending').style.display = 'block';
+  document.getElementById('office-pending').textContent = '📍 Using: ' + lat.toFixed(6) + ', ' + lng.toFixed(6) + ' — click Save to confirm.';
+  document.getElementById('office-save-btn').disabled = false;
+};
+window.captureOfficeLocation = async function(){
+  const btn = document.getElementById('office-capture-btn');
+  btn.textContent = 'Getting location…'; btn.disabled = true;
+  try {
+    const coords = await getLocation();
+    capturedOfficeCoords = coords;
+    document.getElementById('office-pending').style.display = 'block';
+    document.getElementById('office-pending').textContent = '📍 Captured: ' + coords.latitude.toFixed(6) + ', ' + coords.longitude.toFixed(6) + ' — click Save to confirm.';
+    document.getElementById('office-save-btn').disabled = false;
+  } catch(e) {
+    alert(e.message);
+  }
+  btn.textContent = '📍 Use My Current Location'; btn.disabled = false;
+};
+
+window.saveOfficeLocation = async function(){
+  if (!capturedOfficeCoords) return;
+  const radius = parseInt(document.getElementById('office-radius').value) || 200;
+  const btn = document.getElementById('office-save-btn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    const { data: existing } = await sb.from('office_locations').select('id').order('created_at').limit(1).maybeSingle();
+    const payload = { lat: capturedOfficeCoords.latitude, lng: capturedOfficeCoords.longitude, radius_meters: radius, updated_at: new Date().toISOString() };
+    const { error } = existing
+      ? await sb.from('office_locations').update(payload).eq('id', existing.id)
+      : await sb.from('office_locations').insert(payload);
+    if (error) throw error;
+    toast('✓ Office location saved!');
+    capturedOfficeCoords = null;
+    document.getElementById('office-pending').style.display = 'none';
+    loadOfficeSetup();
+  } catch(e) {
+    alert('Error: ' + (e.message||'Could not save.'));
+  }
+  btn.textContent = 'Save Office Location'; btn.disabled = true;
+};
+
+window.loadOfficeSetup = async function(){
+  const { data } = await sb.from('office_locations').select('*').order('created_at').limit(1).maybeSingle();
+  const el = document.getElementById('office-current');
+  if (data) {
+    el.textContent = 'Currently set: ' + data.lat.toFixed(6) + ', ' + data.lng.toFixed(6) + ' · ' + data.radius_meters + 'm radius';
+    document.getElementById('office-radius').value = data.radius_meters;
+  } else {
+    el.textContent = 'No office location set yet — nobody can check in until this is configured.';
+  }
+};
+
+window.loadTeamAttendanceToday = async function(){
+  const todayStr = new Date().toISOString().slice(0,10);
+  const { data } = await sb.from('attendance').select('*').eq('date',todayStr).order('check_in_at',{ascending:true});
+  const el = document.getElementById('team-attendance-today');
+  const rows = data || [];
+  el.innerHTML = '<div class="fl" style="margin-bottom:10px;">Today\'s Team Attendance ('+rows.length+' checked in)</div>'
+    + (rows.length ? rows.map(function(a){
+        return '<div class="team-detail-row"><div><div style="font-weight:600;font-size:13.5px;">'+(a.user_name||'—')+'</div>'
+          + '<div style="font-size:12px;color:var(--muted-foreground);">In: '+fmtTime(a.check_in_at)+(a.check_out_at?' · Out: '+fmtTime(a.check_out_at):' · Still in')+'</div></div>'
+          + '<span class="badge" style="background:'+(a.check_out_at?'rgba(107,114,128,0.12);color:#374151':'rgba(34,197,94,0.14);color:#15803d')+';">'+(a.check_out_at?fmtHours(a.check_in_at,a.check_out_at):'● Present')+'</span></div>';
+      }).join('') : '<div class="empty" style="padding:16px 0;"><p style="font-size:13px;">Nobody has checked in yet today.</p></div>');
+};
+
+window.loadMyAttendanceHistory = async function(){
+  const { data } = await sb.from('attendance').select('*').eq('user_id',currentUser.id).order('date',{ascending:false}).limit(14);
+  const el = document.getElementById('my-attendance-list');
+  const rows = data || [];
+  el.innerHTML = rows.length ? rows.map(function(a){
+    const d = new Date(a.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+    return '<div class="team-detail-row"><div><div style="font-weight:600;font-size:13.5px;">'+d+'</div>'
+      + '<div style="font-size:12px;color:var(--muted-foreground);">In: '+fmtTime(a.check_in_at)+(a.check_out_at?' · Out: '+fmtTime(a.check_out_at):' · Not checked out')+'</div></div>'
+      + '<span class="badge" style="background:rgba(157,29,76,0.1);color:var(--primary);">'+(fmtHours(a.check_in_at,a.check_out_at)||'—')+'</span></div>';
+  }).join('') : '<div class="empty" style="padding:16px 0;"><p style="font-size:13px;">No attendance recorded yet.</p></div>';
+};
+
+// ── QUOTATION BUILDER ──
+function fINRq(n){ n=Math.round(n); const s=Math.abs(n).toString(); let r; if(s.length<=3) r=s; else { const l3=s.slice(-3); const rest=s.slice(0,-3); r=rest.replace(/\B(?=(\d{2})+(?!\d))/g,',')+','+l3; } return (n<0?'-':'')+'₹'+r; }
+
+function computeQuotation(){
+  const size = parseFloat(document.getElementById('qb-size').value) || 0;
+  const rate = parseFloat(document.getElementById('qb-rate').value) || 0;
+  const corner = document.getElementById('qb-corner').checked;
+  const park = document.getElementById('qb-park').checked;
+  const base = size * rate;
+  const cornerExtra = corner ? base * 0.05 : 0;
+  const parkExtra = park ? base * 0.05 : 0;
+  const total = base + cornerExtra + parkExtra;
+  return { size, rate, corner, park, base, cornerExtra, parkExtra, total };
+}
+
+window.updateQuotation = function(){
+  const q = computeQuotation();
+  document.getElementById('qb-total').textContent = fINRq(q.total);
+  document.getElementById('qb-base').textContent = fINRq(q.base);
+  document.getElementById('qb-corner-val').textContent = q.corner ? '+' + fINRq(q.cornerExtra) : '—';
+  document.getElementById('qb-park-val').textContent = q.park ? '+' + fINRq(q.parkExtra) : '—';
+};
+
+// ── QUOTATION PDF EXPORT ──
+let logoDataUrl = null;
+async function getLogoDataUrl(){
+  if (logoDataUrl) return logoDataUrl;
+  try {
+    const res = await fetch('/logo.png');
+    const blob = await res.blob();
+    logoDataUrl = await new Promise(function(resolve,reject){
+      const reader = new FileReader();
+      reader.onload = function(){ resolve(reader.result); };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch(e) { logoDataUrl = null; }
+  return logoDataUrl;
+}
+
+window.downloadQuotationPDF = async function(q){
+  if (!window.jspdf) { alert('PDF library is still loading — please try again in a moment.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 50;
+  let y = 55;
+
+  const logo = await getLogoDataUrl();
+  if (logo) { try { doc.addImage(logo, 'PNG', margin, y-26, 34, 34); } catch(e){} }
+  doc.setFont('times','normal'); doc.setFontSize(22); doc.setTextColor(157,29,76);
+  doc.text('PinkCity', margin + (logo?44:0), y);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(140,140,140);
+  doc.text('PROPERTIES & CONSULTANTS', margin + (logo?44:0), y+13);
+
+  doc.setDrawColor(230,220,210);
+  doc.line(margin, y+26, pageWidth-margin, y+26);
+  y += 56;
+
+  doc.setFontSize(16); doc.setTextColor(30,30,30); doc.setFont('helvetica','bold');
+  doc.text('Property Quotation', margin, y);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(130,130,130);
+  const quoteRef = q.quote_number ? ('PC-Q' + q.quote_number) : 'Draft';
+  const dateStr = new Date(q.created_at || Date.now()).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  doc.text('Ref: ' + quoteRef + '   ·   Date: ' + dateStr, margin, y+16);
+  y += 40;
+
+  if (q.client_name) {
+    doc.setFontSize(11); doc.setTextColor(60,60,60);
+    doc.text('Prepared for: ' + q.client_name, margin, y);
+    y += 26;
+  }
+
+  const rows = [
+    ['Plot No.', String(q.plot_no)],
+    ['Plot Size', q.plot_size_gaj + ' Gaj'],
+    ['Rate', fINRq(q.rate_per_gaj) + ' / Gaj'],
+    ['Corner Plot', q.corner_plot ? 'Yes (+5%)' : 'No'],
+    ['Park Facing', q.park_facing ? 'Yes (+5%)' : 'No'],
+  ];
+  doc.setFontSize(11);
+  rows.forEach(function(r){
+    doc.setTextColor(130,130,130); doc.text(r[0], margin, y);
+    doc.setTextColor(30,30,30); doc.text(r[1], margin+170, y);
+    y += 22;
+  });
+
+  y += 8;
+  doc.setDrawColor(230,220,210); doc.line(margin, y, pageWidth-margin, y);
+  y += 28;
+
+  doc.setFontSize(11); doc.setTextColor(90,90,90); doc.setFont('helvetica','normal');
+  doc.text('Base Price', margin, y); doc.text(fINRq(q.base_price), pageWidth-margin, y, {align:'right'});
+  y += 20;
+  if (q.corner_plot) { doc.text('Corner Plot Extra (5%)', margin, y); doc.text('+' + fINRq(q.corner_extra), pageWidth-margin, y, {align:'right'}); y += 20; }
+  if (q.park_facing) { doc.text('Park Facing Extra (5%)', margin, y); doc.text('+' + fINRq(q.park_extra), pageWidth-margin, y, {align:'right'}); y += 20; }
+
+  y += 10;
+  doc.setFillColor(250,240,244);
+  doc.rect(margin-10, y-18, pageWidth-2*margin+20, 36, 'F');
+  doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(157,29,76);
+  doc.text('Total Quoted Price', margin, y+4);
+  doc.text(fINRq(q.total_price), pageWidth-margin, y+4, {align:'right'});
+  y += 56;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(160,160,160);
+  doc.text('This is an indicative quotation, subject to verification and availability. Not a final offer or booking confirmation.', margin, y, {maxWidth: pageWidth-2*margin});
+  y += 34;
+
+  doc.setDrawColor(230,220,210); doc.line(margin, y, pageWidth-margin, y);
+  y += 20;
+  const meta = currentUser.user_metadata || {};
+  doc.setFontSize(10); doc.setTextColor(90,90,90);
+  doc.text('Prepared by: ' + (q.created_by_name || meta.full_name || meta.name || currentUser.email), margin, y);
+  y += 15;
+  doc.text('PinkCity Properties  ·  +91 9358830405  ·  pinkcityproperties.com', margin, y);
+
+  doc.save('Quotation-' + (q.plot_no||'plot') + '.pdf');
+};
+
+window.downloadLiveQuotationPDF = function(){
+  const plotNo = document.getElementById('qb-plot-no').value.trim();
+  const q = computeQuotation();
+  const errEl = document.getElementById('qb-err');
+  if (!plotNo || !q.size || !q.rate) {
+    errEl.textContent = 'Fill in Plot No., Plot Size, and Rate to generate a PDF.';
+    errEl.style.opacity = '1';
+    setTimeout(function(){ errEl.style.opacity='0'; }, 3000);
+    return;
+  }
+  downloadQuotationPDF({
+    plot_no: plotNo,
+    client_name: document.getElementById('qb-client').value.trim(),
+    plot_size_gaj: q.size,
+    rate_per_gaj: q.rate,
+    corner_plot: q.corner,
+    park_facing: q.park,
+    base_price: q.base,
+    corner_extra: q.cornerExtra,
+    park_extra: q.parkExtra,
+    total_price: q.total,
+    created_at: new Date().toISOString()
+  });
+};
+
+window.clearQuotationForm = function(){
+  ['qb-plot-no','qb-client','qb-size','qb-rate'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('qb-corner').checked = false;
+  document.getElementById('qb-park').checked = false;
+  updateQuotation();
+};
+
+window.saveQuotation = async function(){
+  const plotNo = document.getElementById('qb-plot-no').value.trim();
+  const q = computeQuotation();
+  const errEl = document.getElementById('qb-err');
+  if (!plotNo || !q.size || !q.rate) {
+    errEl.textContent = 'Plot No., Plot Size, and Rate are required.';
+    errEl.style.opacity = '1';
+    setTimeout(function(){ errEl.style.opacity='0'; }, 3000);
+    return;
+  }
+  const btn = document.getElementById('qb-save-btn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    const meta = currentUser.user_metadata;
+    const { error } = await sb.from('quotations').insert({
+      plot_no: plotNo,
+      client_name: document.getElementById('qb-client').value.trim() || null,
+      plot_size_gaj: q.size,
+      rate_per_gaj: q.rate,
+      corner_plot: q.corner,
+      park_facing: q.park,
+      base_price: q.base,
+      corner_extra: q.cornerExtra,
+      park_extra: q.parkExtra,
+      total_price: q.total,
+      created_by: currentUser.id,
+      created_by_name: meta.full_name || meta.name || currentUser.email,
+      created_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    toast('✓ Quotation saved!');
+    clearQuotationForm();
+    loadMyQuotations();
+  } catch(e) {
+    errEl.textContent = 'Error: ' + (e.message || 'Could not save.');
+    errEl.style.opacity = '1';
+  }
+  btn.textContent = 'Save Quotation'; btn.disabled = false;
+};
+
+window.loadMyQuotations = async function(){
+  const { data } = await sb.from('quotations').select('*').eq('created_by', currentUser.id).order('created_at',{ascending:false}).limit(20);
+  const el = document.getElementById('qb-history');
+  const rows = data || [];
+  window.__myQuotations = {};
+  rows.forEach(function(q){ window.__myQuotations[q.id] = q; });
+  if (!rows.length) { el.innerHTML = '<div class="empty"><p style="font-size:13px;">No quotations yet — build your first one above.</p></div>'; return; }
+  el.innerHTML = rows.map(function(q){
+    const d = new Date(q.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const tags = [q.corner_plot?'Corner':null, q.park_facing?'Park Facing':null].filter(Boolean).join(' · ');
+    const waText = encodeURIComponent(
+      'Quotation — Plot ' + q.plot_no + '\n' +
+      'Size: ' + q.plot_size_gaj + ' Gaj\n' +
+      'Rate: ' + fINRq(q.rate_per_gaj) + '/Gaj\n' +
+      (tags ? tags + '\n' : '') +
+      'Total: ' + fINRq(q.total_price)
+    );
+    return '<div class="team-detail-row">'
+      + '<div><div style="font-weight:600;font-size:13.5px;">Plot '+q.plot_no+(q.client_name?' · '+q.client_name:'')+'</div>'
+      + '<div style="font-size:12px;color:var(--muted-foreground);">'+q.plot_size_gaj+' Gaj × '+fINRq(q.rate_per_gaj)+(tags?' · '+tags:'')+' · '+d+'</div></div>'
+      + '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<span style="font-family:var(--font-display);font-size:15px;color:var(--primary);">'+fINRq(q.total_price)+'</span>'
+      + '<button class="lead-icon-btn" title="Download PDF" onclick="event.stopPropagation();downloadQuotationPDF(window.__myQuotations[\''+q.id+'\'])">📄</button>'
+      + '<a href="https://wa.me/?text='+waText+'" target="_blank" rel="noopener" class="lead-icon-btn" title="Share on WhatsApp" onclick="event.stopPropagation()">💬</a>'
+      + '<button class="btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="event.stopPropagation();deleteQuotation(\''+q.id+'\')">✕</button>'
+      + '</div></div>';
+  }).join('');
+};
+
+window.deleteQuotation = async function(id){
+  if (!confirm('Delete this quotation?')) return;
+  await sb.from('quotations').delete().eq('id', id);
+  loadMyQuotations();
 };
 
 window.loadLeads = async function() {
