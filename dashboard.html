@@ -972,7 +972,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       <div class="crm-toolbar">
         <div class="crm-search-wrap">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="fi" id="crm-search" placeholder="Search name, phone, location…" oninput="loadLeads()" style="padding-top:9px;padding-bottom:9px;font-size:13px;"/>
+          <input class="fi" id="crm-search" placeholder="Search name, phone, location, PC#…" oninput="loadLeads()" style="padding-top:9px;padding-bottom:9px;font-size:13px;"/>
         </div>
         <select class="fsel" id="crm-filter" onchange="loadLeads()" style="width:auto;padding:9px 14px;font-size:13px;">
           <option value="all">All statuses</option>
@@ -2093,7 +2093,7 @@ window.loadToday = async function() {
       return '<div class="lead-card" data-lid="'+l.id+'" onclick="openLeadDetail(this.dataset.lid)">'
         + '<div class="lead-av">'+(l.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()+'</div>'
         + '<div style="flex:1;min-width:0;">'
-        + '<div class="lead-name">'+l.name+'</div>'
+        + '<div class="lead-name">'+l.name+' <span style="font-size:11px;font-weight:500;color:var(--muted-foreground);">PC'+l.lead_number+'</span></div>'
         + '<div class="lead-meta">'+l.phone+(l.preferred_location?' · '+l.preferred_location:'')+'</div>'
         + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
         + '<span class="badge st-'+(l.status||'new')+'">'+(STATUS_LABELS[l.status]||l.status)+'</span>'
@@ -2141,7 +2141,8 @@ window.loadLeads = async function() {
     leads = leads.filter(function(l){
       return (l.name||'').toLowerCase().includes(searchTerm)
         || (l.phone||'').toLowerCase().includes(searchTerm)
-        || (l.preferred_location||'').toLowerCase().includes(searchTerm);
+        || (l.preferred_location||'').toLowerCase().includes(searchTerm)
+        || ('pc'+l.lead_number).includes(searchTerm.replace(/\s/g,''));
     });
   }
 
@@ -2172,7 +2173,7 @@ window.loadLeads = async function() {
     return '<div class="lead-card" data-lid="'+l.id+'" onclick="openLeadDetail(this.dataset.lid)">'
       + '<div class="lead-av">'+initials+'</div>'
       + '<div style="flex:1;min-width:0;">'
-      + '<div class="lead-name">'+l.name+'</div>'
+      + '<div class="lead-name">'+l.name+' <span style="font-size:11px;font-weight:500;color:var(--muted-foreground);">PC'+l.lead_number+'</span></div>'
       + '<div class="lead-meta">'+l.phone+(l.budget?' · '+l.budget:'')+(l.preferred_location?' · '+l.preferred_location:'')+'</div>'
       + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">'
       + badges
@@ -2278,7 +2279,7 @@ window.openLeadDetail = async function(id) {
   const { data: l } = await sb.from('leads').select('*').eq('id',id).maybeSingle();
   if (!l) return;
   currentLeadData = l;
-  document.getElementById('ld-name').textContent = l.name;
+  document.getElementById('ld-name').innerHTML = l.name + ' <span style="font-size:14px;font-weight:500;color:var(--primary);">PC'+l.lead_number+'</span>';
   document.getElementById('ld-meta').textContent = [l.phone, l.email, l.budget, l.preferred_location].filter(Boolean).join(' · ');
   const stBadge = document.getElementById('ld-status-badge');
   stBadge.className = 'badge st-'+(l.status||'new');
@@ -2581,7 +2582,7 @@ window.loadPerformance = async function() {
   const [listingsRes, visitsRes, leadsRes, profilesRes] = await Promise.all([
     sb.from('listings').select('uid,submitter_name,status'),
     sb.from('visits').select('logged_by,logged_by_name,visitor_name,visitor_phone,listing_title,visit_date,visit_time'),
-    sb.from('leads').select('id,created_by,created_by_name,status,name,phone,preferred_location'),
+    sb.from('leads').select('id,created_by,created_by_name,status,name,phone,preferred_location,lead_number'),
     sb.from('profiles').select('id,full_name,email,role'),
   ]);
 
@@ -2643,7 +2644,7 @@ window.openTeamMemberDetail = function(memberId) {
   const leadsEl = document.getElementById('tmd-leads');
   leadsEl.innerHTML = m.leadList.length ? m.leadList.map(function(l){
     return '<div class="team-detail-row" style="cursor:pointer;" onclick="closeTeamMemberDetail();openLeadDetail(\''+l.id+'\')">'
-      +'<div><div style="font-weight:600;font-size:13.5px;">'+(l.name||'—')+'</div><div style="font-size:12px;color:var(--muted-foreground);">'+[l.phone,l.preferred_location].filter(Boolean).join(' · ')+'</div></div>'
+      +'<div><div style="font-weight:600;font-size:13.5px;">'+(l.name||'—')+' <span style="font-weight:500;color:var(--muted-foreground);">PC'+l.lead_number+'</span></div><div style="font-size:12px;color:var(--muted-foreground);">'+[l.phone,l.preferred_location].filter(Boolean).join(' · ')+'</div></div>'
       +'<div style="display:flex;align-items:center;gap:8px;"><span class="badge st-'+(l.status||'new')+'">'+(STATUS_LABELS[l.status]||l.status)+'</span><span style="color:var(--muted-foreground);font-size:14px;">›</span></div>'
       +'</div>';
   }).join('') : '<div class="empty" style="padding:16px 0;"><p style="font-size:13px;">No leads yet.</p></div>';
