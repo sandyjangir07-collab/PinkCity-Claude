@@ -2445,34 +2445,38 @@ async function getLogoDataUrl(){
   return logoDataUrl;
 }
 
-let pdfFontsReady = false;
+let cachedFontData = null;
 async function loadPdfFonts(doc){
-  if (pdfFontsReady) return;
-  async function fetchBase64(url){
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Could not load ' + url + ' (HTTP ' + res.status + '). Make sure NotoSans-Regular.ttf, NotoSans-Bold.ttf, and Fraunces-Display.ttf were uploaded to your site\'s root folder.');
-    const buf = await res.arrayBuffer();
-    let binary = '';
-    const bytes = new Uint8Array(buf);
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-    return btoa(binary);
+  if (!cachedFontData) {
+    async function fetchBase64(url){
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Could not load ' + url + ' (HTTP ' + res.status + '). Make sure NotoSans-Regular.ttf, NotoSans-Bold.ttf, and Fraunces-Display.ttf were uploaded to your site\'s root folder.');
+      const buf = await res.arrayBuffer();
+      let binary = '';
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+      return btoa(binary);
+    }
+    // Real font files (not jsPDF's built-in Helvetica/Times) — the standard PDF
+    // fonts have no ₹ glyph at all, which is why it rendered wrong before.
+    // These are the site's actual typefaces: Fraunces for the brand name, Noto
+    // Sans (which does include the Rupee sign) for everything else.
+    const [notoRegular, notoBold, fraunces] = await Promise.all([
+      fetchBase64('/NotoSans-Regular.ttf'),
+      fetchBase64('/NotoSans-Bold.ttf'),
+      fetchBase64('/Fraunces-Display.ttf'),
+    ]);
+    cachedFontData = { notoRegular, notoBold, fraunces };
   }
-  // Real font files (not jsPDF's built-in Helvetica/Times) — the standard PDF
-  // fonts have no ₹ glyph at all, which is why it rendered wrong before.
-  // These are the site's actual typefaces: Fraunces for the brand name, Noto
-  // Sans (which does include the Rupee sign) for everything else.
-  const [notoRegular, notoBold, fraunces] = await Promise.all([
-    fetchBase64('/NotoSans-Regular.ttf'),
-    fetchBase64('/NotoSans-Bold.ttf'),
-    fetchBase64('/Fraunces-Display.ttf'),
-  ]);
-  doc.addFileToVFS('NotoSans-Regular.ttf', notoRegular);
+  // Fonts are registered per jsPDF document instance, not globally — this must
+  // run on every new doc even though the underlying font bytes are only ever
+  // fetched once and reused from cache.
+  doc.addFileToVFS('NotoSans-Regular.ttf', cachedFontData.notoRegular);
   doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
-  doc.addFileToVFS('NotoSans-Bold.ttf', notoBold);
+  doc.addFileToVFS('NotoSans-Bold.ttf', cachedFontData.notoBold);
   doc.addFont('NotoSans-Bold.ttf', 'NotoSans', 'bold');
-  doc.addFileToVFS('Fraunces-Display.ttf', fraunces);
+  doc.addFileToVFS('Fraunces-Display.ttf', cachedFontData.fraunces);
   doc.addFont('Fraunces-Display.ttf', 'Fraunces', 'normal');
-  pdfFontsReady = true;
 }
 
 window.downloadQuotationPDF = async function(q){
