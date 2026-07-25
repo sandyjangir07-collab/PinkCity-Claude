@@ -1441,22 +1441,30 @@ sb.auth.onAuthStateChange(async (event, session) => {
   else av.textContent = (name || "?")[0].toUpperCase();
   if (isAdmin) {
     document.getElementById("admin-tag").style.display = "inline-flex";
-    document.getElementById("page-eyebrow").textContent = "ADMIN PANEL";
-    document.getElementById("page-title").textContent = "All Submissions";
-    document.getElementById("page-sub").textContent = "Review, edit and approve listings from your team.";
-    document.getElementById("add-btn").style.display = "none";
     document.getElementById("admin-tabs").style.display = "flex";
-    document.getElementById("listings").style.display = "flex";
     document.getElementById("admin-stats").style.display = "grid";
     document.getElementById("tab-performance").style.display = "inline-flex";
     document.getElementById("tab-blogs").style.display = "inline-flex";
-    loadAdminListings();
+    let restoredTab = null;
+    try { restoredTab = sessionStorage.getItem('pc-active-tab'); } catch(e){}
+    if (restoredTab && document.getElementById('tab-'+restoredTab)) {
+      showTab(restoredTab);
+    } else {
+      document.getElementById("page-eyebrow").textContent = "ADMIN PANEL";
+      document.getElementById("page-title").textContent = "All Submissions";
+      document.getElementById("page-sub").textContent = "Review, edit and approve listings from your team.";
+      document.getElementById("add-btn").style.display = "none";
+      document.getElementById("listings").style.display = "flex";
+      loadAdminListings();
+    }
   } else {
     // Team members land on their personalized Today view instead of a raw listings dump
     document.getElementById('admin-tabs').style.display = 'flex';
     document.getElementById('tab-performance').style.display = 'none'; // admin only
     document.getElementById('tab-blogs').style.display = 'none'; // admin only
-    showTab('today');
+    let restoredTab = null;
+    try { restoredTab = sessionStorage.getItem('pc-active-tab'); } catch(e){}
+    showTab((restoredTab && document.getElementById('tab-'+restoredTab)) ? restoredTab : 'today');
   }
 });
 
@@ -1861,6 +1869,7 @@ window.closeVisitLog = () => {
 let blogEditId = null, blogStatus = 'draft', blogFeatured = false;
 
 window.showTab = function(tab) {
+  try { sessionStorage.setItem('pc-active-tab', tab); } catch(e){}
   // Hide all sections
   ['listings','blog-section','crm-section','schedule-section','performance-section','today-section','attendance-section','quotation-section'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.style.display='none';
@@ -2575,7 +2584,19 @@ window.downloadQuotationPDF = async function(q){
   y += 15;
   doc.text('PinkCity Properties  ·  pinkcityproperties.com', margin, y);
 
-  doc.save('Quotation-' + (q.plot_no||'plot') + '.pdf');
+  const filename = 'Quotation-' + (q.plot_no||'plot') + '.pdf';
+  const pdfBlob = doc.output('blob');
+  const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+  if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+    try {
+      await navigator.share({ files: [pdfFile], title: filename });
+      return;
+    } catch(e) {
+      if (e.name === 'AbortError') return; // user cancelled the share sheet — not an error
+      // fall through to direct download below if share fails for another reason
+    }
+  }
+  doc.save(filename);
 };
 
 window.downloadLiveQuotationPDF = function(){
