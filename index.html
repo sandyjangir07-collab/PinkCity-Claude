@@ -4,11 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>PinkCity — Buy Verified Property in Jaipur | Plots, Farmhouses &amp; Apartments</title>
-<meta name="description" content="Discover legally verified homes, plots and farmhouses in Jaipur with PinkCity. End-to-end support for loans, legal checks, documentation and registration. Zero commission for buyers."/>
+<meta name="description" content="Discover legally verified homes, plots and farmhouses in Jaipur with PinkCity. End-to-end support for loans, legal checks, documentation and registration."/>
 <meta name="robots" content="index,follow"/>
 <link rel="canonical" href="https://pinkcityproperties.com/"/>
 <meta property="og:title" content="PinkCity — Buy Verified Property in Jaipur"/>
-<meta property="og:description" content="Legally verified plots, farmhouses &amp; apartments in Jaipur. Zero commission for buyers."/>
+<meta property="og:description" content="Legally verified plots, farmhouses &amp; apartments in Jaipur, with end-to-end buying support."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://pinkcityproperties.com/"/>
 <meta property="og:image" content="https://pinkcityproperties.com/icon-512.png"/>
@@ -197,6 +197,25 @@ h1,h2,h3,h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
   text-decoration:none; transition:all 0.3s;
 }
 .btn-secondary:hover { background:white; border-color:rgba(157,29,76,0.3); transform:translateY(-2px); }
+.pill-ruby {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--primary); color:white;
+  border:1px solid var(--primary);
+  padding:12px 20px; border-radius:999px; font-size:13px; font-weight:600;
+  text-decoration:none; transition:all 0.3s cubic-bezier(0.22,1,0.36,1);
+  box-shadow:0 4px 14px -4px rgba(157,29,76,0.35);
+}
+.pill-ruby:hover { background:#8a1943; transform:translateY(-2px); box-shadow:0 6px 18px -4px rgba(157,29,76,0.45); }
+
+/* Investment zone teaser cards */
+#zones-grid { grid-template-columns:1fr; }
+@media(min-width:640px){ #zones-grid { grid-template-columns:1fr 1fr; } }
+.zone-card { display:block; background:var(--card); border:1px solid var(--border); border-radius:22px; padding:26px; text-decoration:none; color:inherit; transition:all 0.3s cubic-bezier(0.22,1,0.36,1); position:relative; }
+.zone-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-elev); border-color:rgba(157,29,76,0.25); }
+.zone-card-badge { display:inline-block; background:var(--primary-soft); color:var(--primary); font-size:10.5px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; padding:4px 11px; border-radius:999px; margin-bottom:14px; }
+.zone-card-title { font-family:var(--font-display); font-size:20px; color:var(--foreground); margin-bottom:8px; letter-spacing:-0.01em; }
+.zone-card-desc { font-size:13px; color:var(--muted-foreground); line-height:1.6; margin-bottom:16px; }
+.zone-card-price { font-size:13px; font-weight:600; color:var(--primary); }
 
 /* Search card */
 .search-wrap { margin-top:64px; }
@@ -214,13 +233,14 @@ h1,h2,h3,h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 .sf-label { font-size:10px; text-transform:uppercase; letter-spacing:0.16em; color:var(--muted-foreground); opacity:0.8; }
 .sf-val { font-size:14px; font-weight:500; color:var(--foreground); margin-top:4px; }
 .btn-search {
-  background:var(--foreground); color:var(--background);
+  background:var(--primary); color:white;
   border:none; border-radius:20px; padding:20px 28px;
-  font-size:14px; font-weight:500; cursor:pointer;
+  font-size:14px; font-weight:600; cursor:pointer;
   display:flex; align-items:center; justify-content:center; gap:8px;
-  transition:all 0.5s; white-space:nowrap;
+  transition:all 0.3s cubic-bezier(0.22,1,0.36,1); white-space:nowrap;
+  box-shadow:0 10px 26px -8px rgba(157,29,76,0.55);
 }
-.btn-search:hover { background:var(--primary); box-shadow:0 12px 28px -8px rgba(157,29,76,0.5); }
+.btn-search:hover { background:#8a1943; box-shadow:0 14px 32px -8px rgba(157,29,76,0.65); transform:translateY(-1px); }
 
 /* Stats */
 .stats-grid { margin-top:56px; display:grid; grid-template-columns:1fr 1fr; gap:32px; border-top:1px solid var(--border); padding-top:40px; opacity:0.6; }
@@ -251,9 +271,16 @@ section { padding:112px 0; }
 .prop-card:hover .prop-img-wrap img { transform:scale(1.08); }
 .prop-img-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.05), transparent); }
 .prop-img-emoji { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:64px; }
-.prop-type-badge { position:absolute; top:16px; left:16px; display:inline-flex; align-items:center; gap:6px; border-radius:999px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); padding:6px 12px; font-size:11px; font-weight:500; color:var(--foreground); }
+.prop-badges-left { position:absolute; top:16px; left:16px; display:flex; flex-direction:column; gap:6px; align-items:flex-start; z-index:2; }
+.prop-badges-right { position:absolute; top:16px; right:16px; display:flex; flex-direction:column; gap:8px; z-index:2; }
+.prop-type-badge { display:inline-flex; align-items:center; gap:6px; border-radius:999px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); padding:6px 12px; font-size:11px; font-weight:500; color:var(--foreground); }
 .prop-type-dot { width:6px; height:6px; border-radius:50%; background:var(--primary); }
-.prop-verified-badge { position:absolute; top:16px; right:16px; display:inline-flex; align-items:center; gap:4px; border-radius:999px; background:rgba(20,20,18,0.85); backdrop-filter:blur(8px); padding:6px 10px; font-size:11px; font-weight:500; color:white; }
+.prop-verified-badge { display:inline-flex; align-items:center; gap:4px; border-radius:999px; background:rgba(20,20,18,0.85); backdrop-filter:blur(8px); padding:6px 10px; font-size:11px; font-weight:500; color:white; }
+.prop-icon-btn { width:32px; height:32px; border-radius:50%; border:none; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; color:var(--foreground); cursor:pointer; box-shadow:0 2px 8px rgba(20,16,18,0.12); transition:all 0.2s; padding:0; }
+.prop-icon-btn:hover { transform:scale(1.08); }
+.prop-save-btn.saved { color:#e0356b; }
+.prop-wa-float { position:absolute; bottom:64px; right:16px; width:38px; height:38px; border-radius:50%; background:#25d366; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 12px rgba(37,211,102,0.45); z-index:2; transition:transform 0.2s; }
+.prop-wa-float:hover { transform:scale(1.08); }
 .prop-location { position:absolute; bottom:20px; left:20px; right:20px; }
 .prop-location-area { font-size:10px; text-transform:uppercase; letter-spacing:0.16em; color:rgba(255,255,255,0.85); }
 .prop-location-name { font-family:var(--font-display); font-size:18px; color:white; margin-top:4px; line-height:1.2; }
@@ -262,11 +289,7 @@ section { padding:112px 0; }
 .prop-price { font-family:var(--font-display); font-size:26px; letter-spacing:-0.02em; }
 .prop-size { display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:500; color:var(--muted-foreground); flex-shrink:0; }
 .prop-area { font-size:11px; color:var(--muted-foreground); letter-spacing:0.04em; }
-.prop-ctas { display:flex; gap:8px; margin-top:20px; }
-.prop-cta-wa { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:11px; font-weight:500; border-radius:999px; background:var(--foreground); color:var(--background); padding:10px 12px; text-decoration:none; transition:all 0.3s; }
-.prop-cta-wa:hover { background:var(--primary); }
-.prop-cta-view { font-size:11px; font-weight:500; border-radius:999px; border:1px solid var(--border); padding:10px 16px; text-decoration:none; color:var(--foreground); background:transparent; cursor:pointer; transition:all 0.2s; }
-.prop-cta-view:hover { background:var(--secondary); }
+.prop-cta-view { display:inline-block; font-size:12px; font-weight:600; color:var(--primary); text-decoration:none; margin-top:14px; }
 .prop-empty { text-align:center; padding:60px 24px; background:var(--card); border-radius:24px; border:1px solid var(--border); color:var(--muted-foreground); font-size:15px; grid-column:1/-1; }
 
 /* ── WHY PINKCITY + HOW IT WORKS ── */
@@ -628,12 +651,14 @@ body {
   box-shadow: 0 4px 20px rgba(20,16,18,0.06), inset 0 1px 0 rgba(255,255,255,1) !important;
 }
 .btn-search {
-  background: oklch(0.16 0.010 25) !important;
+  background: var(--primary) !important;
+  color: white !important;
   letter-spacing: 0.02em !important;
   font-weight: 600 !important;
+  box-shadow: 0 10px 26px -8px rgba(157,29,76,0.55) !important;
 }
 .btn-search:hover {
-  background: var(--primary) !important;
+  background: #8a1943 !important;
   box-shadow: 0 8px 32px rgba(157,29,76,0.45) !important;
 }
 
@@ -1226,8 +1251,8 @@ body > * { position: relative; z-index: 1; }
 .search-card { background: rgba(255,255,255,0.62) !important; border: 1px solid rgba(255,255,255,0.80) !important; box-shadow: 0 2px 4px rgba(20,16,18,0.03), 0 20px 60px -20px rgba(20,16,18,0.12), inset 0 1px 0 rgba(255,255,255,0.95) !important; }
 .search-field { background: rgba(255,255,255,0.70) !important; border: 1px solid rgba(255,255,255,0.60) !important; }
 .search-field:hover { background: rgba(255,255,255,0.95) !important; border-color: rgba(157,29,76,0.15) !important; }
-.btn-search { background: oklch(0.16 0.010 25) !important; font-weight: 600 !important; }
-.btn-search:hover { background: var(--primary) !important; }
+.btn-search { background: var(--primary) !important; color: white !important; font-weight: 600 !important; box-shadow: 0 10px 26px -8px rgba(157,29,76,0.55) !important; }
+.btn-search:hover { background: #8a1943 !important; }
 
 /* ── PROPERTY CARDS ── */
 .prop-card { background: rgba(255,255,255,0.92) !important; box-shadow: 0 1px 2px rgba(20,16,18,0.04), 0 4px 16px rgba(20,16,18,0.05), 0 0 0 1px rgba(20,16,18,0.04) !important; border: none !important; transition: transform 0.55s cubic-bezier(0.22,1,0.36,1), box-shadow 0.55s cubic-bezier(0.22,1,0.36,1) !important; }
@@ -1509,10 +1534,9 @@ footer::before {
       <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);"></div>
     </div>
     <div class="stats-grid">
-        <div><div class="stat-num" data-target="2400" data-suffix="+">2,400+</div><div class="stat-lab">Verified listings</div></div>
-        <div><div class="stat-num" data-prefix="₹ " data-target="380" data-suffix=" Cr">₹ 380 Cr</div><div class="stat-lab">Deals facilitated</div></div>
-        <div><div class="stat-num" data-target="98" data-suffix="%">98%</div><div class="stat-lab">Document accuracy</div></div>
-        <div><div class="stat-num" data-target="12" data-suffix="+">12+</div><div class="stat-lab">Years of trust</div></div>
+        <div><div class="stat-num" id="stat-listings" data-target="0" data-suffix="+">0</div><div class="stat-lab">Live listings</div></div>
+        <div><div class="stat-num" style="font-size:22px;">✓</div><div class="stat-lab">PinkCity Verified™ on every listing</div></div>
+        <div><div class="stat-num" data-target="4">4</div><div class="stat-lab">Jaipur zones data-analyzed</div></div>
       </div>
     </div>
   </div>
@@ -1535,6 +1559,46 @@ footer::before {
 <!-- WHY PINKCITY + HOW IT WORKS -->
 
 
+<!-- INVESTMENT ZONES TEASER -->
+<section id="zones" style="padding:96px 0;background:var(--secondary);border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="eyebrow">Location Intelligence</div>
+      <h2>Know the corridor<br>before you buy.</h2>
+      <p style="font-size:15px;color:var(--muted-foreground);max-width:520px;margin-top:14px;">Infrastructure trackers, sourced pricing, and PinkCity's own rated assessment — not marketing copy — for every growth zone we cover.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:48px;" id="zones-grid">
+      <a href="ajmer-road.html" class="zone-card reveal">
+        <div class="zone-card-badge">Established</div>
+        <div class="zone-card-title">Ajmer Road</div>
+        <div class="zone-card-desc">NH-48, Mahindra World City SEZ, near-complete Ring Road access.</div>
+        <div class="zone-card-price">₹32,000/sq yd</div>
+      </a>
+      <a href="diggi-malpura-road.html" class="zone-card reveal">
+        <div class="zone-card-badge">Early-Stage</div>
+        <div class="zone-card-title">Diggi-Malpura Road</div>
+        <div class="zone-card-desc">JDA Master Plan 2047 zone, Knowledge City South anchor.</div>
+        <div class="zone-card-price">₹6,500/sq yd</div>
+      </a>
+      <a href="tonk-road-shivdaspura.html" class="zone-card reveal">
+        <div class="zone-card-badge">Confirmed Metro</div>
+        <div class="zone-card-title">Tonk Road — Shivdaspura</div>
+        <div class="zone-card-desc">Cabinet-approved Metro Phase II, JDA's first Land Pooling Scheme.</div>
+        <div class="zone-card-price">₹15,000/sq yd</div>
+      </a>
+      <a href="mahindra-sez-south.html" class="zone-card reveal">
+        <div class="zone-card-badge">Strongest Rental</div>
+        <div class="zone-card-title">Southern Mahindra SEZ</div>
+        <div class="zone-card-desc">90+ companies operating since 2007 — real demand, not projected.</div>
+        <div class="zone-card-price">₹8,000/sq yd</div>
+      </a>
+    </div>
+    <div style="text-align:center;margin-top:36px;" class="reveal">
+      <a href="areas.html" class="btn-secondary" style="display:inline-flex;">Explore all investment zones →</a>
+    </div>
+  </div>
+</section>
+
 <!-- WHY PINKCITY + HOW IT WORKS -->
 <!-- VERIFIED PROCESS -->
 <section id="categories" style="background:var(--background);border-top:1px solid var(--border);">
@@ -1544,12 +1608,12 @@ footer::before {
       <h2>Whatever you're<br>looking for.</h2>
     </div>
     <div class="cat-grid">
-      <a href="#" class="cat-card reveal" style="background:#fce8f0;"><div class="cat-icon-wrap"><svg style="stroke:#b06080" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div><div class="cat-name">Residential Plots</div><div class="cat-count">640+ listings</div><div class="cat-explore">Explore →</div></a>
-      <a href="#" class="cat-card reveal" style="background:#e8f5ee;"><div class="cat-icon-wrap"><svg style="stroke:#4a8a6a" viewBox="0 0 24 24"><path d="M12 3c0 0-2 3.5-2 7s2 5 2 5 2-1.5 2-5-2-7-2-7z"/><path d="M12 15v6M8 21h8"/></svg></div><div class="cat-name">Farmhouses</div><div class="cat-count">95+ listings</div><div class="cat-explore">Explore →</div></a>
-      <a href="#" class="cat-card reveal" style="background:#fff3e8;"><div class="cat-icon-wrap"><svg style="stroke:#c47a40" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="1"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div><div class="cat-name">Commercial Plots</div><div class="cat-count">180+ listings</div><div class="cat-explore">Explore →</div></a>
-      <a href="#" class="cat-card reveal" style="background:#eef0fc;"><div class="cat-icon-wrap"><svg style="stroke:#5060b0" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22V12h6v10M8 7h.01M12 7h.01M16 7h.01"/></svg></div><div class="cat-name">Apartments</div><div class="cat-count">820+ listings</div><div class="cat-explore">Explore →</div></a>
-      <a href="#" class="cat-card reveal" style="background:#fdf3e8;"><div class="cat-icon-wrap"><svg style="stroke:#b07a30" viewBox="0 0 24 24"><path d="M2 20h20M4 20V10l8-6 8 6v10M10 20v-6h4v6"/></svg></div><div class="cat-name">Luxury Villas</div><div class="cat-count">210+ listings</div><div class="cat-explore">Explore →</div></a>
-      <a href="#" class="cat-card reveal" style="background:#f0f5e8;"><div class="cat-icon-wrap"><svg style="stroke:#608a40" viewBox="0 0 24 24"><path d="M2 20h20M4 12l8-8 8 8"/><rect x="7" y="12" width="4" height="8"/><rect x="13" y="15" width="4" height="5"/></svg></div><div class="cat-name">Investment Land</div><div class="cat-count">330+ listings</div><div class="cat-explore">Explore →</div></a>
+      <a href="#properties" onclick="filterByCategory('Residential Plot')" class="cat-card reveal" style="background:#fce8f0;"><div class="cat-icon-wrap"><svg style="stroke:#b06080" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div><div class="cat-name">Residential Plots</div><div class="cat-explore">Explore →</div></a>
+      <a href="#properties" onclick="filterByCategory('Farmhouse')" class="cat-card reveal" style="background:#e8f5ee;"><div class="cat-icon-wrap"><svg style="stroke:#4a8a6a" viewBox="0 0 24 24"><path d="M12 3c0 0-2 3.5-2 7s2 5 2 5 2-1.5 2-5-2-7-2-7z"/><path d="M12 15v6M8 21h8"/></svg></div><div class="cat-name">Farmhouses</div><div class="cat-explore">Explore →</div></a>
+      <a href="#properties" onclick="filterByCategory('Commercial Plot')" class="cat-card reveal" style="background:#fff3e8;"><div class="cat-icon-wrap"><svg style="stroke:#c47a40" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="1"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div><div class="cat-name">Commercial Plots</div><div class="cat-explore">Explore →</div></a>
+      <a href="#properties" onclick="filterByCategory('Apartment')" class="cat-card reveal" style="background:#eef0fc;"><div class="cat-icon-wrap"><svg style="stroke:#5060b0" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22V12h6v10M8 7h.01M12 7h.01M16 7h.01"/></svg></div><div class="cat-name">Apartments</div><div class="cat-explore">Explore →</div></a>
+      <a href="#properties" onclick="filterByCategory('Luxury Villa')" class="cat-card reveal" style="background:#fdf3e8;"><div class="cat-icon-wrap"><svg style="stroke:#b07a30" viewBox="0 0 24 24"><path d="M2 20h20M4 20V10l8-6 8 6v10M10 20v-6h4v6"/></svg></div><div class="cat-name">Luxury Villas</div><div class="cat-explore">Explore →</div></a>
+      <a href="#properties" onclick="filterByCategory('Investment Land')" class="cat-card reveal" style="background:#f0f5e8;"><div class="cat-icon-wrap"><svg style="stroke:#608a40" viewBox="0 0 24 24"><path d="M2 20h20M4 12l8-8 8 8"/><rect x="7" y="12" width="4" height="8"/><rect x="13" y="15" width="4" height="5"/></svg></div><div class="cat-name">Investment Land</div><div class="cat-explore">Explore →</div></a>
     </div>
   </div>
 </section>
@@ -1559,55 +1623,17 @@ footer::before {
 <!-- TEASER LINKS TO SUBPAGES -->
 
 <!-- EXPLORE MORE — SUBPAGE LINKS -->
-<section style="background:var(--secondary);border-top:1px solid var(--border);padding:80px 0;">
+<section style="background:var(--secondary);border-top:1px solid var(--border);padding:56px 0;">
   <div class="container">
-    <div class="reveal" style="margin-bottom:48px;">
-      <div class="eyebrow">Explore More</div>
-      <h2 style="font-size:40px;margin-top:16px;letter-spacing:-0.03em;line-height:1.05;">Everything you need<br>to buy with confidence.</h2>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:900px;" class="reveal">
-      <a href="why.html" style="text-decoration:none;display:block;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;transition:all 0.3s;" onmouseover="this.style.boxShadow='var(--shadow-elev)';this.style.transform='translateY(-4px)';this.style.borderColor='rgba(157,29,76,0.25)'" onmouseout="this.style.boxShadow='';this.style.transform='';this.style.borderColor='var(--border)'">
-        <div style="width:44px;height:44px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 3px 10px rgba(157,29,76,0.28);">
-          <svg width="18" height="18" fill="none" stroke="white" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-        </div>
-        <div style="font-family:var(--font-display);font-size:22px;color:var(--foreground);margin-bottom:8px;letter-spacing:-0.01em;">Why PinkCity</div>
-        <div style="font-size:13px;color:var(--muted-foreground);line-height:1.65;margin-bottom:16px;">What makes us different — verified listings, end-to-end support, and local expertise.</div>
-        <div style="font-size:13px;font-weight:600;color:var(--primary);">Learn more →</div>
-      </a>
-      <a href="verified.html" style="text-decoration:none;display:block;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;transition:all 0.3s;" onmouseover="this.style.boxShadow='var(--shadow-elev)';this.style.transform='translateY(-4px)';this.style.borderColor='rgba(157,29,76,0.25)'" onmouseout="this.style.boxShadow='';this.style.transform='';this.style.borderColor='var(--border)'">
-        <div style="width:44px;height:44px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 3px 10px rgba(157,29,76,0.28);">
-          <svg width="18" height="18" fill="none" stroke="white" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
-        </div>
-        <div style="font-family:var(--font-display);font-size:22px;color:var(--foreground);margin-bottom:8px;letter-spacing:-0.01em;">PinkCity Verified™</div>
-        <div style="font-size:13px;color:var(--muted-foreground);line-height:1.65;margin-bottom:16px;">Our 6-point legal verification process — what every listing must pass before going live.</div>
-        <div style="font-size:13px;font-weight:600;color:var(--primary);">See the process →</div>
-      </a>
-      <a href="calculator.html" style="text-decoration:none;display:block;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;transition:all 0.3s;" onmouseover="this.style.boxShadow='var(--shadow-elev)';this.style.transform='translateY(-4px)';this.style.borderColor='rgba(157,29,76,0.25)'" onmouseout="this.style.boxShadow='';this.style.transform='';this.style.borderColor='var(--border)'">
-        <div style="width:44px;height:44px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 3px 10px rgba(157,29,76,0.28);">
-          <svg width="18" height="18" fill="none" stroke="white" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
-        </div>
-        <div style="font-family:var(--font-display);font-size:22px;color:var(--foreground);margin-bottom:8px;letter-spacing:-0.01em;">True Cost Calculator</div>
-        <div style="font-size:13px;color:var(--muted-foreground);line-height:1.65;margin-bottom:16px;">Calculate EMI, stamp duty, registration and total cost with Rajasthan-specific rates.</div>
-        <div style="font-size:13px;font-weight:600;color:var(--primary);">Calculate now →</div>
-      </a>
-      <a href="investment.html" style="text-decoration:none;display:block;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;transition:all 0.3s;" onmouseover="this.style.boxShadow='var(--shadow-elev)';this.style.transform='translateY(-4px)';this.style.borderColor='rgba(157,29,76,0.25)'" onmouseout="this.style.boxShadow='';this.style.transform='';this.style.borderColor='var(--border)'">
-        <div style="width:44px;height:44px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 3px 10px rgba(157,29,76,0.28);">
-          <svg width="18" height="18" fill="none" stroke="white" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-        </div>
-        <div style="font-family:var(--font-display);font-size:22px;color:var(--foreground);margin-bottom:8px;letter-spacing:-0.01em;">Investment Intelligence</div>
-        <div style="font-size:13px;color:var(--muted-foreground);line-height:1.65;margin-bottom:16px;">Growth corridors, micro-market prices and YoY appreciation across 40+ Jaipur localities.</div>
-        <div style="font-size:13px;font-weight:600;color:var(--primary);">View analysis →</div>
-      </a>
-    </div>
-    <div style="margin-top:24px;" class="reveal">
-      <a href="reviews.html" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--primary);text-decoration:none;padding:12px 24px;border:1px solid rgba(157,29,76,0.2);border-radius:999px;background:color-mix(in oklab,var(--primary) 6%,transparent);transition:all 0.2s;" onmouseover="this.style.background='color-mix(in oklab,var(--primary) 12%,transparent)'" onmouseout="this.style.background='color-mix(in oklab,var(--primary) 6%,transparent)'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Read what our 840+ clients say about us →
-      </a>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;" class="reveal">
+      <a href="why.html" class="pill-ruby">Why PinkCity</a>
+      <a href="verified.html" class="pill-ruby">PinkCity Verified™</a>
+      <a href="calculator.html" class="pill-ruby">True Cost Calculator</a>
+      <a href="areas.html" class="pill-ruby">Investment Zones</a>
+      <a href="reviews.html" class="pill-ruby">Client Reviews</a>
     </div>
   </div>
 </section>
-
 
 <section id="consult" style="background:var(--background);border-top:1px solid var(--border);">
   <div class="container">
@@ -1619,7 +1645,7 @@ footer::before {
         <ul class="trust-list reveal">
           <li class="trust-item"><div class="trust-check">✓</div>No spam calls — ever.</li>
           <li class="trust-item"><div class="trust-check">✓</div>Bank-grade data privacy.</li>
-          <li class="trust-item"><div class="trust-check">✓</div>Zero commission from buyers.</li>
+          <li class="trust-item"><div class="trust-check">✓</div>Every listing legally verified.</li>
         </ul>
         <div class="adv-row reveal">
           <div class="adv-logo"><img src="/logo.png" alt="PinkCity"/></div>
@@ -1785,7 +1811,7 @@ footer::before {
   };
   const EMOJI = {villa:"🏯",plot:"🏜️",apartment:"🏢",farmhouse:"🌿",commercial:"🏗️",investment:"🌾"};
   const TYPE_LABEL = {villa:"Villa",plot:"Plot",apartment:"Apartment",farmhouse:"Farmhouse",commercial:"Commercial",investment:"Land"};
-  const TYPE_SLUG_MAP = {"Residential Plot":"plot","Farmhouse":"farmhouse","Luxury Villa":"villa","Apartment":"apartment","Investment Land":"investment"};
+  const TYPE_SLUG_MAP = {"Residential Plot":"plot","Farmhouse":"farmhouse","Luxury Villa":"villa","Apartment":"apartment","Investment Land":"investment","Commercial Plot":"commercial"};
   const BUDGET_BUCKETS = {
     "Under ₹25L": lakh => lakh < 25,
     "₹ 25L — 50L": lakh => lakh >= 25 && lakh <= 50,
@@ -1833,6 +1859,8 @@ footer::before {
     }
 
     window.__allProps = data || [];
+    const statEl = document.getElementById('stat-listings');
+    if (statEl) statEl.dataset.target = String(window.__allProps.length);
     renderPropGrid(window.__allProps);
   }
 
@@ -1858,12 +1886,20 @@ footer::before {
         ? `<img src="${p.image}" alt="${p.title}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>`
         : `<div class="prop-img-emoji">${em}</div>`;
       const bgStyle = p.image ? '' : `style="background:${g};"`;
+      const isSaved = (JSON.parse(localStorage.getItem('pc-saved')||'[]')).includes(p.id);
       return `<div class="prop-card reveal" role="link" tabindex="0" onclick="window.location.href='${p.detailUrl}'" onkeydown="if(event.key==='Enter')window.location.href='${p.detailUrl}'">
         <div class="prop-img-wrap" ${bgStyle}>
           ${imgHtml}
           <div class="prop-img-overlay"></div>
-          <div class="prop-type-badge"><span class="prop-type-dot"></span>${tl}</div>
-          ${p.verified?'<div class="prop-verified-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 4 4L19 7"/></svg> Verified</div>':''}
+          <div class="prop-badges-left">
+            <div class="prop-type-badge"><span class="prop-type-dot"></span>${tl}</div>
+            ${p.verified?'<div class="prop-verified-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 4 4L19 7"/></svg> Verified</div>':''}
+          </div>
+          <div class="prop-badges-right">
+            <button class="prop-icon-btn prop-save-btn ${isSaved?'saved':''}" onclick="event.stopPropagation();toggleSaved('${p.id}',this)" title="Save"><svg width="15" height="15" viewBox="0 0 24 24" fill="${isSaved?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+            <button class="prop-icon-btn" onclick="event.stopPropagation();shareListing('${p.detailUrl}','${(p.title||'').replace(/'/g,"")}')" title="Share"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg></button>
+          </div>
+          <a class="prop-wa-float" href="https://wa.me/919358830405?text=${encodeURIComponent('Hi, I am interested in: '+p.title+' in '+p.area)}" target="_blank" onclick="event.stopPropagation()" title="WhatsApp"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C22 6.45 17.5 2 12.04 2zm5.83 14.13c-.25.7-1.24 1.28-2.03 1.45-.54.11-1.24.2-3.6-.77-3.02-1.25-4.96-4.32-5.11-4.52-.15-.2-1.22-1.62-1.22-3.09s.75-2.19 1.02-2.49c.25-.28.55-.35.73-.35h.53c.17 0 .4-.01.62.48.25.55.86 1.9.93 2.04.07.14.12.31.02.5-.09.19-.14.31-.28.48-.14.17-.29.37-.42.5-.14.14-.28.28-.12.55.16.28.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.24 1.38.28.14.44.12.6-.07.17-.19.72-.84.91-1.13.19-.28.38-.24.63-.14.26.09 1.64.77 1.92.91.28.14.47.21.53.33.07.12.07.68-.18 1.38z"/></svg></a>
           <div class="prop-location">
             <div class="prop-location-area">${p.area}</div>
             <div class="prop-location-name">${p.title}</div>
@@ -1874,10 +1910,7 @@ footer::before {
             <div class="prop-price">${(p.price||'').replace(/₹/g,'<span style="font-family:var(--font-sans);">₹</span>')}</div>
             ${p.size?`<div class="prop-size"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M3 15h6v6"/></svg>${p.size}</div>`:''}
           </div>
-          <div class="prop-ctas">
-            <a class="prop-cta-wa" href="https://wa.me/919358830405?text=${encodeURIComponent('Hi, I am interested in: '+p.title+' in '+p.area)}" target="_blank" onclick="event.stopPropagation()">WhatsApp</a>
-            <a class="prop-cta-view" href="${p.detailUrl}" onclick="event.stopPropagation()">View details</a>
-          </div>
+          <a class="prop-cta-view" href="${p.detailUrl}" onclick="event.stopPropagation()">View details →</a>
         </div>
       </div>`;
     }).join('');
@@ -1915,6 +1948,32 @@ footer::before {
     document.getElementById('v-type').textContent = 'Any type';
     document.getElementById('v-budget').textContent = '₹ 25L — 2 Cr';
     renderPropGrid(window.__allProps || []);
+  };
+
+  window.filterByCategory = function(typeLabel){
+    document.getElementById('v-type').textContent = typeLabel;
+    applyFilters();
+    return false;
+  };
+
+  window.toggleSaved = function(id, btn){
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem('pc-saved') || '[]'); } catch(e){}
+    const idx = saved.indexOf(id);
+    if (idx === -1) { saved.push(id); btn.classList.add('saved'); btn.querySelector('svg').setAttribute('fill','currentColor'); }
+    else { saved.splice(idx,1); btn.classList.remove('saved'); btn.querySelector('svg').setAttribute('fill','none'); }
+    localStorage.setItem('pc-saved', JSON.stringify(saved));
+  };
+
+  window.shareListing = async function(url, title){
+    const fullUrl = location.origin + '/' + url;
+    if (navigator.share) {
+      try { await navigator.share({ title: title, url: fullUrl }); return; } catch(e){ if (e.name === 'AbortError') return; }
+    }
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      showToast('✓ Link copied!');
+    } catch(e) { /* clipboard unavailable — nothing more we can do silently */ }
   };
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',loadProperties);
