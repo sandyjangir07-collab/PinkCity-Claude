@@ -946,7 +946,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   <!-- ── TODAY SECTION ── -->
   <div id="today-section" style="display:none;">
     <div id="today-greeting" style="margin-bottom:32px;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;">TODAY</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom:4px;" id="today-date-label">TODAY</div>
       <div style="font-size:24px;font-family:var(--font-display);color:var(--foreground);" id="today-greeting-text">Good morning.</div>
       <div style="font-size:13.5px;color:var(--muted-foreground);margin-top:4px;" id="today-greeting-sub">Here's how your day looks.</div>
     </div>
@@ -1442,21 +1442,14 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (isAdmin) {
     document.getElementById("admin-tag").style.display = "inline-flex";
     document.getElementById("admin-tabs").style.display = "flex";
-    document.getElementById("admin-stats").style.display = "grid";
     document.getElementById("tab-performance").style.display = "inline-flex";
     document.getElementById("tab-blogs").style.display = "inline-flex";
+    document.getElementById("page-eyebrow").textContent = "ADMIN PANEL";
+    document.getElementById("page-title").textContent = "All Submissions";
+    document.getElementById("page-sub").textContent = "Review, edit and approve listings from your team.";
     let restoredTab = null;
     try { restoredTab = sessionStorage.getItem('pc-active-tab'); } catch(e){}
-    if (restoredTab && document.getElementById('tab-'+restoredTab)) {
-      showTab(restoredTab);
-    } else {
-      document.getElementById("page-eyebrow").textContent = "ADMIN PANEL";
-      document.getElementById("page-title").textContent = "All Submissions";
-      document.getElementById("page-sub").textContent = "Review, edit and approve listings from your team.";
-      document.getElementById("add-btn").style.display = "none";
-      document.getElementById("listings").style.display = "flex";
-      loadAdminListings();
-    }
+    showTab((restoredTab && document.getElementById('tab-'+restoredTab)) ? restoredTab : 'today');
   } else {
     // Team members land on their personalized Today view instead of a raw listings dump
     document.getElementById('admin-tabs').style.display = 'flex';
@@ -1874,6 +1867,7 @@ window.showTab = function(tab) {
   ['listings','blog-section','crm-section','schedule-section','performance-section','today-section','attendance-section','quotation-section'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.style.display='none';
   });
+  document.getElementById('admin-stats').style.display = 'none';
   document.getElementById('add-btn').style.display = 'none';
   // Deactivate all tabs
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active-tab'); });
@@ -1890,7 +1884,7 @@ window.showTab = function(tab) {
   } else if(tab==='listings'){
     document.getElementById('listings').style.display='flex';
     document.getElementById('add-btn').style.display='inline-flex';
-    if (isAdmin) loadAdminListings(); else loadTeamListings();
+    if (isAdmin) { document.getElementById('admin-stats').style.display='grid'; loadAdminListings(); } else loadTeamListings();
   } else if(tab==='blogs'){
     document.getElementById('blog-section').style.display='block';
     loadBlogPosts();
@@ -2165,6 +2159,8 @@ window.loadToday = async function() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   document.getElementById('today-greeting-text').textContent = greeting + ', ' + firstName + '.';
+  const dateLabel = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('today-date-label').textContent = 'TODAY · ' + dateLabel.toUpperCase();
 
   const todayStr = new Date().toISOString().slice(0,10);
 
