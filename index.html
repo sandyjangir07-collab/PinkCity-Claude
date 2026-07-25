@@ -16,7 +16,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 /* ── DESIGN TOKENS (from Lovable styles.css) ── */
 :root {
@@ -512,6 +511,13 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 }
 
 .nav-link-active{color:var(--primary)!important}
+.nav-dropdown{position:relative;}
+.nav-dropdown-trigger{display:inline-flex;align-items:center;gap:4px;background:none;border:none;font-family:inherit;color:var(--foreground);cursor:pointer;padding:0;font-size:14px;font-weight:500;}
+.nav-dropdown-menu{position:absolute;top:calc(100% + 16px);left:50%;transform:translateX(-50%) translateY(6px);background:white;border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 50px -14px rgba(20,16,18,0.22);padding:8px;min-width:200px;opacity:0;visibility:hidden;transition:all 0.2s cubic-bezier(0.22,1,0.36,1);z-index:200;}
+.nav-dropdown:hover .nav-dropdown-menu,.nav-dropdown-menu.open{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.nav-dropdown-item{display:block;padding:10px 14px;border-radius:10px;font-size:13.5px;font-weight:500;color:var(--foreground);text-decoration:none;transition:background 0.15s;}
+.nav-dropdown-item:hover{background:var(--secondary);}
+
 .mobile-menu{display:none;position:fixed;top:80px;left:12px;right:12px;z-index:49;border-radius:24px;padding:8px 8px 12px;box-shadow:var(--shadow-elev);max-width:440px;margin:0 auto;background:color-mix(in oklab,white 88%,transparent);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);border:1px solid color-mix(in oklab,white 70%,transparent)}
 .mobile-menu.open{display:block;animation:fade-up 0.25s cubic-bezier(0.22,1,0.36,1)}
 .mobile-section{font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted-fg);padding:12px 12px 6px;opacity:0.7}
@@ -1437,13 +1443,19 @@ footer::before {
       <span class="nav-brand-name">PinkCity<em>.</em></span>
     </a>
     <div class="nav-links">
-      <a href="why.html" class="nav-link">Why PinkCity</a>
-      <a href="verified.html" class="nav-link">Verified™</a>
-      <a href="blog.html" class="nav-link">Blog</a>
-      <a href="calculator.html" class="nav-link">Calculator</a>
-      <a href="investment.html" class="nav-link">Investment</a>
-      <a href="govt-resources.html" class="nav-link">Govt. Resources</a>
       <a href="areas.html" class="nav-link">Explore Areas</a>
+      <a href="calculator.html" class="nav-link">Calculator</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-trigger" onclick="event.stopPropagation();this.parentElement.querySelector('.nav-dropdown-menu').classList.toggle('open')">Resources <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav-dropdown-menu">
+          <a href="why.html" class="nav-dropdown-item">Why PinkCity</a>
+          <a href="verified.html" class="nav-dropdown-item">Verified™</a>
+          <a href="investment.html" class="nav-dropdown-item">Investment Guide</a>
+          <a href="blog.html" class="nav-dropdown-item">Blog</a>
+          <a href="reviews.html" class="nav-dropdown-item">Reviews</a>
+          <a href="govt-resources.html" class="nav-dropdown-item">Govt. Resources</a>
+        </div>
+      </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <a href="login.html" class="nav-cta">
@@ -1545,12 +1557,16 @@ footer::before {
 </section>
 
 <!-- PROPERTIES FROM SUPABASE -->
-<section id="properties" style="padding:112px 0;background:var(--background);border-top:1px solid var(--border);">
+<section id="properties" style="background:var(--background);border-top:1px solid var(--border);">
   <div class="container">
     <div class="section-header reveal">
       <div class="eyebrow">Featured Properties</div>
       <h2>Hand-picked. Verified.<br><em style="font-style:italic;font-weight:300;color:color-mix(in oklab,var(--foreground) 70%,transparent)">Move-in ready.</em></h2>
       <div id="prop-count" style="font-size:13px;color:var(--primary);font-weight:600;margin-top:10px;"></div>
+      <button id="saved-toggle-btn" onclick="toggleSavedView()" style="display:none;align-items:center;gap:7px;background:white;border:1px solid var(--border);border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;color:var(--foreground);cursor:pointer;margin-top:16px;box-shadow:0 2px 8px rgba(20,16,18,0.06);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#e0356b" stroke="#e0356b" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span id="saved-toggle-text">View saved (0)</span>
+      </button>
     </div>
     <div class="prop-grid" id="prop-grid">
       <div class="prop-empty">Loading verified listings…</div>
@@ -1796,6 +1812,7 @@ footer::before {
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ── SUPABASE LISTINGS ──
 (function(){
@@ -1864,6 +1881,7 @@ footer::before {
     const statEl = document.getElementById('stat-listings');
     if (statEl) statEl.dataset.target = String(window.__allProps.length);
     renderPropGrid(window.__allProps);
+    updateSavedToggleButton();
   }
 
   function renderPropGrid(data, filterLabel){
@@ -1871,10 +1889,14 @@ footer::before {
     const countEl = document.getElementById('prop-count');
 
     if(!data || !data.length){
-      grid.innerHTML = filterLabel
-        ? '<div class="prop-empty">No properties match those filters right now.<br><button class="btn-secondary" style="margin-top:16px;" onclick="clearFilters()">Clear filters</button></div>'
-        : '<div class="prop-empty">No listings yet — check back soon.</div>';
-      if(countEl) countEl.textContent = filterLabel ? '0 properties match your search' : '';
+      if (filterLabel === 'saved') {
+        grid.innerHTML = '<div class="prop-empty">Nothing saved yet — tap the heart on any listing to keep track of it here.<br><button class="btn-secondary" style="margin-top:16px;" onclick="toggleSavedView()">Show all properties</button></div>';
+      } else {
+        grid.innerHTML = filterLabel
+          ? '<div class="prop-empty">No properties match those filters right now.<br><button class="btn-secondary" style="margin-top:16px;" onclick="clearFilters()">Clear filters</button></div>'
+          : '<div class="prop-empty">No listings yet — check back soon.</div>';
+      }
+      if(countEl) countEl.textContent = filterLabel === 'saved' ? '0 saved properties' : (filterLabel ? '0 properties match your search' : '');
       return;
     }
 
@@ -1965,6 +1987,34 @@ footer::before {
     if (idx === -1) { saved.push(id); btn.classList.add('saved'); btn.querySelector('svg').setAttribute('fill','currentColor'); }
     else { saved.splice(idx,1); btn.classList.remove('saved'); btn.querySelector('svg').setAttribute('fill','none'); }
     localStorage.setItem('pc-saved', JSON.stringify(saved));
+    updateSavedToggleButton();
+    if (window.__viewingSaved) toggleSavedView(true);
+  };
+
+  function updateSavedToggleButton(){
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem('pc-saved') || '[]'); } catch(e){}
+    const btn = document.getElementById('saved-toggle-btn');
+    if (!btn) return;
+    btn.style.display = saved.length ? 'inline-flex' : 'none';
+    const label = window.__viewingSaved ? 'Show all properties' : ('View saved (' + saved.length + ')');
+    document.getElementById('saved-toggle-text').textContent = label;
+  }
+
+  window.toggleSavedView = function(forceRefresh){
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem('pc-saved') || '[]'); } catch(e){}
+    if (forceRefresh !== true) window.__viewingSaved = !window.__viewingSaved;
+    if (window.__viewingSaved) {
+      const savedProps = (window.__allProps || []).filter(p => saved.includes(p.id));
+      renderPropGrid(savedProps, 'saved');
+      document.getElementById('prop-count').textContent = savedProps.length + ' saved propert' + (savedProps.length===1?'y':'ies');
+      document.getElementById('properties').scrollIntoView({behavior:'smooth'});
+    } else {
+      renderPropGrid(window.__allProps || []);
+      document.getElementById('prop-count').textContent = '';
+    }
+    updateSavedToggleButton();
   };
 
   window.shareListing = async function(url, title){

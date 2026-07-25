@@ -23,7 +23,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 /* ── DESIGN TOKENS (from Lovable styles.css) ── */
 :root {
@@ -178,10 +177,6 @@ h1,h2,h3,h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 @media(min-width:640px){ .hero-inner { padding:0 32px; } }
 .hero-pill { display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:6px 14px; font-size:11px; font-weight:500; color:color-mix(in oklab,var(--foreground) 75%,transparent); letter-spacing:0.04em; }
 .hero-pill-dot { width:6px; height:6px; border-radius:50%; background:var(--primary); animation:pulse-ring 2s ease-in-out infinite; }
-.hero h1 { margin-top:32px; font-size:44px; line-height:0.98; letter-spacing:-0.035em; color:var(--foreground); max-width:18ch; }
-@media(min-width:640px){ .hero h1 { font-size:68px; } }
-@media(min-width:1024px){ .hero h1 { font-size:84px; } }
-.hero h1 em { font-style:italic; font-weight:300; color:color-mix(in oklab,var(--foreground) 70%,transparent); }
 .hero-sub { margin-top:32px; max-width:560px; font-size:16px; line-height:1.65; color:var(--muted-foreground); }
 @media(min-width:640px){ .hero-sub { font-size:18px; } }
 .hero-actions { margin-top:40px; display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
@@ -495,6 +490,13 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 }
 
 .nav-link-active{color:var(--primary)!important}
+.nav-dropdown{position:relative;}
+.nav-dropdown-trigger{display:inline-flex;align-items:center;gap:4px;background:none;border:none;font-family:inherit;color:var(--foreground);cursor:pointer;padding:0;font-size:14px;font-weight:500;}
+.nav-dropdown-menu{position:absolute;top:calc(100% + 16px);left:50%;transform:translateX(-50%) translateY(6px);background:white;border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 50px -14px rgba(20,16,18,0.22);padding:8px;min-width:200px;opacity:0;visibility:hidden;transition:all 0.2s cubic-bezier(0.22,1,0.36,1);z-index:200;}
+.nav-dropdown:hover .nav-dropdown-menu,.nav-dropdown-menu.open{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+.nav-dropdown-item{display:block;padding:10px 14px;border-radius:10px;font-size:13.5px;font-weight:500;color:var(--foreground);text-decoration:none;transition:background 0.15s;}
+.nav-dropdown-item:hover{background:var(--secondary);}
+
 .mobile-menu{display:none;position:fixed;top:80px;left:12px;right:12px;z-index:49;border-radius:24px;padding:8px 8px 12px;box-shadow:var(--shadow-elev);max-width:440px;margin:0 auto;background:color-mix(in oklab,white 88%,transparent);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);border:1px solid color-mix(in oklab,white 70%,transparent)}
 .mobile-menu.open{display:block;animation:fade-up 0.25s cubic-bezier(0.22,1,0.36,1)}
 .mobile-section{font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted-foreground);padding:12px 12px 6px;opacity:0.7}
@@ -541,13 +543,19 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       <span class="nav-brand-name">PinkCity<em>.</em></span>
     </a>
     <div class="nav-links">
-      <a href="why.html" class="nav-link">Why PinkCity</a>
-      <a href="verified.html" class="nav-link">Verified™</a>
-      <a href="reviews.html" class="nav-link">Reviews</a>
-      <a href="calculator.html" class="nav-link">Calculator</a>
-      <a href="investment.html" class="nav-link">Investment</a>
-      <a href="govt-resources.html" class="nav-link">Govt. Resources</a>
       <a href="areas.html" class="nav-link">Explore Areas</a>
+      <a href="calculator.html" class="nav-link">Calculator</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-trigger" onclick="event.stopPropagation();this.parentElement.querySelector('.nav-dropdown-menu').classList.toggle('open')">Resources <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav-dropdown-menu">
+          <a href="why.html" class="nav-dropdown-item">Why PinkCity</a>
+          <a href="verified.html" class="nav-dropdown-item">Verified™</a>
+          <a href="investment.html" class="nav-dropdown-item">Investment Guide</a>
+          <a href="blog.html" class="nav-dropdown-item">Blog</a>
+          <a href="reviews.html" class="nav-dropdown-item">Reviews</a>
+          <a href="govt-resources.html" class="nav-dropdown-item">Govt. Resources</a>
+        </div>
+      </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <a href="login.html" class="nav-cta">List Property<div class="nav-cta-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div></a>
