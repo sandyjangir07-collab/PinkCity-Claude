@@ -2450,7 +2450,7 @@ async function loadPdfFonts(doc){
   if (!cachedFontData) {
     async function fetchBase64(url){
       const res = await fetch(url);
-      if (!res.ok) throw new Error('Could not load ' + url + ' (HTTP ' + res.status + '). Make sure NotoSans-Regular.ttf, NotoSans-Bold.ttf, and Fraunces-Display.ttf were uploaded to your site\'s root folder.');
+      if (!res.ok) throw new Error('Could not load ' + url + ' (HTTP ' + res.status + '). Make sure NotoSans-Regular.ttf and NotoSans-Bold.ttf were uploaded to your site\'s root folder.');
       const buf = await res.arrayBuffer();
       let binary = '';
       const bytes = new Uint8Array(buf);
@@ -2458,15 +2458,12 @@ async function loadPdfFonts(doc){
       return btoa(binary);
     }
     // Real font files (not jsPDF's built-in Helvetica/Times) — the standard PDF
-    // fonts have no ₹ glyph at all, which is why it rendered wrong before.
-    // These are the site's actual typefaces: Fraunces for the brand name, Noto
-    // Sans (which does include the Rupee sign) for everything else.
-    const [notoRegular, notoBold, fraunces] = await Promise.all([
+    // fonts have no ₹ glyph at all, which is why it rendered wrong originally.
+    const [notoRegular, notoBold] = await Promise.all([
       fetchBase64('/NotoSans-Regular.ttf'),
       fetchBase64('/NotoSans-Bold.ttf'),
-      fetchBase64('/Fraunces-Display.ttf'),
     ]);
-    cachedFontData = { notoRegular, notoBold, fraunces };
+    cachedFontData = { notoRegular, notoBold };
   }
   // Fonts are registered per jsPDF document instance, not globally — this must
   // run on every new doc even though the underlying font bytes are only ever
@@ -2475,8 +2472,6 @@ async function loadPdfFonts(doc){
   doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
   doc.addFileToVFS('NotoSans-Bold.ttf', cachedFontData.notoBold);
   doc.addFont('NotoSans-Bold.ttf', 'NotoSans', 'bold');
-  doc.addFileToVFS('Fraunces-Display.ttf', cachedFontData.fraunces);
-  doc.addFont('Fraunces-Display.ttf', 'Fraunces', 'normal');
 }
 
 window.downloadQuotationPDF = async function(q){
@@ -2504,7 +2499,7 @@ window.downloadQuotationPDF = async function(q){
   // Brand lockup: "PinkCity" in black, "PROPERTIES" / "CONSULTANTS" in grey,
   // and "&" in the same pink as the logo circle — matches the site's actual mark.
   const textX = margin + circleR*2 + 14;
-  doc.setFont('Fraunces','normal'); doc.setFontSize(24); doc.setTextColor(20,20,20);
+  doc.setFont('NotoSans','bold'); doc.setFontSize(22); doc.setTextColor(20,20,20);
   doc.text('PinkCity', textX, y-2);
 
   doc.setFont('NotoSans','normal'); doc.setFontSize(8);
