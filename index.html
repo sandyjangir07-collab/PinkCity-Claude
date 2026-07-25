@@ -270,6 +270,7 @@ section { padding:112px 0; }
 .prop-card:hover .prop-img-wrap img { transform:scale(1.08); }
 .prop-img-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.05), transparent); }
 .prop-img-emoji { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:64px; }
+.prop-img-watermark { position:absolute; bottom:14px; right:14px; width:26px; height:26px; object-fit:contain; opacity:0.45; }
 .prop-badges-left { position:absolute; top:16px; left:16px; display:flex; flex-direction:column; gap:6px; align-items:flex-start; z-index:2; }
 .prop-badges-right { position:absolute; top:16px; right:16px; display:flex; flex-direction:column; gap:8px; z-index:2; }
 .prop-type-badge { display:inline-flex; align-items:center; gap:6px; border-radius:999px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); padding:6px 12px; font-size:11px; font-weight:500; color:var(--foreground); }
@@ -290,6 +291,7 @@ section { padding:112px 0; }
 .prop-area { font-size:11px; color:var(--muted-foreground); letter-spacing:0.04em; }
 .prop-cta-view { display:inline-block; font-size:12px; font-weight:600; color:var(--primary); text-decoration:none; margin-top:14px; }
 .prop-empty { text-align:center; padding:60px 24px; background:var(--card); border-radius:24px; border:1px solid var(--border); color:var(--muted-foreground); font-size:15px; grid-column:1/-1; }
+.prop-empty-logo { width:44px; height:44px; object-fit:contain; margin:0 auto 16px; opacity:0.55; display:block; }
 
 /* ── WHY PINKCITY + HOW IT WORKS ── */
 .why-how { background:color-mix(in oklab,var(--muted) 20%,var(--background)); }
@@ -1423,6 +1425,9 @@ footer::before {
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="PinkCity"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/logo.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-72.png"/>
   <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
   <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png"/>
   <link rel="apple-touch-icon" sizes="144x144" href="/icon-144.png"/>
@@ -1569,7 +1574,7 @@ footer::before {
       </button>
     </div>
     <div class="prop-grid" id="prop-grid">
-      <div class="prop-empty">Loading verified listings…</div>
+      <div class="prop-empty"><img src="/logo.png" alt="" class="prop-empty-logo"/>Loading verified listings…</div>
     </div>
   </div>
 </section>
@@ -1890,11 +1895,11 @@ footer::before {
 
     if(!data || !data.length){
       if (filterLabel === 'saved') {
-        grid.innerHTML = '<div class="prop-empty">Nothing saved yet — tap the heart on any listing to keep track of it here.<br><button class="btn-secondary" style="margin-top:16px;" onclick="toggleSavedView()">Show all properties</button></div>';
+        grid.innerHTML = '<div class="prop-empty"><img src="/logo.png" alt="" class="prop-empty-logo"/>Nothing saved yet — tap the heart on any listing to keep track of it here.<br><button class="btn-secondary" style="margin-top:16px;" onclick="toggleSavedView()">Show all properties</button></div>';
       } else {
         grid.innerHTML = filterLabel
-          ? '<div class="prop-empty">No properties match those filters right now.<br><button class="btn-secondary" style="margin-top:16px;" onclick="clearFilters()">Clear filters</button></div>'
-          : '<div class="prop-empty">No listings yet — check back soon.</div>';
+          ? '<div class="prop-empty"><img src="/logo.png" alt="" class="prop-empty-logo"/>No properties match those filters right now.<br><button class="btn-secondary" style="margin-top:16px;" onclick="clearFilters()">Clear filters</button></div>'
+          : '<div class="prop-empty"><img src="/logo.png" alt="" class="prop-empty-logo"/>No listings yet — check back soon.</div>';
       }
       if(countEl) countEl.textContent = filterLabel === 'saved' ? '0 saved properties' : (filterLabel ? '0 properties match your search' : '');
       return;
@@ -1908,7 +1913,7 @@ footer::before {
       const tl = TYPE_LABEL[p.type]||p.type;
       const imgHtml = p.image
         ? `<img src="${p.image}" alt="${p.title}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>`
-        : `<div class="prop-img-emoji">${em}</div>`;
+        : `<div class="prop-img-emoji">${em}<img src="/logo.png" alt="" class="prop-img-watermark"/></div>`;
       const bgStyle = p.image ? '' : `style="background:${g};"`;
       const isSaved = (JSON.parse(localStorage.getItem('pc-saved')||'[]')).includes(p.id);
       return `<div class="prop-card reveal" role="link" tabindex="0" onclick="window.location.href='${p.detailUrl}'" onkeydown="if(event.key==='Enter')window.location.href='${p.detailUrl}'">

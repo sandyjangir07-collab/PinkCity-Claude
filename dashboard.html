@@ -603,6 +603,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 /* ── EMPTY ── */
 .empty{text-align:center;padding:60px 24px;background:white;border-radius:24px;border:1px solid var(--border);color:var(--muted-foreground);font-size:15px;}
 .empty-icon{font-size:40px;margin-bottom:14px;opacity:0.4;}
+.empty-logo{width:32px;height:32px;object-fit:contain;opacity:0.4;margin:0 auto 10px;display:block;}
 /* ── ANIMATIONS ── */
 @keyframes fade-up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
 .fade-up{animation:fade-up 0.6s cubic-bezier(0.22,1,0.36,1) both;}
@@ -756,6 +757,9 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="PinkCity"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/logo.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-72.png"/>
   <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
   <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png"/>
   <link rel="apple-touch-icon" sizes="144x144" href="/icon-144.png"/>
@@ -950,7 +954,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <div id="attendance-widget" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
       <div>
         <div style="font-size:10px;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Attendance</div>
-        <div id="attendance-status" style="font-size:14px;font-weight:600;">Loading…</div>
+        <div id="attendance-status" style="font-size:14px;font-weight:600;"><img src="/logo.png" alt="" class="empty-logo" style="width:18px;height:18px;display:inline-block;margin:0 6px 0 0;vertical-align:middle;opacity:0.5;"/>Loading…</div>
       </div>
       <button id="attendance-btn" class="btn-submit" style="flex:0 0 auto;padding:10px 22px;width:auto;" onclick="handleAttendanceAction()">—</button>
     </div>
@@ -961,11 +965,11 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     </div>
     <div style="margin-bottom:36px;">
       <div style="font-size:16px;font-family:var(--font-display);color:var(--foreground);margin-bottom:14px;">Follow-ups</div>
-      <div id="today-followups-list"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
+      <div id="today-followups-list"><div class="empty"><img src="/logo.png" alt="" class="empty-logo"/><p style="font-size:13px;">Loading…</p></div></div>
     </div>
     <div>
       <div style="font-size:16px;font-family:var(--font-display);color:var(--foreground);margin-bottom:14px;">Site Visits Today</div>
-      <div id="today-visits-list"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
+      <div id="today-visits-list"><div class="empty"><img src="/logo.png" alt="" class="empty-logo"/><p style="font-size:13px;">Loading…</p></div></div>
     </div>
   </div>
 
@@ -978,7 +982,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 
     <div id="office-setup-panel" style="display:none;background:var(--secondary);border-radius:16px;padding:18px;margin-bottom:28px;">
       <div class="fl" style="margin-bottom:10px;">Office Location <span style="font-weight:400;text-transform:none;letter-spacing:0;">— sets the geofence everyone checks in against</span></div>
-      <div id="office-current" style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:12px;">Loading…</div>
+      <div id="office-current" style="font-size:12.5px;color:var(--muted-foreground);margin-bottom:12px;"><img src="/logo.png" alt="" style="width:14px;height:14px;display:inline-block;margin-right:5px;vertical-align:middle;opacity:0.5;"/>Loading…</div>
       <div class="form-row">
         <div><label class="fl">Radius (meters)</label><input class="fi" id="office-radius" type="number" value="200"/></div>
         <div style="display:flex;align-items:flex-end;">
@@ -1002,7 +1006,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <div id="team-attendance-today" style="margin-bottom:28px;"></div>
 
     <div class="fl" style="margin-bottom:10px;">Your Recent Attendance</div>
-    <div id="my-attendance-list"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
+    <div id="my-attendance-list"><div class="empty"><img src="/logo.png" alt="" class="empty-logo"/><p style="font-size:13px;">Loading…</p></div></div>
   </div>
 
   <!-- ── QUOTATION BUILDER ── -->
@@ -1051,7 +1055,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     </div>
 
     <div class="fl" style="margin-bottom:12px;">Your Recent Quotations</div>
-    <div id="qb-history"><div class="empty"><p style="font-size:13px;">Loading…</p></div></div>
+    <div id="qb-history"><div class="empty"><img src="/logo.png" alt="" class="empty-logo"/><p style="font-size:13px;">Loading…</p></div></div>
   </div>
 
   <!-- ── CRM SECTION ── -->
