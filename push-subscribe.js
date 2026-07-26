@@ -13,7 +13,7 @@
 // here, so this file creates its own lightweight client with the same public
 // project URL/anon key already used across the site.
 
-const VAPID_PUBLIC_KEY = 'BI9IjWTTP88BcnVsVdxwsTHB3G7ZHK-pJnxOm01dGKuWRBejy-XrPODZrbDpJsUrduBZfj6mecgiFT_yyKIgloI';
+const VAPID_PUBLIC_KEY = 'BJlPJv40GQPL4SrPZv_6xVCSJYjDqBTBnW3kL7Y6IckAqWi5I-lXj6RNwb3Z23-QMQrdeSHgkY_ZB9mn9X9XLWU';
 const _pushSb = window.supabase.createClient(
   'https://mfpnndrszjygespcfdbo.supabase.co',
   'sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf'
@@ -42,12 +42,25 @@ async function enablePushNotifications(topics, userId) {
   const registration = await navigator.serviceWorker.register('/sw.js');
   await navigator.serviceWorker.ready;
 
-  let subscription = await registration.pushManager.getSubscription();
-  if (!subscription) {
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
+  // Always start fresh: an existing subscription may have been created against
+  // an older VAPID key pair, in which case it looks "enabled" but silently
+  // fails to deliver. Unsubscribing first guarantees we're always subscribing
+  // with the current key, not blindly reusing whatever was cached before.
+  const existing = await registration.pushManager.getSubscription();
+  let staleEndpoint = null;
+  if (existing) {
+    staleEndpoint = existing.endpoint;
+    try { await existing.unsubscribe(); } catch (e) { console.warn('Could not unsubscribe old subscription:', e); }
+  }
+
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+  });
+
+  // Clean up the old row so the system doesn't keep trying a dead endpoint.
+  if (staleEndpoint && staleEndpoint !== subscription.endpoint) {
+    await _pushSb.from('push_subscriptions').delete().eq('endpoint', staleEndpoint);
   }
 
   const raw = subscription.toJSON();
