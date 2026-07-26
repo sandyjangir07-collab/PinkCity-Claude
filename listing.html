@@ -686,7 +686,6 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
     <div class="detail-title" id="listing-title">—</div>
     <div class="meta-grid">
       <div class="meta-card"><div class="meta-label">Location</div><div class="meta-val" id="listing-area">—</div></div>
-      <div class="meta-card"><div class="meta-label">Size</div><div class="meta-val" id="listing-size">—</div></div>
       <div class="meta-card" id="meta-plot-size" style="display:none;"><div class="meta-label">Plot Size</div><div class="meta-val" id="listing-plot-size">—</div></div>
       <div class="meta-card" id="meta-plot-dims" style="display:none;"><div class="meta-label">Dimensions</div><div class="meta-val" id="listing-plot-dims">—</div></div>
       <div class="meta-card" id="meta-road-width" style="display:none;"><div class="meta-label">Road Width</div><div class="meta-val" id="listing-road-width">—</div></div>
@@ -897,7 +896,6 @@ async function load() {
   document.getElementById("listing-price").innerHTML = formatPriceHTML(data.price);
   document.getElementById("listing-title").textContent = data.title;
   document.getElementById("listing-area").textContent = (data.area||"") + ", Jaipur";
-  document.getElementById("listing-size").textContent = data.size || "—";
   function showMeta(cardId, valId, value) {
     if (!value) return;
     document.getElementById(cardId).style.display = "";
