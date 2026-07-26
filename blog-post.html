@@ -582,6 +582,9 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="PinkCity"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/logo.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-72.png"/>
   <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
   <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png"/>
   <link rel="apple-touch-icon" sizes="144x144" href="/icon-144.png"/>
@@ -592,6 +595,7 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 <body>
 
 <div class="scroll-progress"><div class="scroll-progress-bar" id="sp-bar"></div></div>
+<div class="post-hero">
 <div class="nav-wrap"><nav class="nav" id="main-nav">
   <a href="index.html" class="nav-brand">
     <div class="nav-logo"><img src="/logo.png" alt="PinkCity"/></div>
@@ -625,9 +629,25 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
     </div>
   </nav>
 </div>
+    <div class="post-hero-inner">
+      <div id="post-cat" style="display:inline-flex;align-items:center;gap:6px;background:var(--primary-soft);color:var(--primary);font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;margin-bottom:20px;"></div>
+      <h1 class="post-title" id="post-title"></h1>
+      <div class="post-meta">
+        <div class="post-author">
+          <div class="post-author-av" id="post-av"></div>
+          <span id="post-author-name"></span>
+        </div>
+        <div class="post-meta-dot"></div>
+        <span id="post-date"></span>
+        <div class="post-meta-dot"></div>
+        <span id="post-read"></span>
+      </div>
+    </div>
+</div>
+    <div id="skeleton" style="text-align:center;padding:60px 24px;font-family:var(--font-sans);color:var(--muted-foreground);">Loading article…</div>
     <div id="post-cover-wrap"></div>
 
-  <div class="post-body">
+  <div class="post-body" id="post-wrap" style="display:none;">
     <div class="post-content" id="post-content"></div>
     <div class="post-tags" id="post-tags"></div>
     <div class="post-share" id="post-share">
