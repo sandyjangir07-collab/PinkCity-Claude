@@ -506,6 +506,24 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .modal-title { font-family:var(--font-display); font-size:26px; color:var(--foreground); margin-bottom:20px; }
 .mopt { background:white; border:1px solid var(--border); border-radius:14px; padding:14px 18px; cursor:pointer; text-align:left; width:100%; font-size:15px; font-weight:500; color:var(--foreground); transition:background 0.18s; margin-bottom:8px; font-family:var(--font-sans); }
 .mopt:hover { background:var(--secondary); }
+
+/* Consultation popup */
+.pc-popup-overlay { display:none; position:fixed; inset:0; background:rgba(20,16,18,0.55); backdrop-filter:blur(10px); z-index:400; align-items:center; justify-content:center; padding:20px; }
+.pc-popup-overlay.on { display:flex; }
+.pc-popup-card { position:relative; background:color-mix(in oklab,var(--card) 96%,transparent); backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.6); border-radius:32px; padding:44px 32px 32px; width:100%; max-width:440px; max-height:92vh; overflow-y:auto; box-shadow:0 30px 80px -20px rgba(20,16,18,0.35); animation:pc-popup-in 0.5s cubic-bezier(0.19,1,0.22,1); text-align:center; }
+@keyframes pc-popup-in { from{ transform:translateY(24px) scale(0.97); opacity:0; } to{ transform:none; opacity:1; } }
+@media(prefers-reduced-motion:reduce){ .pc-popup-card{ animation:none; } }
+.pc-popup-close { position:absolute; top:18px; right:18px; width:32px; height:32px; border-radius:50%; border:none; background:var(--secondary); color:var(--muted-foreground); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; }
+.pc-popup-close:hover { background:var(--border); color:var(--foreground); }
+.pc-popup-logo-wrap { position:relative; width:76px; height:76px; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; }
+.pc-popup-logo-wrap::before { content:''; position:absolute; inset:-22px; border-radius:50%; background:radial-gradient(circle,color-mix(in oklab,var(--primary) 18%,transparent) 0%,transparent 70%); filter:blur(16px); }
+.pc-popup-logo { position:relative; z-index:1; width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#7d1740); display:flex; align-items:center; justify-content:center; padding:7px; box-shadow:0 8px 22px -6px rgba(157,29,76,0.5); }
+.pc-popup-logo img { width:100%; height:100%; object-fit:contain; }
+.pc-popup-eyebrow { font-size:10.5px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--primary); margin-bottom:10px; }
+.pc-popup-title { font-family:var(--font-display); font-weight:400; font-size:26px; line-height:1.2; letter-spacing:-0.015em; color:var(--foreground); margin-bottom:12px; }
+.pc-popup-sub { font-size:13.5px; line-height:1.65; color:var(--muted-foreground); max-width:340px; margin:0 auto 28px; }
+.pc-popup-form { display:flex; flex-direction:column; gap:14px; text-align:left; }
+.pc-popup-trust { text-align:center; font-size:11.5px; color:var(--muted-foreground); margin-top:4px; }
 .mopt-sub { font-size:10.5px; font-weight:400; color:var(--muted-foreground); margin-bottom:2px; letter-spacing:0.5px; text-transform:uppercase; }
 
 @media(prefers-reduced-motion:reduce){
@@ -1841,14 +1859,37 @@ footer::before {
 
 <div class="toast" id="toast"></div>
 
+<!-- CONSULTATION POPUP -->
+<div class="pc-popup-overlay" id="pc-popup" onclick="if(event.target===this)closePcPopup()">
+  <div class="pc-popup-card">
+    <button class="pc-popup-close" onclick="closePcPopup()" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="pc-popup-logo-wrap"><div class="pc-popup-logo"><img src="/logo.png" alt="PinkCity"/></div></div>
+    <div class="pc-popup-eyebrow">Free Consultation</div>
+    <h3 class="pc-popup-title">Talk to an Expert<br>PinkCity Advisor.</h3>
+    <p class="pc-popup-sub">Tell us what you're looking for — a senior advisor will respond directly on WhatsApp with verified options that fit.</p>
+    <div class="pc-popup-form">
+      <div><label class="fl">Your Name</label><input class="fi" id="pc-name" type="text" placeholder="Rahul Verma"/></div>
+      <div><label class="fl">Phone</label><input class="fi" id="pc-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
+      <div class="form-row">
+        <div><label class="fl">Budget</label><select class="fsel" id="pc-budget"><option>Under ₹50L</option><option>₹50L – 1 Cr</option><option>₹1 Cr – 2 Cr</option><option>Above ₹2 Cr</option></select></div>
+        <div><label class="fl">Preferred Location</label><input class="fi" id="pc-loc" type="text" placeholder="Jagatpura, Mansarovar…"/></div>
+      </div>
+      <button class="btn-submit" id="pc-popup-btn" onclick="submitPcPopup()">Send via WhatsApp →</button>
+      <div class="pc-popup-trust">✓ No spam, ever &nbsp;·&nbsp; ✓ Responds within hours</div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+const sb = window.supabase.createClient(
+  "https://mfpnndrszjygespcfdbo.supabase.co",
+  "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf"
+);
 // ── SUPABASE LISTINGS ──
 (function(){
-  const sb = window.supabase.createClient(
-    "https://mfpnndrszjygespcfdbo.supabase.co",
-    "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf"
-  );
   const GRADS = {
     villa:"linear-gradient(135deg,#c4a870,#8a6a40)",
     plot:"linear-gradient(135deg,#c8a98a,#9a7050)",
@@ -2157,6 +2198,60 @@ function pcWA(type,data){
   lines.push('','Submitted via pinkcityproperties.com');
   window.open('https://wa.me/'+PC_WA+'?text='+encodeURIComponent(lines.join('\n')),'_blank');
 }
+// ── CONSULTATION POPUP ──
+(function(){
+  const COOLDOWN_DAYS = 7;
+  function shouldShow(){
+    try {
+      const last = localStorage.getItem('pc-popup-last');
+      if (!last) return true;
+      const daysSince = (Date.now() - parseInt(last,10)) / (1000*60*60*24);
+      return daysSince > COOLDOWN_DAYS;
+    } catch(e) { return true; }
+  }
+  function markSeen(){
+    try { localStorage.setItem('pc-popup-last', String(Date.now())); } catch(e){}
+  }
+  window.closePcPopup = function(){
+    document.getElementById('pc-popup').classList.remove('on');
+    document.body.style.overflow = '';
+    markSeen();
+  };
+  if (shouldShow()) {
+    window.addEventListener('load', function(){
+      setTimeout(function(){
+        const popup = document.getElementById('pc-popup');
+        if (popup) { popup.classList.add('on'); document.body.style.overflow = 'hidden'; }
+      }, 2500);
+    });
+  }
+})();
+
+async function submitPcPopup(){
+  const name = document.getElementById('pc-name').value.trim();
+  const phone = document.getElementById('pc-phone').value.trim();
+  const budget = document.getElementById('pc-budget').value;
+  const location = document.getElementById('pc-loc').value.trim();
+  if (!name || !phone) { showToast('Please fill in your name and phone.'); return; }
+  const btn = document.getElementById('pc-popup-btn');
+  const orig = btn.textContent;
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  try {
+    await sb.from('leads').insert({
+      name, phone, budget: budget || null, preferred_location: location || null,
+      source: 'homepage_popup', status: 'new',
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+    });
+  } catch(e) { console.log('Lead save:', e); }
+  const waText = 'Hi, I would like a free consultation.\nName: ' + name +
+    '\nBudget: ' + (budget || 'Not specified') +
+    '\nPreferred Location: ' + (location || 'Not specified');
+  window.open('https://wa.me/919358830405?text=' + encodeURIComponent(waText), '_blank');
+  btn.textContent = orig; btn.disabled = false;
+  closePcPopup();
+  showToast('✓ Opening WhatsApp — send the message to connect with your advisor.');
+}
+
 async function submitC(){
   const name=document.getElementById('f-name').value.trim(),phone=document.getElementById('f-phone').value.trim(),email=document.getElementById('f-email').value.trim(),budget=document.getElementById('f-budget').value,propertyType=document.getElementById('f-type').value,location=document.getElementById('f-loc2').value.trim();
   if(!name||!phone){showToast('Please fill in your name and phone.');return;}
