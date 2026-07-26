@@ -2200,31 +2200,16 @@ function pcWA(type,data){
 }
 // ── CONSULTATION POPUP ──
 (function(){
-  const COOLDOWN_DAYS = 7;
-  function shouldShow(){
-    try {
-      const last = localStorage.getItem('pc-popup-last');
-      if (!last) return true;
-      const daysSince = (Date.now() - parseInt(last,10)) / (1000*60*60*24);
-      return daysSince > COOLDOWN_DAYS;
-    } catch(e) { return true; }
-  }
-  function markSeen(){
-    try { localStorage.setItem('pc-popup-last', String(Date.now())); } catch(e){}
-  }
   window.closePcPopup = function(){
     document.getElementById('pc-popup').classList.remove('on');
     document.body.style.overflow = '';
-    markSeen();
   };
-  if (shouldShow()) {
-    window.addEventListener('load', function(){
-      setTimeout(function(){
-        const popup = document.getElementById('pc-popup');
-        if (popup) { popup.classList.add('on'); document.body.style.overflow = 'hidden'; }
-      }, 2500);
-    });
-  }
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      const popup = document.getElementById('pc-popup');
+      if (popup) { popup.classList.add('on'); document.body.style.overflow = 'hidden'; }
+    }, 2500);
+  });
 })();
 
 async function submitPcPopup(){
