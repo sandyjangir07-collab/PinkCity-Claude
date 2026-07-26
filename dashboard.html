@@ -1291,6 +1291,17 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       </div>
       <div id="ld-visit-empty" style="font-size:12.5px;color:var(--muted-foreground);">No visit scheduled yet.</div>
     </div>
+    <div id="ld-call-details" style="background:var(--primary-soft);border-radius:14px;padding:14px 16px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="fl" style="margin-bottom:0;">Call</div>
+        <button class="btn-ghost" id="ld-call-btn" onclick="openScheduleCallFromLead()" style="padding:5px 12px;font-size:12px;">📞 Schedule Call</button>
+      </div>
+      <div id="ld-call-info" style="display:none;gap:20px;flex-wrap:wrap;font-size:13px;">
+        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Date</div><div id="ld-call-date" style="font-weight:600;">—</div></div>
+        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Time</div><div id="ld-call-time" style="font-weight:600;">—</div></div>
+      </div>
+      <div id="ld-call-empty" style="font-size:12.5px;color:var(--muted-foreground);">No call scheduled yet.</div>
+    </div>
     <div id="ld-loan-details" style="display:none;background:var(--secondary);border-radius:14px;padding:14px 16px;margin-bottom:20px;">
       <div class="fl" style="margin-bottom:8px;">Loan Details</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:13px;">
@@ -1342,6 +1353,28 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       <div style="display:flex;gap:10px;">
         <button class="btn-ghost" onclick="closeSchedModal()" style="flex:0 0 auto;">Cancel</button>
         <button class="btn-submit" id="sv-save-btn" onclick="saveScheduledVisit()" style="flex:1;">Schedule Visit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHEDULE CALL MODAL ── -->
+<div class="overlay" id="call-sched-overlay" onclick="if(event.target===this)closeCallSchedModal()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="call-sched-modal-title">Schedule Call</div>
+    <div class="form-err" id="call-sched-err" style="opacity:0;"></div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div><label class="fl">Client Name *</label><input class="fi" id="sc-client" placeholder="Client name"/></div>
+        <div><label class="fl">Client Phone</label><input class="fi" id="sc-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
+      </div>
+      <div><label class="fl">Date & Time *</label><input class="fi" id="sc-datetime" type="datetime-local"/></div>
+      <div><label class="fl">Notes</label><textarea class="ftextarea" id="sc-notes" placeholder="What's this call about?" style="min-height:70px;"></textarea></div>
+      <div style="font-size:11.5px;color:var(--muted-foreground);">You'll get a push notification 15 minutes before the call.</div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-ghost" onclick="closeCallSchedModal()" style="flex:0 0 auto;">Cancel</button>
+        <button class="btn-submit" id="sc-save-btn" onclick="saveScheduledCall()" style="flex:1;">Schedule Call</button>
       </div>
     </div>
   </div>
@@ -2088,7 +2121,7 @@ window.closeBlogEditor = function() {
 // ════════════════════════════════════════════════
 // CRM — LEADS
 // ════════════════════════════════════════════════
-let currentLeadStatus = 'new', currentLeadId = null, currentLeadData = null, currentLeadVisit = null, editLeadId = null;
+let currentLeadStatus = 'new', currentLeadId = null, currentLeadData = null, currentLeadVisit = null, currentLeadCall = null, editLeadId = null;
 
 const STATUS_LABELS = {
   new:'🔵 New', contacted:'🟡 Contacted', visit_scheduled:'🟠 Visit Sched.',
@@ -2891,6 +2924,26 @@ window.openLeadDetail = async function(id) {
     btnEl.textContent = '📅 Schedule Visit';
   }
 
+  // Scheduled call (most recent, upcoming preferred over past)
+  const { data: calls } = await sb.from('scheduled_calls').select('*').eq('lead_id', id).order('call_datetime',{ascending:false});
+  const call = (calls && calls.find(c => c.status === 'scheduled')) || (calls && calls[0]) || null;
+  currentLeadCall = call;
+  const callInfoEl = document.getElementById('ld-call-info');
+  const callEmptyEl = document.getElementById('ld-call-empty');
+  const callBtnEl = document.getElementById('ld-call-btn');
+  if (call && call.status === 'scheduled') {
+    callInfoEl.style.display = 'flex';
+    callEmptyEl.style.display = 'none';
+    const cd = new Date(call.call_datetime);
+    document.getElementById('ld-call-date').textContent = cd.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    document.getElementById('ld-call-time').textContent = cd.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});
+    callBtnEl.textContent = '📞 Reschedule';
+  } else {
+    callInfoEl.style.display = 'none';
+    callEmptyEl.style.display = 'block';
+    callBtnEl.textContent = '📞 Schedule Call';
+  }
+
   // Status pills
   document.getElementById('ld-status-pills').onclick = function(e){ var b=e.target.closest('.ld-status-pill'); if(b) updateLeadStatus(b.dataset.lid, b.dataset.st); };
   document.getElementById('ld-status-pills').innerHTML = Object.keys(STATUS_LABELS).map(function(s){
@@ -2982,6 +3035,8 @@ window.closeLeadDetail = function() { document.getElementById('lead-detail-overl
 // SITE VISIT SCHEDULER
 // ════════════════════════════════════════════════
 let editSchedId = null;
+let editCallSchedId = null;
+let pendingCallLeadId = null;
 
 window.loadScheduledVisits = async function() {
   const filter = document.getElementById('sched-filter').value;
@@ -3151,6 +3206,77 @@ window.cancelVisit = async function(id) {
   toast('Visit cancelled.'); loadScheduledVisits();
 };
 window.closeSchedModal = function() { document.getElementById('sched-overlay').classList.remove('on'); document.body.style.overflow=''; };
+
+// Opened from a lead's detail view — pre-fills from the lead, and from the
+// existing call if one's already scheduled (reschedule).
+window.openScheduleCallFromLead = function() {
+  const l = currentLeadData;
+  const c = currentLeadCall && currentLeadCall.status === 'scheduled' ? currentLeadCall : null;
+  editCallSchedId = c ? c.id : null;
+  pendingCallLeadId = currentLeadId;
+  document.getElementById('sc-client').value = (c && c.client_name) || (l && l.name) || '';
+  document.getElementById('sc-phone').value = (c && c.client_phone) || (l && l.phone) || '';
+  document.getElementById('sc-notes').value = (c && c.notes) || '';
+  const dtInput = document.getElementById('sc-datetime');
+  const now = new Date();
+  dtInput.min = new Date(now.getTime() - now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  if (c && c.call_datetime) {
+    const cd = new Date(c.call_datetime);
+    dtInput.value = new Date(cd.getTime() - cd.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  } else {
+    const inHour = new Date(now.getTime() + 60*60000);
+    dtInput.value = new Date(inHour.getTime() - inHour.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  }
+  document.getElementById('call-sched-modal-title').textContent = c ? 'Reschedule Call' : 'Schedule Call';
+  document.getElementById('sc-save-btn').textContent = c ? 'Save New Date & Time' : 'Schedule Call';
+  document.getElementById('call-sched-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+window.saveScheduledCall = async function() {
+  const client = document.getElementById('sc-client').value.trim();
+  const dt = document.getElementById('sc-datetime').value;
+  if (!client||!dt) {
+    const e=document.getElementById('call-sched-err');e.textContent='Client name and date & time are required.';e.style.opacity='1';
+    setTimeout(function(){e.style.opacity='0';},3000); return;
+  }
+  const btn = document.getElementById('sc-save-btn');
+  const origBtnText = btn.textContent;
+  btn.textContent='Saving…'; btn.disabled=true;
+  const meta = currentUser.user_metadata;
+  const payload = {
+    client_name: client,
+    client_phone: document.getElementById('sc-phone').value.trim()||null,
+    call_datetime: new Date(dt).toISOString(),
+    notes: document.getElementById('sc-notes').value.trim()||null,
+    lead_id: pendingCallLeadId || null,
+    status: 'scheduled',
+    reminder_sent: false,
+    updated_at: new Date().toISOString(),
+  };
+  try {
+    if (editCallSchedId) {
+      const {error} = await sb.from('scheduled_calls').update(payload).eq('id',editCallSchedId);
+      if(error) throw error;
+      toast('✓ Call rescheduled!');
+    } else {
+      payload.created_by = currentUser.id;
+      payload.created_by_name = meta.full_name||meta.name||currentUser.email;
+      payload.assigned_to = currentUser.id;
+      payload.assigned_name = meta.full_name||meta.name||currentUser.email;
+      payload.created_at = new Date().toISOString();
+      const {error} = await sb.from('scheduled_calls').insert(payload);
+      if(error) throw error;
+      toast('✓ Call scheduled!');
+    }
+    closeCallSchedModal();
+    if (pendingCallLeadId && document.getElementById('lead-detail-overlay').classList.contains('on')) openLeadDetail(pendingCallLeadId);
+  } catch(e) {
+    const el=document.getElementById('call-sched-err');el.textContent='Error: '+(e.message||'Could not save.');el.style.opacity='1';
+  } finally { btn.textContent = origBtnText; btn.disabled=false; }
+};
+
+window.closeCallSchedModal = function() { document.getElementById('call-sched-overlay').classList.remove('on'); document.body.style.overflow=''; };
 
 // ════════════════════════════════════════════════
 // TEAM PERFORMANCE (admin only)
