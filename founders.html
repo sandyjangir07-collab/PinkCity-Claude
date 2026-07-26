@@ -22,7 +22,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Inter:wght@400;500;600;700&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
 /* ── DESIGN TOKENS (from Lovable styles.css) ── */
 :root {
@@ -563,13 +563,15 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .fh-p-card h3{position:relative;z-index:1;font-family:var(--font-display);font-weight:400;font-size:22px;letter-spacing:-0.012em;color:var(--foreground);margin-bottom:15px;}
 .fh-p-card p{position:relative;z-index:1;font-size:14.5px;line-height:1.75;color:var(--muted-foreground);}
 
-/* Statement */
-.fh-statement{position:relative;background:linear-gradient(165deg,oklch(0.18 0.012 30) 0%,oklch(0.13 0.009 20) 100%);padding:260px 24px;text-align:center;overflow:hidden;}
-.fh-statement-inner{position:relative;z-index:1;max-width:920px;margin:0 auto;}
-.fh-statement h2{font-family:var(--font-display);font-weight:400;font-size:clamp(30px,5.6vw,64px);line-height:1.18;letter-spacing:-0.02em;color:white;margin-bottom:40px;}
-.fh-statement h2 em{font-style:italic;color:var(--gold);}
-.fh-statement-sub{font-size:clamp(16px,2vw,20px);color:rgba(255,255,255,0.55);max-width:560px;margin:0 auto;line-height:1.7;font-weight:400;letter-spacing:-0.005em;}
-.fh-statement-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:760px;height:760px;background:radial-gradient(circle,color-mix(in oklab,var(--primary) 22%,transparent) 0%,transparent 70%);filter:blur(110px);pointer-events:none;}
+/* Ethos */
+.fh-ethos{position:relative;background:linear-gradient(165deg,oklch(0.18 0.012 30) 0%,oklch(0.13 0.009 20) 100%);padding:100px 24px;text-align:center;overflow:hidden;}
+.fh-ethos-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:700px;background:radial-gradient(circle,color-mix(in oklab,var(--primary) 20%,transparent) 0%,transparent 70%);filter:blur(100px);pointer-events:none;}
+.fh-ethos-inner{position:relative;z-index:1;max-width:600px;margin:0 auto;}
+.fh-ethos-verse{font-family:'Tiro Devanagari Hindi',serif;font-size:clamp(21px,3.2vw,28px);line-height:1.7;color:white;margin:0 0 14px;letter-spacing:0.01em;}
+.fh-ethos-meaning{font-family:'Tiro Devanagari Hindi',serif;font-size:clamp(14px,1.8vw,16.5px);line-height:1.8;color:rgba(255,255,255,0.6);max-width:480px;margin:0 auto;}
+.fh-ethos-divider{width:32px;height:1px;background:color-mix(in oklab,var(--gold) 45%,transparent);margin:32px auto;}
+.fh-ethos-attr{font-family:'Tiro Devanagari Hindi',serif;font-size:12px;letter-spacing:0.02em;color:rgba(255,255,255,0.4);margin-top:20px;}
+@media(min-width:768px){ .fh-ethos{ padding:160px 24px; } }
 
 /* Closing */
 .fh-closing{max-width:900px;margin:0 auto;padding:230px 24px 100px;text-align:center;}
@@ -600,6 +602,9 @@ body{animation:fh-page-in 0.9s cubic-bezier(0.19,1,0.22,1) both;}
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="PinkCity"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/logo.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-72.png"/>
   <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
   <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png"/>
   <link rel="apple-touch-icon" sizes="144x144" href="/icon-144.png"/>
@@ -702,6 +707,18 @@ body{animation:fh-page-in 0.9s cubic-bezier(0.19,1,0.22,1) both;}
   <p class="fh-reveal">PinkCity Properties was built on three simple principles.</p>
 </section>
 
+<section class="fh-ethos" id="ethos" aria-label="Our ethos">
+  <div class="fh-ethos-glow" aria-hidden="true"></div>
+  <div class="fh-ethos-inner">
+    <p class="fh-ethos-verse fh-reveal">रघुकुल रीत सदा चली आई।<br>प्राण जाई पर वचन न जाई॥</p>
+    <p class="fh-ethos-meaning fh-reveal" style="transition-delay:0.08s;">भावार्थ : रघुकुल की यह परंपरा सदा से चली आई है — प्राण भले चले जाएं, पर दिया हुआ वचन कभी नहीं टूटना चाहिए।</p>
+    <div class="fh-ethos-divider fh-reveal" style="transition-delay:0.16s;" aria-hidden="true"></div>
+    <p class="fh-ethos-verse fh-reveal" style="transition-delay:0.24s;">पर हित सरिस धर्म नहिं भाई।<br>पर पीड़ा सम नहिं अधमाई॥</p>
+    <p class="fh-ethos-meaning fh-reveal" style="transition-delay:0.32s;">भावार्थ : हे भाई! दूसरों की भलाई के समान कोई धर्म नहीं है, और दूसरों को दुःख पहुँचाने के समान कोई नीचता नहीं है।</p>
+    <p class="fh-ethos-attr fh-reveal" style="transition-delay:0.4s;">— रामचरितमानस, तुलसीदास</p>
+  </div>
+</section>
+
 <section class="fh-principles-wrap" aria-label="Our principles">
   <div class="fh-principles-head fh-reveal">
     <div class="fh-eyebrow" style="margin-bottom:16px;">What We Stand For</div>
@@ -725,14 +742,6 @@ body{animation:fh-page-in 0.9s cubic-bezier(0.19,1,0.22,1) both;}
       <h3>Long-term value over quick sales</h3>
       <p>A great investment isn't just about today — it's about the future it creates.</p>
     </div>
-  </div>
-</section>
-
-<section class="fh-statement" id="fh-statement-section">
-  <div class="fh-statement-glow" id="fh-statement-glow" aria-hidden="true"></div>
-  <div class="fh-statement-inner">
-    <h2 class="fh-reveal">We don't just <em>sell property.</em></h2>
-    <p class="fh-statement-sub fh-reveal" style="transition-delay:0.15s;">We help people make one of life's biggest decisions with confidence.</p>
   </div>
 </section>
 
@@ -791,18 +800,6 @@ body{animation:fh-page-in 0.9s cubic-bezier(0.19,1,0.22,1) both;}
   document.querySelectorAll('.fh-reveal').forEach(el=>fhObs.observe(el));
 
   if (reduceMotion) return;
-
-  // Subtle parallax on the statement section's ambient glow
-  const statementSection = document.getElementById('fh-statement-section');
-  const glow = document.getElementById('fh-statement-glow');
-  if (statementSection && glow) {
-    window.addEventListener('scroll', () => {
-      const rect = statementSection.getBoundingClientRect();
-      const progress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-      const offset = (progress - 0.5) * 60;
-      glow.style.transform = `translate(-50%, calc(-50% + ${offset}px))`;
-    }, {passive:true});
-  }
 
   // Magnetic hover for founder portraits
   document.querySelectorAll('[data-magnetic]').forEach(el=>{
