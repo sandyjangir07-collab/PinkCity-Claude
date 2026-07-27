@@ -213,7 +213,7 @@ h1,h2,h3,h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 /* Stats */
 .stats-grid { margin-top:56px; display:grid; grid-template-columns:1fr 1fr; gap:32px; border-top:1px solid var(--border); padding-top:40px; opacity:0.6; }
 @media(min-width:640px){ .stats-grid { grid-template-columns:repeat(4,1fr); } }
-.stat-num { font-family:var(--font-display); font-size:26px; letter-spacing:-0.02em; color:var(--primary); }
+.stat-num { font-family:var(--font-sans); font-size:26px; letter-spacing:-0.02em; color:var(--primary); }
 @media(min-width:640px){ .stat-num { font-size:30px; } }
 .stat-lab { font-size:12px; color:var(--muted-foreground); margin-top:4px; }
 
@@ -247,7 +247,7 @@ section { padding:112px 0; }
 .prop-location-name { font-family:var(--font-display); font-size:18px; color:white; margin-top:4px; line-height:1.2; }
 .prop-body { padding:24px; }
 .prop-price-row { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
-.prop-price { font-family:var(--font-display); font-size:26px; letter-spacing:-0.02em; }
+.prop-price { font-family:var(--font-sans); font-size:26px; letter-spacing:-0.02em; }
 .prop-area { font-size:11px; color:var(--muted-foreground); letter-spacing:0.04em; }
 .prop-ctas { display:flex; gap:8px; margin-top:20px; }
 .prop-cta-wa { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:11px; font-weight:500; border-radius:999px; background:var(--foreground); color:var(--background); padding:10px 12px; text-decoration:none; transition:all 0.3s; }
@@ -1275,7 +1275,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;">
       <div>
         <div class="modal-title" id="ld-name" style="margin-bottom:4px;font-size:24px;"></div>
-        <div id="ld-meta" style="font-size:13px;color:var(--muted-foreground);"></div>
+        <div id="ld-meta" style="font-size:13px;color:var(--muted-foreground);display:flex;align-items:center;gap:10px;flex-wrap:wrap;"></div>
       </div>
       <div id="ld-status-badge" class="badge"></div>
     </div>
@@ -2890,7 +2890,19 @@ window.openLeadDetail = async function(id) {
   if (!l) return;
   currentLeadData = l;
   document.getElementById('ld-name').innerHTML = l.name + ' <span style="font-size:14px;font-weight:500;color:var(--primary);">PC'+l.lead_number+'</span>';
-  document.getElementById('ld-meta').textContent = [l.phone, l.email, l.budget, l.preferred_location].filter(Boolean).join(' · ');
+  {
+    const metaText = [l.email, l.budget, l.preferred_location].filter(Boolean).join(' · ');
+    const digits = (l.phone||'').replace(/\D/g,'');
+    const waNum = digits.length===10 ? '91'+digits : digits;
+    let metaHtml = '';
+    if (l.phone) {
+      metaHtml += '<a class="lead-icon-btn" href="tel:'+l.phone+'" title="Call" style="width:26px;height:26px;font-size:13px;">📞</a>';
+      metaHtml += '<a class="lead-icon-btn" href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp" style="width:26px;height:26px;font-size:13px;">💬</a>';
+      metaHtml += '<span>'+l.phone+'</span>';
+    }
+    if (metaText) metaHtml += (l.phone ? ' · ' : '') + metaText;
+    document.getElementById('ld-meta').innerHTML = metaHtml;
+  }
   const stBadge = document.getElementById('ld-status-badge');
   stBadge.className = 'badge st-'+(l.status||'new');
   stBadge.textContent = STATUS_LABELS[l.status]||l.status;
