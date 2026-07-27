@@ -510,20 +510,34 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 /* Consultation popup */
 .pc-popup-overlay { display:none; position:fixed; inset:0; background:rgba(20,16,18,0.55); backdrop-filter:blur(10px); z-index:400; align-items:center; justify-content:center; padding:20px; }
 .pc-popup-overlay.on { display:flex; }
-.pc-popup-card { position:relative; background:color-mix(in oklab,var(--card) 96%,transparent); backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.6); border-radius:32px; padding:44px 32px 32px; width:100%; max-width:440px; max-height:92vh; overflow-y:auto; box-shadow:0 30px 80px -20px rgba(20,16,18,0.35); animation:pc-popup-in 0.5s cubic-bezier(0.19,1,0.22,1); text-align:center; }
-@keyframes pc-popup-in { from{ transform:translateY(24px) scale(0.97); opacity:0; } to{ transform:none; opacity:1; } }
+.pc-popup-card { position:relative; background:color-mix(in oklab,var(--card) 97%,transparent); backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.65); border-radius:28px; padding:48px 34px 34px; width:100%; max-width:436px; max-height:92vh; overflow-y:auto; box-shadow:0 30px 80px -20px rgba(20,16,18,0.32); animation:pc-popup-in 0.55s cubic-bezier(0.19,1,0.22,1); text-align:center; }
+@keyframes pc-popup-in { from{ transform:translateY(20px) scale(0.97); opacity:0; } to{ transform:none; opacity:1; } }
 @media(prefers-reduced-motion:reduce){ .pc-popup-card{ animation:none; } }
-.pc-popup-close { position:absolute; top:18px; right:18px; width:32px; height:32px; border-radius:50%; border:none; background:var(--secondary); color:var(--muted-foreground); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; }
+.pc-popup-close { position:absolute; top:18px; right:18px; width:30px; height:30px; border-radius:50%; border:none; background:var(--secondary); color:var(--muted-foreground); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; }
 .pc-popup-close:hover { background:var(--border); color:var(--foreground); }
-.pc-popup-logo-wrap { position:relative; width:76px; height:76px; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; }
-.pc-popup-logo-wrap::before { content:''; position:absolute; inset:-22px; border-radius:50%; background:radial-gradient(circle,color-mix(in oklab,var(--primary) 18%,transparent) 0%,transparent 70%); filter:blur(16px); }
-.pc-popup-logo { position:relative; z-index:1; width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#7d1740); display:flex; align-items:center; justify-content:center; padding:7px; box-shadow:0 8px 22px -6px rgba(157,29,76,0.5); }
+.pc-popup-logo-wrap { position:relative; width:64px; height:64px; margin:0 auto 24px; display:flex; align-items:center; justify-content:center; }
+.pc-popup-logo-wrap::before { content:''; position:absolute; inset:-20px; border-radius:50%; background:radial-gradient(circle,color-mix(in oklab,var(--primary) 16%,transparent) 0%,transparent 70%); filter:blur(16px); }
+.pc-popup-logo { position:relative; z-index:1; width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#7d1740); display:flex; align-items:center; justify-content:center; padding:6px; box-shadow:0 8px 20px -6px rgba(157,29,76,0.45); }
+@media(prefers-reduced-motion:no-preference){ .pc-popup-logo{ animation:pc-popup-float 4s ease-in-out infinite; } }
+@keyframes pc-popup-float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
 .pc-popup-logo img { width:100%; height:100%; object-fit:contain; }
-.pc-popup-eyebrow { font-size:10.5px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--primary); margin-bottom:10px; }
-.pc-popup-title { font-family:var(--font-display); font-weight:400; font-size:26px; line-height:1.2; letter-spacing:-0.015em; color:var(--foreground); margin-bottom:12px; }
-.pc-popup-sub { font-size:13.5px; line-height:1.65; color:var(--muted-foreground); max-width:340px; margin:0 auto 28px; }
-.pc-popup-form { display:flex; flex-direction:column; gap:14px; text-align:left; }
-.pc-popup-trust { text-align:center; font-size:11.5px; color:var(--muted-foreground); margin-top:4px; }
+.pc-popup-title { font-family:var(--font-display); font-weight:400; font-size:29px; line-height:1.18; letter-spacing:-0.015em; color:var(--foreground); margin-bottom:14px; }
+.pc-popup-subhead { font-family:var(--font-sans); font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--primary); margin-bottom:18px; }
+.pc-popup-sub { font-family:var(--font-sans); font-size:14px; line-height:1.7; color:#6B6B6B; max-width:320px; margin:0 auto 34px; }
+.pc-popup-form { display:flex; flex-direction:column; gap:18px; text-align:left; }
+.pc-popup-form .fi, .pc-popup-form .fsel { background:#FFFFFE; border:1px solid #E9E5DF; border-radius:17px; padding:16px 18px; font-size:15px; transition:border-color 0.25s cubic-bezier(0.22,1,0.36,1),box-shadow 0.25s cubic-bezier(0.22,1,0.36,1); }
+.pc-popup-form .fi:focus, .pc-popup-form .fsel:focus { border-color:var(--primary); box-shadow:0 0 0 4px color-mix(in oklab,var(--primary) 10%,transparent); }
+.pc-popup-form .form-row { gap:14px; }
+.pc-popup-form .fl { font-size:10px; letter-spacing:0.09em; margin-bottom:8px; }
+#pc-popup-btn { height:56px; border-radius:18px; background:linear-gradient(135deg,var(--primary),#7d1740); font-size:15.5px; font-weight:600; letter-spacing:0.01em; box-shadow:0 10px 26px -8px rgba(157,29,76,0.45); transition:transform 0.25s cubic-bezier(0.22,1,0.36,1),box-shadow 0.25s cubic-bezier(0.22,1,0.36,1); margin-top:8px; }
+#pc-popup-btn:hover { transform:translateY(-1px); box-shadow:0 14px 32px -8px rgba(157,29,76,0.5); }
+#pc-popup-btn:active { transform:translateY(0) scale(0.98); }
+.pc-popup-trust { text-align:center; font-size:11.5px; color:#6B6B6B; margin-top:6px; letter-spacing:0.01em; }
+@media(max-width:400px){
+  .pc-popup-card { padding:40px 24px 28px; }
+  .pc-popup-title { font-size:25px; }
+  .pc-popup-subhead { font-size:10px; white-space:nowrap; }
+}
 .mopt-sub { font-size:10.5px; font-weight:400; color:var(--muted-foreground); margin-bottom:2px; letter-spacing:0.5px; text-transform:uppercase; }
 
 @media(prefers-reduced-motion:reduce){
@@ -1866,9 +1880,9 @@ footer::before {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
     <div class="pc-popup-logo-wrap"><div class="pc-popup-logo"><img src="/logo.png" alt="PinkCity"/></div></div>
-    <div class="pc-popup-eyebrow">Free Consultation</div>
-    <h3 class="pc-popup-title">Talk to an Expert<br>PinkCity Advisor.</h3>
-    <p class="pc-popup-sub">Tell us what you're looking for — a senior advisor will respond directly on WhatsApp with verified options that fit.</p>
+    <h3 class="pc-popup-title">Find Your Perfect<br>Property</h3>
+    <div class="pc-popup-subhead">Expert Guidance &nbsp;·&nbsp; Verified Listings</div>
+    <p class="pc-popup-sub">Tell us what you're looking for. We'll send verified property recommendations directly on WhatsApp.</p>
     <div class="pc-popup-form">
       <div><label class="fl">Your Name</label><input class="fi" id="pc-name" type="text" placeholder="Rahul Verma"/></div>
       <div><label class="fl">Phone</label><input class="fi" id="pc-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
@@ -1876,8 +1890,8 @@ footer::before {
         <div><label class="fl">Budget</label><select class="fsel" id="pc-budget"><option>Under ₹50L</option><option>₹50L – 1 Cr</option><option>₹1 Cr – 2 Cr</option><option>Above ₹2 Cr</option></select></div>
         <div><label class="fl">Preferred Location</label><input class="fi" id="pc-loc" type="text" placeholder="Jagatpura, Mansarovar…"/></div>
       </div>
-      <button class="btn-submit" id="pc-popup-btn" onclick="submitPcPopup()">Send via WhatsApp →</button>
-      <div class="pc-popup-trust">✓ No spam, ever &nbsp;·&nbsp; ✓ Responds within hours</div>
+      <button class="btn-submit" id="pc-popup-btn" onclick="submitPcPopup()">Get Recommendations →</button>
+      <div class="pc-popup-trust">✓ Verified Listings &nbsp;&nbsp;✓ No Spam &nbsp;&nbsp;✓ Personal Advisor</div>
     </div>
   </div>
 </div>
