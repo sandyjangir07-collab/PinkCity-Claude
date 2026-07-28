@@ -257,6 +257,9 @@ section { padding:112px 0; }
 .section-header h2 { margin-top:20px; font-size:36px; line-height:1.02; letter-spacing:-0.03em; }
 @media(min-width:640px){ .section-header h2 { font-size:48px; } }
 @media(min-width:1024px){ .section-header h2 { font-size:56px; } }
+#properties-h2 { font-size:clamp(26px,7.8vw,36px); white-space:nowrap; }
+#properties-h2 em { white-space:normal; display:inline-block; }
+@media(min-width:640px){ #properties-h2 { font-size:48px; white-space:normal; } }
 .section-header p { margin-top:20px; font-size:16px; line-height:1.7; color:var(--muted-foreground); max-width:520px; }
 
 /* ── PROPERTIES GRID ── */
@@ -1642,7 +1645,7 @@ footer::before {
   <div class="container">
     <div class="section-header reveal">
       <div class="eyebrow">Featured Properties</div>
-      <h2>Hand-picked. Verified.<br><em style="font-style:italic;font-weight:300;color:color-mix(in oklab,var(--foreground) 70%,transparent)">Move-in ready.</em></h2>
+      <h2 id="properties-h2">Discover Verified Plots.<br><em style="font-style:italic;font-weight:300;color:color-mix(in oklab,var(--foreground) 70%,transparent)">Where smart investments begin.</em></h2>
       <div id="prop-count" style="font-size:13px;color:var(--primary);font-weight:600;margin-top:10px;"></div>
       <button id="saved-toggle-btn" onclick="toggleSavedView()" style="display:none;align-items:center;gap:7px;background:white;border:1px solid var(--border);border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;color:var(--foreground);cursor:pointer;margin-top:16px;box-shadow:0 2px 8px rgba(20,16,18,0.06);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="#e0356b" stroke="#e0356b" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
