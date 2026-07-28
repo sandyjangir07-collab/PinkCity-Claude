@@ -658,8 +658,9 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .toolbar-btn{padding:5px 10px;border-radius:8px;border:none;background:white;font-size:13px;font-weight:500;cursor:pointer;color:var(--foreground);font-family:var(--font-sans);transition:all 0.15s;}
 .toolbar-btn:hover{background:var(--primary-soft);color:var(--primary);}
 .status-pills{display:flex;gap:8px;}
-.status-pill{padding:8px 16px;border-radius:999px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--foreground);font-family:var(--font-sans);transition:all 0.2s;}
+.status-pill{padding:8px 16px;border-radius:999px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--foreground);font-family:var(--font-sans);transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
 .status-pill.active{background:var(--primary);color:white;border-color:var(--primary);}
+.status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 /* Blog post cards in dashboard */
 .blog-post-card{background:white;border:1px solid var(--border);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px;transition:all 0.2s;}
 .blog-post-card:hover{box-shadow:var(--shadow-soft);transform:translateY(-1px);}
@@ -1281,13 +1282,16 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     </div>
     <div id="ld-visit-details" style="background:var(--primary-soft);border-radius:14px;padding:14px 16px;margin-bottom:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div class="fl" style="margin-bottom:0;">Site Visit</div>
-        <button class="btn-ghost" id="ld-visit-btn" onclick="openScheduleVisitFromLead()" style="padding:5px 12px;font-size:12px;">📅 Schedule Visit</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:26px;height:26px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--primary);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+          <div class="fl" style="margin-bottom:0;">Site Visit</div>
+        </div>
+        <button class="btn-ghost" id="ld-visit-btn" onclick="openScheduleVisitFromLead()" style="padding:5px 12px;font-size:12px;display:inline-flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span id="ld-visit-btn-label">Schedule Visit</span></button>
       </div>
       <div id="ld-visit-info" style="display:none;gap:20px;flex-wrap:wrap;font-size:13px;">
-        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Date</div><div id="ld-visit-date" style="font-weight:600;">—</div></div>
-        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Time</div><div id="ld-visit-time" style="font-weight:600;">—</div></div>
-        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Property</div><div id="ld-visit-property" style="font-weight:600;">—</div></div>
+        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Date</div><div id="ld-visit-date" style="font-weight:700;color:var(--primary);">—</div></div>
+        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Time</div><div id="ld-visit-time" style="font-weight:700;color:var(--primary);">—</div></div>
+        <div><div style="color:var(--muted-foreground);font-size:11px;margin-bottom:2px;">Property</div><div id="ld-visit-property" style="font-weight:700;color:var(--primary);">—</div></div>
       </div>
       <div id="ld-visit-empty" style="font-size:12.5px;color:var(--muted-foreground);">No visit scheduled yet.</div>
     </div>
@@ -1314,20 +1318,20 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <!-- Status updater -->
     <div style="margin-bottom:20px;">
       <div class="fl" style="margin-bottom:8px;">Update Status</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="ld-status-pills"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="ld-status-pills"></div>
     </div>
     <!-- Add note -->
     <div style="margin-bottom:20px;">
       <div class="fl" style="margin-bottom:8px;">Add Note</div>
       <textarea class="ftextarea" id="ld-note-input" placeholder="What happened? Next steps?" style="min-height:72px;margin-bottom:8px;"></textarea>
-      <button class="btn-primary" onclick="addLeadNote()" style="border:none;cursor:pointer;padding:10px 20px;font-size:13px;">Save note</button>
+      <button class="btn-primary" onclick="addLeadNote()" style="border:none;cursor:pointer;padding:10px 20px;font-size:13px;display:inline-flex;align-items:center;gap:7px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Save note</button>
     </div>
     <!-- Timeline -->
     <div class="fl" style="margin-bottom:10px;">Activity Timeline</div>
     <div id="ld-timeline" style="display:flex;flex-direction:column;gap:10px;max-height:260px;overflow-y:auto;"></div>
     <div style="display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
-      <button class="btn-ghost" onclick="openEditLead(currentLeadId)" style="flex:0 0 auto;">✎ Edit</button>
-      <button class="btn-del" onclick="deleteLead(currentLeadId)">Delete</button>
+      <button class="btn-ghost" onclick="openEditLead(currentLeadId)" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>Edit</button>
+      <button class="btn-del" onclick="deleteLead(currentLeadId)" style="display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Delete</button>
       <button class="btn-ghost" onclick="closeLeadDetail()" style="margin-left:auto;flex:0 0 auto;">Close</button>
     </div>
   </div>
@@ -2127,6 +2131,14 @@ const STATUS_LABELS = {
   new:'🔵 New', contacted:'🟡 Contacted', visit_scheduled:'🟠 Visit Sched.',
   visit_done:'🟣 Visit Done', negotiating:'🔴 Negotiating', closed:'🟢 Closed', lost:'⚫ Lost'
 };
+const STATUS_TEXT = {
+  new:'New', contacted:'Contacted', visit_scheduled:'Visit Sched.',
+  visit_done:'Visit Done', negotiating:'Negotiating', closed:'Closed', lost:'Lost'
+};
+const STATUS_DOT = {
+  new:'#3b82f6', contacted:'#eab308', visit_scheduled:'#f97316',
+  visit_done:'#a855f7', negotiating:'#ef4444', closed:'#22c55e', lost:'#1a1414'
+};
 const SOURCE_LABELS = {
   whatsapp:'WhatsApp', visit_form:'Visit Form', consultation:'Consultation',
   manual:'Manual', referral:'Referral', loan_calculator:'Loan Offer'
@@ -2891,17 +2903,15 @@ window.openLeadDetail = async function(id) {
   currentLeadData = l;
   document.getElementById('ld-name').innerHTML = l.name + ' <span style="font-size:14px;font-weight:500;color:var(--primary);">PC'+l.lead_number+'</span>';
   {
-    const metaText = [l.email, l.budget, l.preferred_location].filter(Boolean).join(' · ');
     const digits = (l.phone||'').replace(/\D/g,'');
-    const waNum = digits.length===10 ? '91'+digits : digits;
-    let metaHtml = '';
-    if (l.phone) {
-      metaHtml += '<a class="lead-icon-btn" href="tel:'+l.phone+'" title="Call" style="width:26px;height:26px;font-size:13px;">📞</a>';
-      metaHtml += '<a class="lead-icon-btn" href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp" style="width:26px;height:26px;font-size:13px;">💬</a>';
-      metaHtml += '<span>'+l.phone+'</span>';
-    }
-    if (metaText) metaHtml += (l.phone ? ' · ' : '') + metaText;
-    document.getElementById('ld-meta').innerHTML = metaHtml;
+    const ICON_PHONE = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+    const ICON_RUPEE = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M6 3h12M6 8h12M6 3c3 0 6 1.2 6 5s-3 5-6 5m0 0h12M6 13l8 8"/></svg>';
+    const ICON_PIN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    let parts = [];
+    if (l.phone) parts.push('<a href="tel:'+l.phone+'" style="display:inline-flex;align-items:center;gap:4px;color:inherit;text-decoration:none;">'+ICON_PHONE+l.phone+'</a>');
+    if (l.budget) parts.push('<span style="display:inline-flex;align-items:center;gap:4px;">'+ICON_RUPEE+l.budget+'</span>');
+    if (l.preferred_location) parts.push('<span style="display:inline-flex;align-items:center;gap:4px;">'+ICON_PIN+l.preferred_location+'</span>');
+    document.getElementById('ld-meta').innerHTML = parts.join('<span style="opacity:0.4;">&middot;</span>');
   }
   const stBadge = document.getElementById('ld-status-badge');
   stBadge.className = 'badge st-'+(l.status||'new');
@@ -2929,11 +2939,11 @@ window.openLeadDetail = async function(id) {
     document.getElementById('ld-visit-date').textContent = new Date(visit.visit_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
     document.getElementById('ld-visit-time').textContent = visit.visit_time || '—';
     document.getElementById('ld-visit-property').textContent = visit.listing_title || '—';
-    btnEl.textContent = '📅 Reschedule';
+    document.getElementById('ld-visit-btn-label').textContent = 'Reschedule';
   } else {
     infoEl.style.display = 'none';
     emptyEl.style.display = 'block';
-    btnEl.textContent = '📅 Schedule Visit';
+    document.getElementById('ld-visit-btn-label').textContent = 'Schedule Visit';
   }
 
   // Scheduled call (most recent, upcoming preferred over past)
@@ -2958,8 +2968,8 @@ window.openLeadDetail = async function(id) {
 
   // Status pills
   document.getElementById('ld-status-pills').onclick = function(e){ var b=e.target.closest('.ld-status-pill'); if(b) updateLeadStatus(b.dataset.lid, b.dataset.st); };
-  document.getElementById('ld-status-pills').innerHTML = Object.keys(STATUS_LABELS).map(function(s){
-    return '<button class="status-pill'+(l.status===s?' active':'')+' ld-status-pill" data-lid="'+id+'" data-st="'+s+'">'+(STATUS_LABELS[s])+'</button>';
+  document.getElementById('ld-status-pills').innerHTML = Object.keys(STATUS_TEXT).map(function(s){
+    return '<button class="status-pill'+(l.status===s?' active':'')+' ld-status-pill" data-lid="'+id+'" data-st="'+s+'"><span class="status-dot" style="background:'+(l.status===s?'white':STATUS_DOT[s])+';"></span>'+(STATUS_TEXT[s])+'</button>';
   }).join('');
 
   // Load timeline
