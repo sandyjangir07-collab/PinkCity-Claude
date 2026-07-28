@@ -3,7 +3,7 @@
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>PinkCity — Dashboard</title>
 <meta name="robots" content="noindex, nofollow"/>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
 /* ── DESIGN TOKENS (from Lovable styles.css) ── */
@@ -26,8 +26,9 @@
   --shadow-soft: 0 1px 2px rgba(20,16,18,0.025), 0 4px 14px -6px rgba(20,16,18,0.06);
   --shadow-elev: 0 1px 2px rgba(20,16,18,0.03), 0 18px 50px -20px rgba(157,29,76,0.22);
   --shadow-card: 0 1px 2px rgba(20,16,18,0.03), 0 10px 30px -14px rgba(20,16,18,0.10);
-  --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-numeric: "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
@@ -546,7 +547,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:32px;}
 @media(min-width:640px){.stat-grid{grid-template-columns:repeat(4,1fr);}}
 .stat-card{background:white;border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(20,16,18,0.025),0 4px 14px -6px rgba(20,16,18,0.06);}
-.stat-n{font-family:var(--font-display);font-size:32px;color:var(--primary);letter-spacing:-0.02em;line-height:1;}
+.stat-n{font-family:var(--font-numeric);font-size:32px;color:var(--primary);letter-spacing:-0.02em;line-height:1;}
 .stat-l{font-size:12px;color:var(--muted-foreground);margin-top:5px;}
 /* ── LISTING CARDS ── */
 .listing-list{display:flex;flex-direction:column;gap:14px;}
@@ -716,7 +717,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .sched-card{background:white;border:1px solid var(--border);border-radius:18px;padding:16px 18px;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;}
 .sched-card:hover{box-shadow:var(--shadow-soft);border-color:rgba(157,29,76,0.15);}
 .sched-date-block{width:52px;flex-shrink:0;text-align:center;background:var(--primary-soft);border-radius:12px;padding:8px 4px;}
-.sched-day{font-size:22px;font-family:var(--font-display);color:var(--primary);line-height:1;font-weight:600;}
+.sched-day{font-size:22px;font-family:var(--font-numeric);color:var(--primary);line-height:1;font-weight:600;}
 .sched-month{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--primary);opacity:0.7;}
 .sched-today{background:var(--primary);}
 .sched-today .sched-day,.sched-today .sched-month{color:white;}
@@ -736,7 +737,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .team-email{font-size:12px;color:var(--muted-foreground);}
 .team-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .team-stat{text-align:center;background:var(--secondary);border-radius:14px;padding:12px 6px;}
-.team-stat-n{font-family:var(--font-display);font-size:22px;color:var(--primary);letter-spacing:-0.02em;line-height:1;}
+.team-stat-n{font-family:var(--font-numeric);font-size:22px;color:var(--primary);letter-spacing:-0.02em;line-height:1;}
 .team-stat-l{font-size:9.5px;color:var(--muted-foreground);margin-top:3px;text-transform:uppercase;letter-spacing:0.03em;}
 .team-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
 .team-detail-row:last-child{border-bottom:none;}
@@ -2737,7 +2738,7 @@ window.loadMyQuotations = async function(){
       + '<div><div style="font-weight:600;font-size:13.5px;">Plot '+q.plot_no+(q.client_name?' · '+q.client_name:'')+'</div>'
       + '<div style="font-size:12px;color:var(--muted-foreground);">'+q.plot_size_gaj+' Gaj × '+fINRq(q.rate_per_gaj)+(tags?' · '+tags:'')+' · '+d+'</div></div>'
       + '<div style="display:flex;align-items:center;gap:8px;">'
-      + '<span style="font-family:var(--font-display);font-size:15px;color:var(--primary);">'+fINRq(q.total_price)+'</span>'
+      + '<span style="font-family:var(--font-numeric);font-size:15px;color:var(--primary);">'+fINRq(q.total_price)+'</span>'
       + '<button class="lead-icon-btn" title="Download PDF" onclick="event.stopPropagation();downloadQuotationPDF(window.__myQuotations[\''+q.id+'\'])">📄</button>'
       + '<a href="https://wa.me/?text='+waText+'" target="_blank" rel="noopener" class="lead-icon-btn" title="Share on WhatsApp" onclick="event.stopPropagation()">💬</a>'
       + '<button class="btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="event.stopPropagation();deleteQuotation(\''+q.id+'\')">✕</button>'
@@ -2901,7 +2902,7 @@ window.openLeadDetail = async function(id) {
   const { data: l } = await sb.from('leads').select('*').eq('id',id).maybeSingle();
   if (!l) return;
   currentLeadData = l;
-  document.getElementById('ld-name').innerHTML = l.name + ' <span style="font-size:14px;font-weight:500;color:var(--primary);">PC'+l.lead_number+'</span>';
+  document.getElementById('ld-name').innerHTML = l.name + ' <span style="font-family:var(--font-numeric);font-size:14px;font-weight:500;color:var(--primary);">PC'+l.lead_number+'</span>';
   {
     const digits = (l.phone||'').replace(/\D/g,'');
     const ICON_PHONE = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
