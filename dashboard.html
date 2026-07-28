@@ -1414,7 +1414,11 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <div class="modal-handle"></div>
     <div class="modal-title" id="availability-modal-title">Manage Availability</div>
     <div class="form-err" id="availability-err" style="opacity:0;"></div>
-    <div class="form-grid">
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="tab-btn active-tab" id="au-tab-one" onclick="switchAddMode('one')" style="flex:1;padding:9px;">Add One</button>
+      <button class="tab-btn" id="au-tab-bulk" onclick="switchAddMode('bulk')" style="flex:1;padding:9px;">Bulk Add</button>
+    </div>
+    <div class="form-grid" id="au-mode-one">
       <div class="form-row">
         <div><label class="fl">Unit / Plot No.</label><input class="fi" id="au-number" placeholder="e.g. Plot 12"/></div>
         <div><label class="fl">Size</label><input class="fi" id="au-size" placeholder="e.g. 150 Gaj"/></div>
@@ -1425,6 +1429,26 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <option value="sold">🔴 Sold</option>
       </select></div>
       <button class="btn-submit" onclick="addUnit()">+ Add Unit</button>
+    </div>
+    <div class="form-grid" id="au-mode-bulk" style="display:none;">
+      <div>
+        <label class="fl">Upload from Excel / CSV</label>
+        <input type="file" id="au-file-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleUnitFile(this)"/>
+        <button class="btn-ghost" onclick="document.getElementById('au-file-input').click()" style="width:100%;justify-content:center;">📄 Choose file…</button>
+        <div style="font-size:11.5px;color:var(--muted-foreground);margin-top:6px;">Columns: Unit Number, Size, Status (status optional — defaults to Available). <a href="/units_template.xlsx" download style="color:var(--primary);font-weight:600;">Download a template →</a></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;color:var(--muted-foreground);font-size:11px;"><div style="flex:1;height:1px;background:var(--border);"></div>or paste manually<div style="flex:1;height:1px;background:var(--border);"></div></div>
+      <div>
+        <label class="fl">Units — one per line</label>
+        <textarea class="ftextarea" id="au-bulk-text" style="min-height:120px;font-family:var(--font-sans);" placeholder="Plot 1, 150 Gaj&#10;Plot 2, 150 Gaj&#10;Plot 3, 200 Gaj&#10;&#10;Or just numbers if size is the same for all:&#10;Plot 4&#10;Plot 5"></textarea>
+        <div style="font-size:11.5px;color:var(--muted-foreground);margin-top:6px;">One unit per line: Number, Size, Status — size and status are both optional.</div>
+      </div>
+      <div><label class="fl">Default status (used when a line has none)</label><select class="fsel" id="au-bulk-status">
+        <option value="available">🟢 Available</option>
+        <option value="token">🟡 Token Received</option>
+        <option value="sold">🔴 Sold</option>
+      </select></div>
+      <button class="btn-submit" onclick="addUnitsBulk()">+ Add All Units</button>
     </div>
     <div style="margin-top:20px;">
       <div class="fl" style="margin-bottom:10px;">Units (<span id="unit-count">0</span>)</div>
@@ -1497,6 +1521,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="push-subscribe.js"></script>
 <script>
 const sb = window.supabase.createClient(
@@ -1630,6 +1655,9 @@ window.openAvailability = async function(listingId, title){
   document.getElementById('au-number').value = '';
   document.getElementById('au-size').value = '';
   document.getElementById('au-status').selectedIndex = 0;
+  document.getElementById('au-bulk-text').value = '';
+  document.getElementById('au-bulk-status').selectedIndex = 0;
+  switchAddMode('one');
   await renderUnits();
   document.getElementById('availability-overlay').classList.add('on');
   document.body.style.overflow = 'hidden';
@@ -1661,6 +1689,76 @@ async function renderUnits(){
       + '</div></div>';
   }).join('');
 }
+
+window.switchAddMode = function(mode){
+  const isOne = mode === 'one';
+  document.getElementById('au-mode-one').style.display = isOne ? 'grid' : 'none';
+  document.getElementById('au-mode-bulk').style.display = isOne ? 'none' : 'grid';
+  document.getElementById('au-tab-one').classList.toggle('active-tab', isOne);
+  document.getElementById('au-tab-bulk').classList.toggle('active-tab', !isOne);
+};
+
+window.addUnitsBulk = async function(){
+  const raw = document.getElementById('au-bulk-text').value;
+  const defaultStatus = document.getElementById('au-bulk-status').value;
+  const VALID_STATUS = ['available','token','sold'];
+  const lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  if (!lines.length) {
+    const e = document.getElementById('availability-err');
+    e.textContent = 'Add at least one unit, one per line.'; e.style.opacity = '1';
+    setTimeout(function(){ e.style.opacity = '0'; }, 3000);
+    return;
+  }
+  const rows = lines.map(function(line){
+    const parts = line.split(',');
+    const unit_number = parts[0].trim();
+    const unit_size = parts[1] ? parts[1].trim() : null;
+    const rowStatusRaw = parts[2] ? parts[2].trim().toLowerCase() : '';
+    const status = VALID_STATUS.includes(rowStatusRaw) ? rowStatusRaw : defaultStatus;
+    return { listing_id: currentAvailabilityListingId, unit_number, unit_size, status };
+  });
+  const { error } = await sb.from('colony_units').insert(rows);
+  if (error) { toast('Error: ' + error.message); return; }
+  document.getElementById('au-bulk-text').value = '';
+  await renderUnits();
+  toast('✓ Added ' + rows.length + ' unit' + (rows.length===1?'':'s') + '!');
+  switchAddMode('one');
+};
+
+window.handleUnitFile = function(input){
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+      const lines = rows.map(function(r){
+        // Accept common header variants case-insensitively.
+        const keys = Object.keys(r);
+        const findKey = function(names){ return keys.find(function(k){ return names.includes(k.trim().toLowerCase()); }); };
+        const numKey = findKey(['unit number','unit no','plot number','plot no','number','unit']);
+        const sizeKey = findKey(['size','unit size','plot size']);
+        const statusKey = findKey(['status']);
+        const number = numKey ? String(r[numKey]).trim() : '';
+        const size = sizeKey ? String(r[sizeKey]).trim() : '';
+        const status = statusKey ? String(r[statusKey]).trim().toLowerCase() : '';
+        return number ? [number, size, status].filter(function(v){ return v !== ''; }).join(', ') : null;
+      }).filter(Boolean);
+      if (!lines.length) {
+        toast('No units found in that file — check the column headers match the template.');
+        return;
+      }
+      document.getElementById('au-bulk-text').value = lines.join('\n');
+      toast('✓ Loaded ' + lines.length + ' unit' + (lines.length===1?'':'s') + ' from file — review below, then tap Add All.');
+    } catch(err) {
+      toast('Could not read that file: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsBinaryString(file);
+};
 
 window.addUnit = async function(){
   const number = document.getElementById('au-number').value.trim();
