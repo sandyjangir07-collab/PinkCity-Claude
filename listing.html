@@ -698,6 +698,8 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       <div class="meta-card" id="meta-facing" style="display:none;"><div class="meta-label">Facing</div><div class="meta-val" id="listing-facing">—</div></div>
       <div class="meta-card" id="meta-approval" style="display:none;"><div class="meta-label">Approval</div><div class="meta-val" id="listing-approval">—</div></div>
       <div class="meta-card" id="meta-agreement-value" style="display:none;"><div class="meta-label">Agreement Value</div><div class="meta-val" id="listing-agreement-value">—</div></div>
+      <div class="meta-card" id="meta-no-units" style="display:none;"><div class="meta-label">No. of Units</div><div class="meta-val" id="listing-no-units">—</div></div>
+      <div class="meta-card" id="meta-project-area" style="display:none;"><div class="meta-label">Total Project Area</div><div class="meta-val" id="listing-project-area">—</div></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
       <div id="rera-badge" style="display:none;align-items:center;gap:7px;background:rgba(34,197,94,0.12);color:#15803d;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;width:fit-content;">
@@ -723,6 +725,25 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
     <div class="desc-card">
       <div class="desc-label">About this property</div>
       <div class="desc-text" id="listing-desc">—</div>
+    </div>
+    <div class="desc-card" id="amenities-card" style="display:none;">
+      <div class="desc-label">Amenities</div>
+      <div class="desc-text" id="listing-amenities">—</div>
+    </div>
+    <div id="project-map-card" style="display:none;margin-bottom:20px;">
+      <div class="desc-label" style="margin-bottom:10px;">Project Map</div>
+      <img id="project-map-img" src="" alt="Project layout map" style="width:100%;border-radius:16px;border:1px solid var(--border);"/>
+    </div>
+    <div id="availability-card" style="display:none;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="desc-label" style="margin-bottom:0;">Availability</div>
+        <div style="display:flex;align-items:center;gap:14px;font-size:11px;color:var(--muted-foreground);">
+          <span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;"></span>Available</span>
+          <span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#eab308;display:inline-block;"></span>Token</span>
+          <span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;"></span>Sold</span>
+        </div>
+      </div>
+      <div id="availability-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;"></div>
     </div>
     <div id="verified-info-block" style="display:none;background:linear-gradient(135deg,oklch(0.18 0.012 30),oklch(0.14 0.009 20));border-radius:20px;padding:20px 22px;margin-bottom:20px;">
       <div style="display:flex;align-items:center;gap:12px;">
@@ -808,7 +829,7 @@ const sb = window.supabase.createClient(
   "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf"
 );
 const GRADS = {plot:"linear-gradient(135deg,#c8a98a,#9a7050)",farmhouse:"linear-gradient(135deg,#5a8a6a,#2a5a3a)",apartment:"linear-gradient(135deg,#8090b0,#506080)",villa:"linear-gradient(135deg,#c4a870,#8a6a40)",land:"linear-gradient(135deg,#8aaa7a,#4a7a4a)",commercial:"linear-gradient(135deg,#6a8faf,#3a5f7f)"};
-const EMOJI = {plot:"🏜️",farmhouse:"🌿",apartment:"🏢",villa:"🏯",land:"🌾",commercial:"🏗️"};
+const EMOJI = {plot:"🏜️",apartment:"🏢",villa:"🏯",colony:"🏘️"};
 const TYPE_LABEL = {plot:"Residential Plot",farmhouse:"Farmhouse",apartment:"Apartment",villa:"Luxury Villa",land:"Investment Land",commercial:"Commercial Plot"};
 
 let listingData = null, galIndex = 0, galImages = [], selectedTime = "9–11 AM";
@@ -925,6 +946,19 @@ async function load() {
   if (data.rera_approved) document.getElementById("rera-badge").style.display = "inline-flex";
   if (data.corner_plot) document.getElementById("corner-badge").style.display = "inline-flex";
   if (data.park_facing) document.getElementById("park-badge").style.display = "inline-flex";
+  if (data.type === "colony") {
+    showMeta("meta-no-units", "listing-no-units", data.no_of_units);
+    showMeta("meta-project-area", "listing-project-area", data.total_project_area);
+    if (data.amenities) {
+      document.getElementById("listing-amenities").textContent = data.amenities;
+      document.getElementById("amenities-card").style.display = "block";
+    }
+    if (data.project_map_url) {
+      document.getElementById("project-map-img").src = data.project_map_url;
+      document.getElementById("project-map-card").style.display = "block";
+    }
+    loadAvailability(data.id);
+  }
   document.getElementById("listing-desc").textContent = data.desc || data.description || "Contact us for full property details.";
   document.getElementById("wa-btn").href = `https://wa.me/919358830405?text=${encodeURIComponent("Hi, I am interested in: "+data.title+" ("+data.price+") in "+(data.area||""))}`;
   const today = new Date().toISOString().split("T")[0];
@@ -936,6 +970,23 @@ async function load() {
   sb.auth.getSession().then(({ data: { session } }) => {
     if (session) document.getElementById("btn-add-visit").style.display = "flex";
   });
+}
+
+async function loadAvailability(listingId) {
+  const { data: units, error } = await sb.from("colony_units").select("*").eq("listing_id", listingId).order("created_at", { ascending: true });
+  if (error || !units || !units.length) return;
+  const STATUS_COLOR = { available: "#22c55e", token: "#eab308", sold: "#ef4444" };
+  const STATUS_TEXT = { available: "Available", token: "Token Received", sold: "Sold" };
+  const grid = document.getElementById("availability-grid");
+  grid.innerHTML = units.map(function(u) {
+    const color = STATUS_COLOR[u.status] || "#9ca3af";
+    return '<div style="border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center;background:white;" title="' + (STATUS_TEXT[u.status] || u.status) + '">'
+      + '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';margin:0 auto 6px;"></div>'
+      + '<div style="font-size:12.5px;font-weight:600;color:var(--foreground);">' + (u.unit_number || "—") + '</div>'
+      + (u.unit_size ? '<div style="font-size:10.5px;color:var(--muted-foreground);margin-top:2px;">' + u.unit_size + '</div>' : '')
+      + '</div>';
+  }).join('');
+  document.getElementById("availability-card").style.display = "block";
 }
 
 function showErr(msg) {

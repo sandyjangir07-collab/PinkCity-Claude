@@ -662,6 +662,15 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .status-pill{padding:8px 16px;border-radius:999px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--foreground);font-family:var(--font-sans);transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
 .status-pill.active{background:var(--primary);color:white;border-color:var(--primary);}
 .status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.unit-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:white;}
+.unit-row-info{display:flex;align-items:center;gap:10px;font-size:13px;}
+.unit-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.unit-dot.available{background:#22c55e;}
+.unit-dot.token{background:#eab308;}
+.unit-dot.sold{background:#ef4444;}
+.unit-status-sel{border:1px solid var(--border);border-radius:999px;font-size:11px;padding:5px 10px;background:var(--secondary);font-family:var(--font-sans);}
+.unit-del-btn{width:26px;height:26px;border-radius:50%;border:none;background:var(--secondary);color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.unit-del-btn:hover{background:#fee2e2;color:#ef4444;}
 /* Blog post cards in dashboard */
 .blog-post-card{background:white;border:1px solid var(--border);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px;transition:all 0.2s;}
 .blog-post-card:hover{box-shadow:var(--shadow-soft);transform:translateY(-1px);}
@@ -844,12 +853,13 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <div class="form-grid" id="lform">
       <div class="form-row">
         <div><label class="fl">Title *</label><input class="fi" id="f-title" placeholder="e.g. 200 sq yd Corner Plot"/></div>
-        <div><label class="fl">Type *</label><select class="fsel" id="f-type"><option value="plot">Residential Plot</option><option value="apartment">Apartment</option><option value="farmhouse">Farmhouse</option><option value="villa">Villa</option><option value="land">Investment Land</option><option value="commercial">Commercial Plot</option></select></div>
+        <div><label class="fl">Category *</label><select class="fsel" id="f-type" onchange="toggleColonyFields()"><option value="colony">Colony</option><option value="plot">Plot</option><option value="apartment">Flat</option><option value="villa">Villa</option></select></div>
       </div>
       <div class="form-row">
         <div><label class="fl">Area / Locality *</label><input class="fi" id="f-area" placeholder="e.g. Mansarovar, Jaipur"/></div>
         <div><label class="fl">Price *</label><input class="fi" id="f-price" placeholder="e.g. ₹68 Lakh"/></div>
       </div>
+      <div id="plot-only-fields">
       <div class="form-row">
         <div><label class="fl">Plot Size</label>
           <div style="display:flex;align-items:center;gap:6px;">
@@ -909,6 +919,15 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
           <input type="checkbox" id="f-park-facing"/>
           <label for="f-park-facing">Park Facing</label>
         </div>
+      </div>
+      </div>
+      <div id="colony-only-fields" style="display:none;">
+        <div class="form-row">
+          <div><label class="fl">No. of Units</label><input class="fi" id="f-no-units" type="number" placeholder="e.g. 120"/></div>
+          <div><label class="fl">Total Project Area</label><input class="fi" id="f-project-area" placeholder="e.g. 25 Acres"/></div>
+        </div>
+        <div><label class="fl">Amenities</label><input class="fi" id="f-amenities" placeholder="e.g. Clubhouse, Park, 24x7 Security, Underground Wiring"/></div>
+        <div><label class="fl">Project Map (image URL)</label><input class="fi" id="f-project-map" placeholder="Paste a link to the layout/map image"/></div>
       </div>
       <div class="verified-row">
         <input type="checkbox" id="f-rera"/>
@@ -1250,7 +1269,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       </div>
       <div class="form-row">
         <div><label class="fl">Budget</label><input class="fi" id="lead-budget" placeholder="e.g. ₹50L–1Cr"/></div>
-        <div><label class="fl">Property Type</label><select class="fsel" id="lead-proptype"><option value="">Any</option><option value="plot">Plot</option><option value="apartment">Apartment</option><option value="farmhouse">Farmhouse</option><option value="villa">Villa</option><option value="land">Land</option></select></div>
+        <div><label class="fl">Property Type</label><select class="fsel" id="lead-proptype"><option value="">Any</option><option value="colony">Colony</option><option value="plot">Plot</option><option value="apartment">Flat</option><option value="villa">Villa</option></select></div>
       </div>
       <div><label class="fl">Preferred Location</label><input class="fi" id="lead-location" placeholder="e.g. Jagatpura, Mansarovar"/></div>
       <div><label class="fl">Follow-up Date</label><input class="fi" id="lead-followup" type="date"/></div>
@@ -1386,6 +1405,32 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <button class="btn-submit" id="sc-save-btn" onclick="saveScheduledCall()" style="flex:1;">Schedule Call</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── AVAILABILITY MANAGER MODAL ── -->
+<div class="overlay" id="availability-overlay" onclick="if(event.target===this)closeAvailability()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="availability-modal-title">Manage Availability</div>
+    <div class="form-err" id="availability-err" style="opacity:0;"></div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div><label class="fl">Unit / Plot No.</label><input class="fi" id="au-number" placeholder="e.g. Plot 12"/></div>
+        <div><label class="fl">Size</label><input class="fi" id="au-size" placeholder="e.g. 150 Gaj"/></div>
+      </div>
+      <div><label class="fl">Status</label><select class="fsel" id="au-status">
+        <option value="available">🟢 Available</option>
+        <option value="token">🟡 Token Received</option>
+        <option value="sold">🔴 Sold</option>
+      </select></div>
+      <button class="btn-submit" onclick="addUnit()">+ Add Unit</button>
+    </div>
+    <div style="margin-top:20px;">
+      <div class="fl" style="margin-bottom:10px;">Units (<span id="unit-count">0</span>)</div>
+      <div id="units-list" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;"></div>
+    </div>
+    <button class="btn-ghost" onclick="closeAvailability()" style="margin-top:16px;width:100%;">Close</button>
   </div>
 </div>
 
@@ -1551,6 +1596,7 @@ function renderListings(listings, admin) {
         ${admin && l.submitter_phone ? `<div class="listing-phone-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14h0v3z"/></svg> ${l.submitter_phone}</div>` : ""}
         ${imgs.length > 1 ? `<div style="font-size:11px;color:var(--muted-foreground);margin-bottom:8px;">📷 ${imgs.length} photos</div>` : ""}
         <div class="listing-actions">
+          ${l.type === "colony" ? `<button class="btn-edit" onclick="openAvailability('${l.id}','${(l.title||'').replace(/'/g,"")}')">🏘️ Manage Availability</button>` : ""}
           ${admin && l.status==="pending" ? `<button class="btn-edit" onclick="adminEdit('${l.id}')">✎ Edit & Verify</button><button class="btn-approve" onclick="approve('${l.id}')">✓ Approve</button><button class="btn-reject" onclick="reject('${l.id}')">✕ Reject</button>` : ""}
           ${admin && l.status==="active" ? `<button class="btn-edit" onclick="adminEdit('${l.id}')">✎ Edit</button><button class="btn-reject" onclick="reject('${l.id}')">Take offline</button>` : ""}
           ${!admin && l.status !== "active" ? `<button class="btn-edit" onclick="openEdit('${l.id}')">Edit</button>` : ""}
@@ -1569,6 +1615,86 @@ function renderListings(listings, admin) {
 // ── IMAGE HANDLING ──
 let pendingFiles = []; // new File objects to upload
 let savedUrls = [];    // already-uploaded URLs (for edit mode)
+
+window.toggleColonyFields = function(){
+  const isColony = document.getElementById('f-type').value === 'colony';
+  document.getElementById('plot-only-fields').style.display = isColony ? 'none' : 'block';
+  document.getElementById('colony-only-fields').style.display = isColony ? 'block' : 'none';
+};
+
+let currentAvailabilityListingId = null;
+
+window.openAvailability = async function(listingId, title){
+  currentAvailabilityListingId = listingId;
+  document.getElementById('availability-modal-title').textContent = title ? title + ' — Availability' : 'Manage Availability';
+  document.getElementById('au-number').value = '';
+  document.getElementById('au-size').value = '';
+  document.getElementById('au-status').selectedIndex = 0;
+  await renderUnits();
+  document.getElementById('availability-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeAvailability = function(){
+  document.getElementById('availability-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+};
+
+async function renderUnits(){
+  const { data, error } = await sb.from('colony_units').select('*').eq('listing_id', currentAvailabilityListingId).order('created_at', {ascending:true});
+  const list = document.getElementById('units-list');
+  const units = data || [];
+  document.getElementById('unit-count').textContent = units.length;
+  if (!units.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted-foreground);font-size:13px;">No units added yet.</div>';
+    return;
+  }
+  const STATUS_TEXT = { available:'Available', token:'Token Received', sold:'Sold' };
+  list.innerHTML = units.map(function(u){
+    return '<div class="unit-row">'
+      + '<div class="unit-row-info"><span class="unit-dot ' + u.status + '"></span><strong>' + (u.unit_number||'—') + '</strong>' + (u.unit_size ? ' · ' + u.unit_size : '') + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<select class="unit-status-sel" onchange="updateUnitStatus(\'' + u.id + '\',this.value)">'
+      + Object.keys(STATUS_TEXT).map(function(s){ return '<option value="'+s+'"'+(u.status===s?' selected':'')+'>'+STATUS_TEXT[s]+'</option>'; }).join('')
+      + '</select>'
+      + '<button class="unit-del-btn" onclick="deleteUnit(\'' + u.id + '\')" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
+      + '</div></div>';
+  }).join('');
+}
+
+window.addUnit = async function(){
+  const number = document.getElementById('au-number').value.trim();
+  const size = document.getElementById('au-size').value.trim();
+  const status = document.getElementById('au-status').value;
+  if (!number) {
+    const e = document.getElementById('availability-err');
+    e.textContent = 'Unit / Plot number is required.'; e.style.opacity = '1';
+    setTimeout(function(){ e.style.opacity = '0'; }, 3000);
+    return;
+  }
+  const { error } = await sb.from('colony_units').insert({
+    listing_id: currentAvailabilityListingId, unit_number: number, unit_size: size || null, status
+  });
+  if (error) { toast('Error: ' + error.message); return; }
+  document.getElementById('au-number').value = '';
+  document.getElementById('au-size').value = '';
+  document.getElementById('au-status').selectedIndex = 0;
+  await renderUnits();
+  toast('✓ Unit added!');
+};
+
+window.updateUnitStatus = async function(unitId, newStatus){
+  const { error } = await sb.from('colony_units').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', unitId);
+  if (error) { toast('Error: ' + error.message); return; }
+  await renderUnits();
+  toast('✓ Status updated!');
+};
+
+window.deleteUnit = async function(unitId){
+  const { error } = await sb.from('colony_units').delete().eq('id', unitId);
+  if (error) { toast('Error: ' + error.message); return; }
+  await renderUnits();
+};
 
 window.handleImages = (input) => {
   const files = Array.from(input.files).slice(0, 8 - savedUrls.length - pendingFiles.length);
@@ -1637,8 +1763,9 @@ async function uploadAllImages() {
 window.openAdd = () => {
   editId = null; pendingFiles = []; savedUrls = [];
   document.getElementById("modal-title").textContent = "Add New Listing";
-  ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width","f-no-units","f-project-area","f-amenities","f-project-map"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   const ft=document.getElementById("f-type");if(ft)ft.selectedIndex=0;
+  toggleColonyFields();
   const frw=document.getElementById("f-road-width");if(frw)frw.selectedIndex=0;
   const fpu=document.getElementById("f-plot-size-unit");if(fpu)fpu.selectedIndex=0;
   const ffc=document.getElementById("f-facing");if(ffc)ffc.selectedIndex=0;
@@ -1662,6 +1789,7 @@ window.adminEdit = async (id) => {
   document.getElementById("modal-title").textContent = "Edit & Verify";
   document.getElementById("f-title").value = data.title||"";
   document.getElementById("f-type").value = data.type||"plot";
+  toggleColonyFields();
   document.getElementById("f-area").value = data.area||"";
   document.getElementById("f-price").value = data.price||"";
   document.getElementById("f-desc").value = data.desc||"";
@@ -1674,6 +1802,10 @@ window.adminEdit = async (id) => {
   document.getElementById("f-plot-size-unit").value = data.plot_size_unit||"Gaj";
   document.getElementById("f-plot-length").value = data.plot_length||"";
   document.getElementById("f-plot-width").value = data.plot_width||"";
+  document.getElementById("f-no-units").value = data.no_of_units||"";
+  document.getElementById("f-project-area").value = data.total_project_area||"";
+  document.getElementById("f-amenities").value = data.amenities||"";
+  document.getElementById("f-project-map").value = data.project_map_url||"";
   const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=!!data.corner_plot;
   const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=!!data.park_facing;
   const fr=document.getElementById("f-rera");if(fr)fr.checked=!!data.rera_approved;
@@ -1706,6 +1838,10 @@ window.submitListing = async () => {
   const plotSizeUnit = document.getElementById("f-plot-size-unit").value;
   const plotLength = document.getElementById("f-plot-length").value.trim();
   const plotWidth = document.getElementById("f-plot-width").value.trim();
+  const noOfUnits = document.getElementById("f-no-units").value.trim();
+  const totalProjectArea = document.getElementById("f-project-area").value.trim();
+  const amenities = document.getElementById("f-amenities").value.trim();
+  const projectMapUrl = document.getElementById("f-project-map").value.trim();
   const size = plotSize ? plotSize + " " + plotSizeUnit : "";
   const cornerPlot = document.getElementById("f-corner-plot")?.checked || false;
   const parkFacing = document.getElementById("f-park-facing")?.checked || false;
@@ -1723,6 +1859,8 @@ window.submitListing = async () => {
         road_width: roadWidth, facing, agreement_value: agreementValue,
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
+        no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         submitter_phone: phone,
@@ -1736,6 +1874,8 @@ window.submitListing = async () => {
         road_width: roadWidth, facing, agreement_value: agreementValue,
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
+        no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         status: "pending",
