@@ -674,9 +674,14 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 
 
 /* ── TABS ── */
-.tab-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:999px;border:1.5px solid var(--border);background:white;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--muted-foreground);cursor:pointer;transition:all 0.2s;margin-bottom:0;}
-.tab-btn:hover{border-color:rgba(157,29,76,0.25);color:var(--primary);}
-.tab-btn.active-tab{background:var(--primary);color:white;border-color:var(--primary);box-shadow:0 3px 12px rgba(157,29,76,0.28);}
+.tab-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;}
+@media(max-width:520px){ .tab-grid{ grid-template-columns:repeat(2,1fr); } }
+.tab-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px 10px;border-radius:18px;border:1.5px solid var(--border);background:white;font-family:var(--font-sans);font-size:13px;font-weight:600;color:var(--foreground);cursor:pointer;transition:all 0.2s;}
+.tab-btn:hover{border-color:rgba(157,29,76,0.25);transform:translateY(-1px);}
+.tab-btn.active-tab{background:var(--primary);color:white;border-color:var(--primary);box-shadow:0 6px 18px -4px rgba(157,29,76,0.35);}
+.tab-btn-icon{width:44px;height:44px;border-radius:14px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;font-size:21px;}
+.tab-btn.active-tab .tab-btn-icon{background:rgba(255,255,255,0.18);}
+.tab-btn-label{line-height:1;}
 /* ── CRM LEAD CARDS ── */
 .lead-card{background:white;border:1px solid var(--border);border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all 0.2s;cursor:pointer;}
 .lead-card:hover{box-shadow:var(--shadow-elev);border-color:rgba(157,29,76,0.18);transform:translateY(-1px);}
@@ -790,15 +795,15 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   <div class="page-eyebrow fade-up" id="page-eyebrow">YOUR LISTINGS</div>
   <h1 class="page-title fade-up fade-up-1" id="page-title">Manage properties</h1>
   <p class="page-sub fade-up fade-up-2" id="page-sub">Manage listings, track leads, and schedule site visits.</p>
-  <div id="admin-tabs" style="display:none;gap:8px;margin-bottom:28px;flex-wrap:wrap;">
-    <button onclick="showTab('today')" id="tab-today" class="tab-btn">☀️ Today</button>
-    <button onclick="showTab('attendance')" id="tab-attendance" class="tab-btn">📍 Attendance</button>
-    <button onclick="showTab('listings')" id="tab-listings" class="tab-btn active-tab">🏠 Listings</button>
-    <button onclick="showTab('crm')" id="tab-crm" class="tab-btn">👥 CRM</button>
-    <button onclick="showTab('schedule')" id="tab-schedule" class="tab-btn">📅 Visits</button>
-    <button onclick="showTab('quotation')" id="tab-quotation" class="tab-btn">🧾 Quotation</button>
-    <button onclick="showTab('performance')" id="tab-performance" class="tab-btn" style="display:none;">📊 Performance</button>
-    <button onclick="showTab('blogs')" id="tab-blogs" class="tab-btn" style="display:none;">✍️ Blog</button>
+  <div id="admin-tabs" class="tab-grid" style="display:none;">
+    <button onclick="showTab('today')" id="tab-today" class="tab-btn"><span class="tab-btn-icon">☀️</span><span class="tab-btn-label">Today</span></button>
+    <button onclick="showTab('attendance')" id="tab-attendance" class="tab-btn"><span class="tab-btn-icon">📍</span><span class="tab-btn-label">Attendance</span></button>
+    <button onclick="showTab('listings')" id="tab-listings" class="tab-btn active-tab"><span class="tab-btn-icon">🏠</span><span class="tab-btn-label">Listings</span></button>
+    <button onclick="showTab('crm')" id="tab-crm" class="tab-btn"><span class="tab-btn-icon">👥</span><span class="tab-btn-label">CRM</span></button>
+    <button onclick="showTab('schedule')" id="tab-schedule" class="tab-btn"><span class="tab-btn-icon">📅</span><span class="tab-btn-label">Visits</span></button>
+    <button onclick="showTab('quotation')" id="tab-quotation" class="tab-btn"><span class="tab-btn-icon">🧾</span><span class="tab-btn-label">Quotation</span></button>
+    <button onclick="showTab('performance')" id="tab-performance" class="tab-btn" style="display:none;"><span class="tab-btn-icon">📊</span><span class="tab-btn-label">Performance</span></button>
+    <button onclick="showTab('blogs')" id="tab-blogs" class="tab-btn" style="display:none;"><span class="tab-btn-icon">✍️</span><span class="tab-btn-label">Blog</span></button>
   </div>
 
   <div class="stat-grid" id="admin-stats" style="display:none;">
@@ -1483,7 +1488,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
   else av.textContent = (name || "?")[0].toUpperCase();
   if (isAdmin) {
     document.getElementById("admin-tag").style.display = "inline-flex";
-    document.getElementById("admin-tabs").style.display = "flex";
+    document.getElementById("admin-tabs").style.display = "grid";
     document.getElementById("tab-performance").style.display = "inline-flex";
     document.getElementById("tab-blogs").style.display = "inline-flex";
     document.getElementById("page-eyebrow").textContent = "ADMIN PANEL";
@@ -1494,7 +1499,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     showTab((restoredTab && document.getElementById('tab-'+restoredTab)) ? restoredTab : 'today');
   } else {
     // Team members land on their personalized Today view instead of a raw listings dump
-    document.getElementById('admin-tabs').style.display = 'flex';
+    document.getElementById('admin-tabs').style.display = 'grid';
     document.getElementById('tab-performance').style.display = 'none'; // admin only
     document.getElementById('tab-blogs').style.display = 'none'; // admin only
     let restoredTab = null;
