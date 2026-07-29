@@ -660,6 +660,9 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .toolbar-btn:hover{background:var(--primary-soft);color:var(--primary);}
 .status-pills{display:flex;gap:8px;}
 .status-pill{padding:8px 16px;border-radius:999px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--foreground);font-family:var(--font-sans);transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+.road-width-pill{padding:9px 16px;border-radius:999px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--foreground);transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
+.road-width-pill input{accent-color:var(--primary);width:14px;height:14px;}
+.road-width-pill:has(input:checked){background:var(--primary);color:white;border-color:var(--primary);}
 .status-pill.active{background:var(--primary);color:white;border-color:var(--primary);}
 .status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .unit-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:white;}
@@ -926,14 +929,16 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
           <div><label class="fl">No. of Units</label><input class="fi" id="f-no-units" type="number" placeholder="e.g. 120"/></div>
           <div><label class="fl">Total Project Area</label><input class="fi" id="f-project-area" placeholder="e.g. 25 Acres"/></div>
         </div>
-        <div><label class="fl">Road Type</label><select class="fsel" id="f-colony-road-type">
-          <option value="">Select</option>
-          <option value="Interlocking Tile Road">Interlocking Tile Road</option>
-          <option value="Concrete Road">Concrete Road</option>
-          <option value="Tar / Asphalt Road">Tar / Asphalt Road</option>
-          <option value="WBM Road">WBM Road (Water Bound Macadam)</option>
-          <option value="Kutcha Road">Kutcha Road</option>
-        </select></div>
+        <div>
+          <label class="fl">Road Widths (select all that apply)</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;" id="f-colony-road-widths">
+            <label class="road-width-pill"><input type="checkbox" value="30 Ft"/>30 Ft</label>
+            <label class="road-width-pill"><input type="checkbox" value="40 Ft"/>40 Ft</label>
+            <label class="road-width-pill"><input type="checkbox" value="60 Ft"/>60 Ft</label>
+            <label class="road-width-pill"><input type="checkbox" value="80 Ft"/>80 Ft</label>
+            <label class="road-width-pill"><input type="checkbox" value="100 Ft"/>100 Ft</label>
+          </div>
+        </div>
         <div><label class="fl">Amenities</label><input class="fi" id="f-amenities" placeholder="e.g. Clubhouse, Park, 24x7 Security, Underground Wiring"/></div>
         <div><label class="fl">Project Map (image URL)</label><input class="fi" id="f-project-map" placeholder="Paste a link to the layout/map image"/></div>
       </div>
@@ -1870,7 +1875,7 @@ window.openAdd = () => {
   editId = null; pendingFiles = []; savedUrls = [];
   document.getElementById("modal-title").textContent = "Add New Listing";
   ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width","f-no-units","f-project-area","f-amenities","f-project-map"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
-  const fcrt=document.getElementById("f-colony-road-type");if(fcrt)fcrt.selectedIndex=0;
+  document.querySelectorAll('#f-colony-road-widths input').forEach(function(cb){ cb.checked = false; });
   const ft=document.getElementById("f-type");if(ft)ft.selectedIndex=0;
   toggleColonyFields();
   const frw=document.getElementById("f-road-width");if(frw)frw.selectedIndex=0;
@@ -1913,7 +1918,10 @@ window.adminEdit = async (id) => {
   document.getElementById("f-project-area").value = data.total_project_area||"";
   document.getElementById("f-amenities").value = data.amenities||"";
   document.getElementById("f-project-map").value = data.project_map_url||"";
-  document.getElementById("f-colony-road-type").value = data.colony_road_type||"";
+  {
+    const savedWidths = (data.colony_road_type || "").split(",").map(function(s){ return s.trim(); });
+    document.querySelectorAll('#f-colony-road-widths input').forEach(function(cb){ cb.checked = savedWidths.includes(cb.value); });
+  }
   const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=!!data.corner_plot;
   const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=!!data.park_facing;
   const fr=document.getElementById("f-rera");if(fr)fr.checked=!!data.rera_approved;
@@ -1950,15 +1958,15 @@ window.submitListing = async () => {
   const totalProjectArea = document.getElementById("f-project-area").value.trim();
   const amenities = document.getElementById("f-amenities").value.trim();
   const projectMapUrl = document.getElementById("f-project-map").value.trim();
-  const colonyRoadType = document.getElementById("f-colony-road-type").value;
+  const colonyRoadType = Array.from(document.querySelectorAll('#f-colony-road-widths input:checked')).map(function(cb){ return cb.value; }).join(", ");
   const isColony = type === "colony";
   if (isColony) {
     roadWidth = ""; facing = ""; agreementValue = ""; approvalType = "";
     plotSize = ""; plotSizeUnit = "Gaj"; plotLength = ""; plotWidth = "";
   }
   const size = (!isColony && plotSize) ? plotSize + " " + plotSizeUnit : "";
-  const cornerPlot = document.getElementById("f-corner-plot")?.checked || false;
-  const parkFacing = document.getElementById("f-park-facing")?.checked || false;
+  const cornerPlot = isColony ? false : (document.getElementById("f-corner-plot")?.checked || false);
+  const parkFacing = isColony ? false : (document.getElementById("f-park-facing")?.checked || false);
   const reraApproved = document.getElementById("f-rera")?.checked || false;
   const verified = document.getElementById("f-verified")?.checked || false;
   if (!title||!area||!price) { showFormErr("Please fill in Title, Area and Price."); return; }
