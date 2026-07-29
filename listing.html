@@ -34,7 +34,38 @@
   --shadow-card: 0 1px 2px rgba(20,16,18,0.03), 0 10px 30px -14px rgba(20,16,18,0.10);
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --radius-lg: 1.75rem;
 }
+/* ── PD: Property Detail redesign component classes ── */
+.pd-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px 24px;margin-bottom:24px;box-shadow:var(--shadow-soft);}
+.pd-section-heading{font-size:18px;font-weight:600;color:var(--foreground);margin-bottom:16px;font-family:var(--font-sans);}
+.pd-row{display:flex;align-items:center;gap:14px;padding:14px 0;}
+.pd-row+.pd-row{border-top:1px solid var(--border);}
+.pd-row-icon{color:var(--primary);flex-shrink:0;width:20px;height:20px;}
+.pd-row-heading{font-size:14px;color:var(--muted-foreground);margin-bottom:2px;}
+.pd-row-value{font-size:16px;font-weight:600;color:var(--foreground);}
+.pd-chip{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:14px;font-weight:500;color:var(--foreground);}
+.pd-chip svg{color:var(--primary);flex-shrink:0;}
+.pd-chips{display:flex;flex-wrap:wrap;gap:10px;}
+.pd-pill{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:76px;}
+.pd-pill-icon{width:48px;height:48px;border-radius:50%;background:var(--secondary);display:flex;align-items:center;justify-content:center;color:var(--primary);transition:transform 0.18s ease;}
+.pd-pill:active .pd-pill-icon{transform:scale(0.94);}
+.pd-pill-label{font-size:12px;color:var(--foreground);text-align:center;line-height:1.3;}
+.pd-check-row{display:flex;align-items:center;gap:12px;padding:10px 0;}
+.pd-check-icon{width:22px;height:22px;border-radius:50%;background:rgba(34,197,94,0.12);color:#16a34a;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pd-check-text{font-size:15px;color:var(--foreground);}
+.pd-doc-row{display:flex;align-items:center;gap:14px;padding:14px 4px;text-decoration:none;transition:opacity 0.18s ease;}
+.pd-doc-row:active{opacity:0.7;}
+.pd-doc-row+.pd-doc-row{border-top:1px solid var(--border);}
+.pd-doc-icon{width:40px;height:40px;border-radius:12px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pd-doc-name{font-size:15px;font-weight:600;color:var(--foreground);}
+.pd-doc-sub{font-size:12.5px;color:var(--muted-foreground);}
+.pd-landmark-row{display:flex;align-items:center;gap:14px;padding:12px 0;}
+.pd-landmark-row+.pd-landmark-row{border-top:1px solid var(--border);}
+.pd-landmark-icon{width:36px;height:36px;border-radius:10px;background:var(--secondary);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pd-fade-in{animation:pd-fade-in 0.32s ease both;}
+@keyframes pd-fade-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@media(prefers-reduced-motion:reduce){.pd-fade-in{animation:none;}}
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 body {
@@ -734,24 +765,32 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
         <div class="desc-text" id="listing-desc">—</div>
       </div>
     </div>
+    <div class="pd-card" id="verification-card" style="display:none;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg>
+        </div>
+        <div class="pd-section-heading" style="margin-bottom:0;">PinkCity Verified™</div>
+      </div>
+      <div id="verification-list"></div>
+    </div>
+    <div class="pd-card" id="highlights-card" style="display:none;">
+      <div class="pd-section-heading">Highlights</div>
+      <div class="pd-chips" id="listing-highlights"></div>
+    </div>
     <div class="desc-card" id="amenities-card" style="display:none;">
       <div class="desc-label" style="margin-bottom:14px;">Amenities</div>
       <div id="listing-amenities" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:16px 8px;"></div>
     </div>
-    <div id="project-map-card" style="display:none;margin-bottom:20px;">
-      <div class="desc-label" style="margin-bottom:10px;">Project Map</div>
-      <img id="project-map-img" src="" alt="Project layout map" style="width:100%;border-radius:16px;border:1px solid var(--border);"/>
+    <div class="pd-card" id="landmarks-card" style="display:none;">
+      <div class="pd-section-heading">Nearby Landmarks</div>
+      <div id="landmarks-list"></div>
     </div>
-    <a id="site-map-pdf-link" href="" target="_blank" rel="noopener" style="display:none;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:20px;text-decoration:none;">
-      <div style="width:44px;height:44px;border-radius:12px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--primary);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-      </div>
-      <div style="flex:1;">
-        <div style="font-size:14.5px;font-weight:600;color:var(--foreground);">Site Map</div>
-        <div style="font-size:12px;color:var(--muted-foreground);">View PDF</div>
-      </div>
-      <div style="color:var(--primary);font-size:16px;flex-shrink:0;">→</div>
-    </a>
+    <div class="pd-card" id="documents-card" style="display:none;">
+      <div class="pd-section-heading">Documents</div>
+      <div id="documents-list"></div>
+    </div>
+    <img id="project-map-img" src="" alt="" style="display:none;"/>
     <div id="availability-card" style="display:none;margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div class="desc-label" style="margin-bottom:0;">Availability</div>
@@ -784,12 +823,17 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
       WhatsApp
     </a>
-    <button class="btn-visit" onclick="openVisit()">Request Visit</button>
+    <button class="btn-visit" onclick="openVisit()">Schedule Site Visit</button>
+    <button id="agent-menu-btn" onclick="toggleAgentMenu()" style="display:none;flex-shrink:0;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border);background:white;color:var(--foreground);align-items:center;justify-content:center;cursor:pointer;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+    </button>
   </div>
-  <button class="btn-add-visit" id="btn-add-visit" onclick="openAddVisit()" style="display:none;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Log Visit
-  </button>
+  <div id="agent-menu" style="display:none;padding:10px 0 2px;">
+    <button class="btn-add-visit" id="btn-add-visit" onclick="openAddVisit()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Log Visit
+    </button>
+  </div>
 </div>
 
 <div class="visit-overlay" id="visit-overlay" onclick="if(event.target===this)closeVisit()">
@@ -851,6 +895,11 @@ const EMOJI = {plot:"🏜️",apartment:"🏢",villa:"🏯",colony:"🏘️"};
 const TYPE_LABEL = {plot:"Residential Plot",farmhouse:"Farmhouse",apartment:"Apartment",villa:"Luxury Villa",land:"Investment Land",commercial:"Commercial Plot"};
 
 let listingData = null, galIndex = 0, galImages = [], selectedTime = "9–11 AM";
+
+function toggleAgentMenu(){
+  const menu = document.getElementById("agent-menu");
+  menu.style.display = menu.style.display === "none" ? "block" : "none";
+}
 
 function galBuild(images, type) {
   const track = document.getElementById("gallery-track");
@@ -936,6 +985,7 @@ async function load() {
   document.getElementById("type-badge").innerHTML = `<span class="hero-badge-dot"></span>${TYPE_LABEL[data.type]||data.type}`;
   if (data.verified) {
     document.getElementById("verified-badge").style.display = "inline-flex";
+    renderVerificationChecklist();
     document.getElementById("verified-info-block").style.display = "block";
   }
   document.getElementById("listing-price").innerHTML = formatPriceHTML(data.price);
@@ -977,16 +1027,12 @@ async function load() {
     showMeta("meta-project-area", "listing-project-area", data.total_project_area);
     showMeta("meta-colony-road-type", "listing-colony-road-type", data.colony_road_type);
     showMeta("meta-approach-road", "listing-approach-road", data.approach_road);
-    if (data.amenities) {
-      renderAmenities(data.amenities);
-      document.getElementById("amenities-card").style.display = "block";
-    }
-    if (data.project_map_url) {
-      document.getElementById("project-map-img").src = data.project_map_url;
-      document.getElementById("project-map-card").style.display = "block";
-    }
     loadAvailability(data.id);
   }
+  if (data.amenities) renderAmenities(data.amenities);
+  if (data.highlights) renderHighlights(data.highlights);
+  renderDocuments(data);
+  if (data.latitude && data.longitude) renderNearbyLandmarks(Number(data.latitude), Number(data.longitude));
   document.getElementById("listing-desc").textContent = data.desc || data.description || "Contact us for full property details.";
   document.getElementById("wa-btn").href = `https://wa.me/919358830405?text=${encodeURIComponent("Hi, I am interested in: "+data.title+" ("+data.price+") in "+(data.area||""))}`;
   const today = new Date().toISOString().split("T")[0];
@@ -996,7 +1042,7 @@ async function load() {
   document.getElementById("content").style.display = "block";
   // Show Add Visit button (only for logged-in team members)
   sb.auth.getSession().then(({ data: { session } }) => {
-    if (session) document.getElementById("btn-add-visit").style.display = "flex";
+    if (session) document.getElementById("agent-menu-btn").style.display = "flex";
   });
 }
 
@@ -1049,6 +1095,75 @@ function renderAmenities(text) {
       + '<div style="font-size:11.5px;color:var(--foreground);line-height:1.3;">' + name + '</div>'
       + '</div>';
   }).join('');
+  document.getElementById("amenities-card").style.display = "block";
+}
+
+function renderVerificationChecklist() {
+  const CHECK_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 7"/></svg>';
+  const items = ["Ownership Verified", "Site Personally Inspected", "Legal Documents Checked", "Connectivity Verified"];
+  document.getElementById("verification-list").innerHTML = items.map(function(t){
+    return '<div class="pd-check-row"><div class="pd-check-icon">' + CHECK_SVG + '</div><div class="pd-check-text">' + t + '</div></div>';
+  }).join('');
+  document.getElementById("verification-card").style.display = "block";
+}
+
+function renderHighlights(text) {
+  const items = text.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+  if (!items.length) return;
+  const CHIP_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 7"/></svg>';
+  document.getElementById("listing-highlights").innerHTML = items.map(function(t){
+    return '<span class="pd-chip">' + CHIP_SVG + t + '</span>';
+  }).join('');
+  document.getElementById("highlights-card").style.display = "block";
+}
+
+function renderDocuments(data) {
+  const docs = [];
+  if (data.location_map_url) docs.push({ name: "Site Map", sub: "PDF document", url: data.location_map_url,
+    icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>' });
+  if (data.project_map_url) docs.push({ name: "Project Map", sub: "Layout image", url: data.project_map_url,
+    icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>' });
+  if (!docs.length) return;
+  document.getElementById("documents-list").innerHTML = docs.map(function(d){
+    return '<a class="pd-doc-row" href="' + d.url + '" target="_blank" rel="noopener">'
+      + '<div class="pd-doc-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + d.icon + '</svg></div>'
+      + '<div style="flex:1;"><div class="pd-doc-name">' + d.name + '</div><div class="pd-doc-sub">' + d.sub + '</div></div>'
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted-foreground);flex-shrink:0;"><path d="M7 17 17 7M7 7h10v10"/></svg>'
+      + '</a>';
+  }).join('');
+  document.getElementById("documents-card").style.display = "block";
+}
+
+// Real landmarks with verified, fixed real-world coordinates only — no vague
+// areas like "Ring Road" or "Educational Institutes" that don't have one true point.
+const JAIPUR_LANDMARKS = [
+  { name: "Jaipur Airport", lat: 26.82417, lng: 75.81222,
+    icon: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.7.7c-.5.5-.3 1.4.4 1.6L9 11l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 1.9 6.1c.2.7 1.1.9 1.6.4l.7-.7c.4-.3.6-.8.5-1.3z"/>' },
+  { name: "Muhana Mandi", lat: 26.811207, lng: 75.7831659,
+    icon: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>' },
+  { name: "Mahindra World City (SEZ)", lat: 26.806486, lng: 75.686874,
+    icon: '<rect x="2" y="7" width="20" height="14" rx="1"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>' },
+];
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function renderNearbyLandmarks(lat, lng) {
+  const rows = JAIPUR_LANDMARKS.map(function(l){
+    const km = haversineKm(lat, lng, l.lat, l.lng);
+    return { name: l.name, icon: l.icon, km: km };
+  }).sort(function(a,b){ return a.km - b.km; });
+  document.getElementById("landmarks-list").innerHTML = rows.map(function(r){
+    return '<div class="pd-landmark-row">'
+      + '<div class="pd-landmark-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + r.icon + '</svg></div>'
+      + '<div style="flex:1;font-size:15px;color:var(--foreground);">' + r.name + '</div>'
+      + '<div style="font-size:14px;font-weight:600;color:var(--muted-foreground);">' + r.km.toFixed(1) + ' km</div>'
+      + '</div>';
+  }).join('');
+  document.getElementById("landmarks-card").style.display = "block";
 }
 
 async function loadAvailability(listingId) {
