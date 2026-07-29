@@ -723,13 +723,18 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       </div>
       <div style="color:var(--primary);font-size:18px;flex-shrink:0;">→</div>
     </a>
-    <div class="desc-card">
-      <div class="desc-label">About this property</div>
-      <div class="desc-text" id="listing-desc">—</div>
+    <div class="desc-card" style="display:flex;align-items:flex-start;gap:18px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--primary);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div>
+        <div class="desc-label">About this property</div>
+        <div class="desc-text" id="listing-desc">—</div>
+      </div>
     </div>
     <div class="desc-card" id="amenities-card" style="display:none;">
-      <div class="desc-label">Amenities</div>
-      <div class="desc-text" id="listing-amenities">—</div>
+      <div class="desc-label" style="margin-bottom:14px;">Amenities</div>
+      <div id="listing-amenities" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:16px 8px;"></div>
     </div>
     <div id="project-map-card" style="display:none;margin-bottom:20px;">
       <div class="desc-label" style="margin-bottom:10px;">Project Map</div>
@@ -954,7 +959,7 @@ async function load() {
     showMeta("meta-project-area", "listing-project-area", data.total_project_area);
     showMeta("meta-colony-road-type", "listing-colony-road-type", data.colony_road_type);
     if (data.amenities) {
-      document.getElementById("listing-amenities").textContent = data.amenities;
+      renderAmenities(data.amenities);
       document.getElementById("amenities-card").style.display = "block";
     }
     if (data.project_map_url) {
@@ -974,6 +979,57 @@ async function load() {
   sb.auth.getSession().then(({ data: { session } }) => {
     if (session) document.getElementById("btn-add-visit").style.display = "flex";
   });
+}
+
+const AMENITY_ICONS = {
+  solar: '<path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4"/>',
+  light: '<path d="M9 21h6M12 3a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.1V17h6v-1.4c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/>',
+  water: '<path d="M12 2.5s-6 7-6 11.5a6 6 0 0 0 12 0c0-4.5-6-11.5-6-11.5z"/>',
+  road: '<path d="M4 3 2 21M20 3l2 18M9 3l-1 6M15 3l1 6M8 15l-1 6M16 15l1 6"/>',
+  gate: '<path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-8h6v8M3 12h18"/>',
+  security: '<path d="M12 3 4.5 6v6c0 4.5 3 7.5 7.5 9 4.5-1.5 7.5-4.5 7.5-9V6Z"/><path d="m9 12 2 2 4-4"/>',
+  plant: '<path d="M12 3c0 0-2 3.5-2 7s2 5 2 5 2-1.5 2-5-2-7-2-7z"/><path d="M12 15v6M8 21h8"/>',
+  park: '<path d="M12 22V13M12 13 7 8M12 13l5-5M12 8 8.5 4.5M12 8l3.5-3.5"/>',
+  club: '<path d="M2 20h20M4 20V10l8-6 8 6v10M10 20v-6h4v6"/>',
+  pool: '<path d="M2 18c1.5-1 2.5-1 4 0s2.5 1 4 0 2.5-1 4 0 2.5 1 4 0 2.5-1 4 0M4 14V6a2 2 0 0 1 2-2h6l6 6v4"/>',
+  gym: '<path d="M6.5 6.5 17.5 17.5M4 8l2-2M2 6l2-2M20 16l2 2M22 18l-2 2M9 4l-5 5M15 20l5-5"/>',
+  cctv: '<path d="M2 8h13l4-3v10l-4-3H2z"/><path d="M12 15v3a2 2 0 0 0 2 2h2"/>',
+  wiring: '<path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/>',
+  playground: '<circle cx="12" cy="5" r="2"/><path d="M12 7v6M8 22l4-9 4 9M6 13h12"/>',
+  temple: '<path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6M12 4v3"/>',
+  parking: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
+  default: '<path d="M12 22s8-4.5 8-11a8 8 0 0 0-16 0c0 6.5 8 11 8 11Z"/><path d="m9 11 2 2 4-4"/>',
+};
+function iconForAmenity(name) {
+  const n = name.toLowerCase();
+  if (n.includes("solar")) return AMENITY_ICONS.solar;
+  if (n.includes("light")) return AMENITY_ICONS.light;
+  if (n.includes("water")) return AMENITY_ICONS.water;
+  if (n.includes("road") || n.includes("tile") || n.includes("interlock")) return AMENITY_ICONS.road;
+  if (n.includes("township") || n.includes("gated") || n.includes("gate")) return AMENITY_ICONS.gate;
+  if (n.includes("security") || n.includes("cctv") || n.includes("camera")) return AMENITY_ICONS.cctv;
+  if (n.includes("plantation") || n.includes("garden") || n.includes("green")) return AMENITY_ICONS.plant;
+  if (n.includes("park") && !n.includes("parking")) return AMENITY_ICONS.park;
+  if (n.includes("club")) return AMENITY_ICONS.club;
+  if (n.includes("pool") || n.includes("swim")) return AMENITY_ICONS.pool;
+  if (n.includes("gym") || n.includes("fitness")) return AMENITY_ICONS.gym;
+  if (n.includes("wiring") || n.includes("power") || n.includes("electric")) return AMENITY_ICONS.wiring;
+  if (n.includes("play")) return AMENITY_ICONS.playground;
+  if (n.includes("temple") || n.includes("mandir")) return AMENITY_ICONS.temple;
+  if (n.includes("parking")) return AMENITY_ICONS.parking;
+  return AMENITY_ICONS.default;
+}
+function renderAmenities(text) {
+  const items = text.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+  const grid = document.getElementById("listing-amenities");
+  grid.innerHTML = items.map(function(name){
+    return '<div style="text-align:center;">'
+      + '<div style="width:52px;height:52px;border-radius:14px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:var(--primary);">'
+      + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + iconForAmenity(name) + '</svg>'
+      + '</div>'
+      + '<div style="font-size:11.5px;color:var(--foreground);line-height:1.3;">' + name + '</div>'
+      + '</div>';
+  }).join('');
 }
 
 async function loadAvailability(listingId) {
