@@ -868,6 +868,11 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <option value="90A">90A</option>
         <option value="Society Patta">Society Patta</option>
       </select></div>
+      <div>
+        <label class="fl">Site Map (PDF)</label>
+        <input type="file" id="f-map-pdf" accept="application/pdf" style="display:none;" onchange="handleMapPdf(this)"/>
+        <div id="map-pdf-status"></div>
+      </div>
       <div id="plot-only-fields">
       <div class="form-row">
         <div><label class="fl">Plot Size</label>
@@ -1651,6 +1656,9 @@ function renderListings(listings, admin) {
 // ── IMAGE HANDLING ──
 let pendingFiles = []; // new File objects to upload
 let savedUrls = [];    // already-uploaded URLs (for edit mode)
+let pendingMapPdfFile = null; // new PDF to upload
+let savedMapPdfUrl = null;    // already-uploaded PDF URL (edit mode)
+let removeMapPdfFlag = false; // user explicitly removed the existing PDF
 
 window.toggleColonyFields = function(){
   const isColony = document.getElementById('f-type').value === 'colony';
@@ -1812,6 +1820,41 @@ window.handleImages = (input) => {
   input.value = "";
 };
 
+window.handleMapPdf = (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.type !== "application/pdf") {
+    toast("Please choose a PDF file.");
+    input.value = "";
+    return;
+  }
+  pendingMapPdfFile = file;
+  removeMapPdfFlag = false;
+  renderMapPdfStatus();
+  input.value = "";
+};
+
+window.removeMapPdf = () => {
+  pendingMapPdfFile = null;
+  savedMapPdfUrl = null;
+  removeMapPdfFlag = true;
+  renderMapPdfStatus();
+};
+
+function renderMapPdfStatus() {
+  const el = document.getElementById("map-pdf-status");
+  const name = pendingMapPdfFile ? pendingMapPdfFile.name : (savedMapPdfUrl ? "Site map on file" : null);
+  if (name) {
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:10px;background:var(--secondary);border-radius:12px;padding:10px 14px;margin-top:4px;">'
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary);flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>'
+      + '<span style="font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</span>'
+      + '<button type="button" onclick="removeMapPdf()" style="border:none;background:none;color:var(--muted-foreground);cursor:pointer;flex-shrink:0;">✕</button>'
+      + '</div>';
+  } else {
+    el.innerHTML = '<button type="button" class="btn-ghost" onclick="document.getElementById(\'f-map-pdf\').click()" style="width:100%;justify-content:center;margin-top:4px;">📄 Choose PDF…</button>';
+  }
+}
+
 function renderImageGrid() {
   const grid = document.getElementById("img-grid");
   const total = savedUrls.length + pendingFiles.length;
@@ -1868,9 +1911,22 @@ async function uploadAllImages() {
   return uploaded;
 }
 
+async function uploadMapPdf() {
+  if (removeMapPdfFlag && !pendingMapPdfFile) return null;
+  if (!pendingMapPdfFile) return savedMapPdfUrl;
+  const path = `listings/${currentUser.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
+  const buffer = await pendingMapPdfFile.arrayBuffer();
+  if (!buffer.byteLength) throw new Error("That PDF appears to be empty (0 bytes) — try selecting it again.");
+  const { error } = await sb.storage.from("property-documents").upload(path, buffer, {cacheControl:"3600",upsert:false,contentType:"application/pdf"});
+  if (error) throw new Error("Failed to upload site map PDF: " + (error.message || "unknown error"));
+  const { data } = sb.storage.from("property-documents").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 // ── MODAL OPEN/CLOSE ──
 window.openAdd = () => {
-  editId = null; pendingFiles = []; savedUrls = [];
+  editId = null; pendingFiles = []; savedUrls = []; pendingMapPdfFile = null; savedMapPdfUrl = null; removeMapPdfFlag = false;
+  renderMapPdfStatus();
   document.getElementById("modal-title").textContent = "Add New Listing";
   ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width","f-no-units","f-project-area","f-amenities","f-project-map"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   document.querySelectorAll('#f-colony-road-widths input').forEach(function(cb){ cb.checked = false; });
@@ -1896,6 +1952,10 @@ window.adminEdit = async (id) => {
   editId = id;
   savedUrls = data.images && data.images.length ? [...data.images] : (data.image_url ? [data.image_url] : []);
   pendingFiles = [];
+  pendingMapPdfFile = null;
+  savedMapPdfUrl = data.location_map_url || null;
+  removeMapPdfFlag = false;
+  renderMapPdfStatus();
   document.getElementById("modal-title").textContent = "Edit & Verify";
   document.getElementById("f-title").value = data.title||"";
   document.getElementById("f-type").value = data.type||"plot";
@@ -1973,6 +2033,7 @@ window.submitListing = async () => {
   try {
     const imageUrls = await uploadAllImages();
     const image_url = imageUrls[0] || "";
+    const mapPdfUrl = await uploadMapPdf();
     if (editId) {
       const { error } = await sb.from("listings").update({
         title, type, area, price, size, desc, verified,
@@ -1980,7 +2041,7 @@ window.submitListing = async () => {
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
-        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, location_map_url: mapPdfUrl || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         submitter_phone: phone,
@@ -1995,7 +2056,7 @@ window.submitListing = async () => {
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
-        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, location_map_url: mapPdfUrl || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         status: "pending",
