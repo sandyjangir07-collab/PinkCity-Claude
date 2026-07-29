@@ -1016,11 +1016,6 @@ async function load() {
     if (data.park_facing) document.getElementById("park-badge").style.display = "inline-flex";
   }
   if (data.rera_approved) document.getElementById("rera-badge").style.display = "inline-flex";
-  if (data.location_map_url) {
-    const mapLink = document.getElementById("site-map-pdf-link");
-    mapLink.href = data.location_map_url;
-    mapLink.style.display = "flex";
-  }
   if (data.type === "colony") {
     document.getElementById("gallery").classList.add("gallery-contain");
     showMeta("meta-no-units", "listing-no-units", data.no_of_units);
