@@ -36,36 +36,61 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-lg: 1.75rem;
 }
-/* ── PD: Property Detail redesign component classes ── */
-.pd-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px 24px;margin-bottom:24px;box-shadow:var(--shadow-soft);}
-.pd-section-heading{font-size:18px;font-weight:600;color:var(--foreground);margin-bottom:16px;font-family:var(--font-sans);}
-.pd-row{display:flex;align-items:center;gap:14px;padding:14px 0;}
-.pd-row+.pd-row{border-top:1px solid var(--border);}
-.pd-row-icon{color:var(--primary);flex-shrink:0;width:20px;height:20px;}
-.pd-row-heading{font-size:14px;color:var(--muted-foreground);margin-bottom:2px;}
-.pd-row-value{font-size:16px;font-weight:600;color:var(--foreground);}
-.pd-chip{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:14px;font-weight:500;color:var(--foreground);}
-.pd-chip svg{color:var(--primary);flex-shrink:0;}
-.pd-chips{display:flex;flex-wrap:wrap;gap:10px;}
-.pd-pill{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:76px;}
-.pd-pill-icon{width:48px;height:48px;border-radius:50%;background:var(--secondary);display:flex;align-items:center;justify-content:center;color:var(--primary);transition:transform 0.18s ease;}
-.pd-pill:active .pd-pill-icon{transform:scale(0.94);}
-.pd-pill-label{font-size:12px;color:var(--foreground);text-align:center;line-height:1.3;}
-.pd-check-row{display:flex;align-items:center;gap:12px;padding:10px 0;}
-.pd-check-icon{width:22px;height:22px;border-radius:50%;background:rgba(34,197,94,0.12);color:#16a34a;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+/* ── PD: Property Detail redesign — matched to PinkCity Prime (07) reference ── */
+:root{
+  --pd-shadow-soft: 0 1px 2px oklch(0.22 0.02 20 / 0.04), 0 8px 24px oklch(0.22 0.02 20 / 0.06);
+  --pd-shadow-lift: 0 2px 4px oklch(0.22 0.02 20 / 0.05), 0 20px 40px oklch(0.42 0.14 8 / 0.1);
+  --pd-success: oklch(0.62 0.11 150);
+  --pd-success-soft: oklch(0.94 0.04 150);
+  --pd-gold: oklch(0.72 0.11 75);
+}
+.pd-eyebrow{font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:color-mix(in oklab,var(--primary) 80%,transparent);margin-bottom:6px;}
+.pd-section{padding:0 20px;margin-top:32px;}
+.pd-section-title{font-family:var(--font-display);font-size:22px;line-height:1.2;font-weight:500;color:var(--foreground);margin-bottom:16px;}
+.pd-card{background:var(--card);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);border-radius:28px;box-shadow:var(--pd-shadow-soft);padding:24px;}
+.pd-divider{height:1px;background:linear-gradient(to right,transparent,var(--border),transparent);}
+.pd-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+.pd-row-left{display:flex;align-items:center;gap:12px;}
+.pd-row-icon{width:36px;height:36px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pd-row-icon.pd-row-icon-muted{background:var(--secondary);}
+.pd-row-label{font-size:14px;color:var(--muted-foreground);}
+.pd-row-value{font-size:15px;font-weight:500;color:var(--foreground);text-align:right;}
+.pd-chip{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:500;transition:transform 0.18s ease;}
+.pd-chip:active{transform:translateY(1px);}
+.pd-chip-quiet{background:var(--secondary);color:var(--foreground);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);}
+.pd-chip-surface{background:var(--card);color:var(--foreground);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);box-shadow:var(--pd-shadow-soft);}
+.pd-chip-primary{background:var(--primary-soft);color:var(--primary);border:1px solid color-mix(in oklab,var(--primary) 15%,transparent);}
+.pd-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none;}
+.pd-scroll::-webkit-scrollbar{display:none;}
+.pd-pill{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);border-radius:999px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--foreground);box-shadow:var(--pd-shadow-soft);transition:transform 0.18s ease;}
+.pd-pill:active{transform:translateY(1px);}
+.pd-pill svg{color:var(--primary);flex-shrink:0;}
+.pd-check-row{display:flex;align-items:center;gap:12px;padding:6px 0;}
+.pd-check-icon{width:24px;height:24px;border-radius:50%;background:var(--pd-success-soft);color:var(--pd-success);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .pd-check-text{font-size:15px;color:var(--foreground);}
-.pd-doc-row{display:flex;align-items:center;gap:14px;padding:14px 4px;text-decoration:none;transition:opacity 0.18s ease;}
-.pd-doc-row:active{opacity:0.7;}
-.pd-doc-row+.pd-doc-row{border-top:1px solid var(--border);}
-.pd-doc-icon{width:40px;height:40px;border-radius:12px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.pd-doc-name{font-size:15px;font-weight:600;color:var(--foreground);}
-.pd-doc-sub{font-size:12.5px;color:var(--muted-foreground);}
-.pd-landmark-row{display:flex;align-items:center;gap:14px;padding:12px 0;}
-.pd-landmark-row+.pd-landmark-row{border-top:1px solid var(--border);}
-.pd-landmark-icon{width:36px;height:36px;border-radius:10px;background:var(--secondary);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pd-landmark-icon{width:36px;height:36px;border-radius:50%;background:var(--secondary);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pd-hero-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:500;}
+.pd-hero-badge-verified{background:var(--primary);color:var(--primary-foreground);box-shadow:var(--pd-shadow-lift);}
+.pd-hero-badge-plain{background:color-mix(in oklab,var(--card) 95%,transparent);backdrop-filter:blur(8px);color:var(--foreground);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);}
+.pd-hero-icon-btn{width:44px;height:44px;border-radius:50%;background:color-mix(in oklab,var(--card) 90%,transparent);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);box-shadow:var(--pd-shadow-soft);display:flex;align-items:center;justify-content:center;color:var(--foreground);transition:transform 0.15s ease;}
+.pd-hero-icon-btn:active{transform:scale(0.95);}
+.pd-title-card{margin:-56px 0 0;position:relative;z-index:10;}
+.pd-gallery-thumb{flex-shrink:0;border-radius:16px;overflow:hidden;border:1px solid color-mix(in oklab,var(--border) 60%,transparent);box-shadow:var(--pd-shadow-soft);width:112px;height:80px;position:relative;}
+.pd-gallery-thumb img{width:100%;height:100%;object-fit:cover;}
+.pd-cta-wrap{position:fixed;inset-inline:0;bottom:0;z-index:200;padding:12px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--background) 60%,transparent);}
+.pd-cta-bar{background:var(--card);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);border-radius:28px;box-shadow:var(--pd-shadow-lift);padding:10px;display:flex;align-items:center;gap:8px;}
+.pd-cta-primary{flex:1;height:48px;border-radius:999px;background:var(--primary);color:var(--primary-foreground);border:none;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.15s ease;cursor:pointer;}
+.pd-cta-primary:active{transform:scale(0.98);}
+.pd-cta-icon-btn{width:48px;height:48px;border-radius:50%;background:var(--secondary);color:var(--foreground);border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.15s ease;cursor:pointer;}
+.pd-cta-icon-btn:active{transform:scale(0.95);}
+.pd-agent-menu{position:absolute;bottom:60px;right:0;width:208px;background:var(--card);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);border-radius:18px;box-shadow:var(--pd-shadow-lift);padding:8px;animation:pd-fade-in 0.18s ease both;}
+.pd-agent-menu-label{padding:8px 10px 4px;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted-foreground);}
+.pd-agent-menu-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:12px;background:none;border:none;text-align:left;font-size:14px;color:var(--foreground);cursor:pointer;}
+.pd-agent-menu-item:active{background:var(--secondary);}
+.pd-agent-menu-item svg{color:var(--primary);flex-shrink:0;}
 .pd-fade-in{animation:pd-fade-in 0.32s ease both;}
 @keyframes pd-fade-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
-@media(prefers-reduced-motion:reduce){.pd-fade-in{animation:none;}}
+@media(prefers-reduced-motion:reduce){.pd-fade-in,.pd-agent-menu{animation:none;}}
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 body {
@@ -541,7 +566,10 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .mobile-cta{display:block;padding:13px 16px;font-size:14px;font-weight:500;background:var(--primary);color:var(--primary-foreground);border-radius:16px;text-align:center;text-decoration:none;transition:all 0.2s;box-shadow:0 2px 10px -2px rgba(157,29,76,0.35)}
 .mobile-cta:hover{background:#9d1d4c}
 
-.gallery{position:relative;width:100%;height:300px;overflow:hidden;background:var(--secondary);}
+.gallery{position:relative;width:100%;height:440px;overflow:hidden;background:var(--secondary);}
+.hero-gradient{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.32) 0%,transparent 32%,transparent 68%,var(--background) 100%);pointer-events:none;z-index:2;}
+.hero-icon-row{position:absolute;inset-inline:16px;top:16px;display:flex;align-items:center;justify-content:space-between;z-index:6;}
+.hero-icon-row-right{display:flex;gap:8px;}
 @media(min-width:640px){.gallery{height:440px;}}
 .gallery-track{display:flex;height:100%;transition:transform 0.45s cubic-bezier(0.22,1,0.36,1);will-change:transform;}
 .gallery-slide{min-width:100%;height:100%;flex-shrink:0;}
@@ -555,7 +583,7 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .gallery-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.5);transition:all 0.2s;cursor:pointer;border:none;}
 .gallery-dot.on{background:white;width:14px;border-radius:3px;}
 .gallery-count{position:absolute;top:14px;right:14px;background:rgba(20,16,18,0.55);backdrop-filter:blur(8px);color:white;font-size:12px;font-weight:500;padding:4px 10px;border-radius:999px;display:none;z-index:5;}
-.hero-badges{position:absolute;top:14px;left:14px;display:flex;gap:8px;flex-wrap:wrap;z-index:5;}
+.hero-badges{position:absolute;left:16px;right:16px;bottom:78px;display:flex;gap:8px;flex-wrap:wrap;z-index:5;}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--foreground);}
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--primary);}
 .hero-badge-verified{background:rgba(20,16,18,0.85);color:white;text-decoration:none;cursor:pointer;transition:all 0.2s;display:none;}
@@ -694,9 +722,19 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
 <div id="content" style="display:none;">
   <div class="gallery" id="gallery">
     <div class="gallery-track" id="gallery-track"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-icon-row">
+      <span></span>
+      <div class="hero-icon-row-right">
+        <button class="pd-hero-icon-btn" onclick="shareListingPage()" aria-label="Share">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
+        </button>
+      </div>
+    </div>
     <div class="hero-badges">
       <div class="hero-badge" id="type-badge"><span class="hero-badge-dot"></span>Plot</div>
       <a href="verified.html" class="hero-badge hero-badge-verified" id="verified-badge">
@@ -714,26 +752,95 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
     <div class="gallery-count" id="gallery-count"></div>
   </div>
 
-  <div class="detail-wrap">
-    <div class="price-row">
-      <div>
-        <div class="price-eyebrow">All-Inclusive Price</div>
-        <div class="price" id="listing-price">—</div>
+  <div class="detail-wrap" style="padding-top:0;">
+    <div class="pd-title-card">
+      <div class="pd-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="min-width:0;">
+            <div class="detail-title" style="margin-top:0;"><span id="listing-title-icon"></span><span id="listing-title">—</span></div>
+            <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted-foreground);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span id="listing-area-inline">—</span>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div class="price-eyebrow" style="margin-bottom:2px;">Starting</div>
+            <div class="price" id="listing-price" style="font-size:22px;">—</div>
+          </div>
+        </div>
+        <div class="pd-scroll" style="margin-top:18px;">
+          <span class="pd-chip pd-chip-quiet" id="qc-area"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="qc-area-val">—</span></span>
+          <span class="pd-chip pd-chip-quiet" id="qc-size" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 21M8 21H3v-5M16 3h5v5"/></svg><span id="qc-size-val">—</span></span>
+          <span class="pd-chip pd-chip-quiet" id="qc-units" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><span id="qc-units-val">—</span></span>
+          <span class="pd-chip pd-chip-quiet" id="qc-approval" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7z"/></svg><span id="qc-approval-val">—</span></span>
+        </div>
       </div>
     </div>
-    <div class="detail-title"><span id="listing-title-icon"></span><span id="listing-title">—</span></div>
-    <div class="meta-grid">
+    <div id="gallery-thumbs-wrap" style="display:none;margin-top:16px;">
+      <div class="pd-scroll" id="gallery-thumbs"></div>
+      <button onclick="openLightboxFromThumbs()" style="margin-top:10px;width:100%;border-radius:999px;border:1px solid var(--border);background:none;padding:12px;font-size:14px;font-weight:500;color:var(--foreground);cursor:pointer;">
+        <span id="thumb-count-label">View all photos</span>
+      </button>
+    </div>
+    <div class="pd-section" style="padding:0;margin-top:28px;">
+      <div class="pd-section-title" style="font-size:18px;">Project Overview</div>
+      <div class="pd-card" id="overview-rows">
+        <div class="pd-row" id="meta-plot-size" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 21M8 21H3v-5M16 3h5v5"/></svg></div><span class="pd-row-label">Plot Size</span></div>
+          <div style="text-align:right;">
+            <span class="pd-row-value" id="listing-plot-size">—</span>
+            <div class="pd-chip pd-chip-primary" id="meta-size-tag" style="display:none;margin-top:4px;padding:3px 10px;font-size:11px;"></div>
+          </div>
+        </div>
+        <div class="pd-divider" id="div-plot-size" style="display:none;"></div>
+        <div class="pd-row" id="meta-plot-dims" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><span class="pd-row-label">Dimensions</span></div>
+          <span class="pd-row-value" id="listing-plot-dims">—</span>
+        </div>
+        <div class="pd-divider" id="div-plot-dims" style="display:none;"></div>
+        <div class="pd-row" id="meta-road-width" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3 2 21M20 3l2 18M9 3l-1 6M15 3l1 6M8 15l-1 6M16 15l1 6"/></svg></div><span class="pd-row-label">Road Width</span></div>
+          <span class="pd-row-value" id="listing-road-width">—</span>
+        </div>
+        <div class="pd-divider" id="div-road-width" style="display:none;"></div>
+        <div class="pd-row" id="meta-facing" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg></div><span class="pd-row-label">Facing</span></div>
+          <span class="pd-row-value" id="listing-facing">—</span>
+        </div>
+        <div class="pd-divider" id="div-facing" style="display:none;"></div>
+        <div class="pd-row" id="meta-approval" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7z"/></svg></div><span class="pd-row-label">Approval</span></div>
+          <span class="pd-row-value" id="listing-approval">—</span>
+        </div>
+        <div class="pd-divider" id="div-approval" style="display:none;"></div>
+        <div class="pd-row" id="meta-agreement-value" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><span class="pd-row-label">Agreement Value</span></div>
+          <span class="pd-row-value" id="listing-agreement-value">—</span>
+        </div>
+        <div class="pd-divider" id="div-agreement-value" style="display:none;"></div>
+        <div class="pd-row" id="meta-no-units" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div><span class="pd-row-label">Total Units</span></div>
+          <span class="pd-row-value" id="listing-no-units">—</span>
+        </div>
+        <div class="pd-divider" id="div-no-units" style="display:none;"></div>
+        <div class="pd-row" id="meta-project-area" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 21M8 21H3v-5M16 3h5v5"/></svg></div><span class="pd-row-label">Project Area</span></div>
+          <span class="pd-row-value" id="listing-project-area">—</span>
+        </div>
+        <div class="pd-divider" id="div-project-area" style="display:none;"></div>
+        <div class="pd-row" id="meta-colony-road-type" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3 2 21M20 3l2 18M9 3l-1 6M15 3l1 6M8 15l-1 6M16 15l1 6"/></svg></div><span class="pd-row-label">Internal Roads</span></div>
+          <span class="pd-row-value" id="listing-colony-road-type">—</span>
+        </div>
+        <div class="pd-divider" id="div-colony-road-type" style="display:none;"></div>
+        <div class="pd-row" id="meta-approach-road" style="display:none;">
+          <div class="pd-row-left"><div class="pd-row-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div><span class="pd-row-label">Approach Road</span></div>
+          <span class="pd-row-value" id="listing-approach-road">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="meta-grid" style="display:none;">
       <div class="meta-card"><div class="meta-label">Location</div><div class="meta-val" id="listing-area">—</div><div class="meta-tag" id="meta-area-tag" style="display:none;"></div></div>
-      <div class="meta-card" id="meta-plot-size" style="display:none;"><div class="meta-label">Plot Size</div><div class="meta-val" id="listing-plot-size">—</div><div class="meta-tag" id="meta-size-tag" style="display:none;"></div></div>
-      <div class="meta-card" id="meta-plot-dims" style="display:none;"><div class="meta-label">Dimensions</div><div class="meta-val" id="listing-plot-dims">—</div></div>
-      <div class="meta-card" id="meta-road-width" style="display:none;"><div class="meta-label">Road Width</div><div class="meta-val" id="listing-road-width">—</div></div>
-      <div class="meta-card" id="meta-facing" style="display:none;"><div class="meta-label">Facing</div><div class="meta-val" id="listing-facing">—</div></div>
-      <div class="meta-card" id="meta-approval" style="display:none;"><div class="meta-label">Approval</div><div class="meta-val" id="listing-approval">—</div></div>
-      <div class="meta-card" id="meta-agreement-value" style="display:none;"><div class="meta-label">Agreement Value</div><div class="meta-val" id="listing-agreement-value">—</div></div>
-      <div class="meta-card" id="meta-no-units" style="display:none;"><div class="meta-label">No. of Units</div><div class="meta-val" id="listing-no-units">—</div></div>
-      <div class="meta-card" id="meta-project-area" style="display:none;"><div class="meta-label">Total Project Area</div><div class="meta-val" id="listing-project-area">—</div></div>
-      <div class="meta-card" id="meta-colony-road-type" style="display:none;"><div class="meta-label">Internal Roads</div><div class="meta-val" id="listing-colony-road-type">—</div></div>
-      <div class="meta-card" id="meta-approach-road" style="display:none;"><div class="meta-label">Approach Road</div><div class="meta-val" id="listing-approach-road">—</div></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
       <div id="rera-badge" style="display:none;align-items:center;gap:7px;background:rgba(34,197,94,0.12);color:#15803d;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;width:fit-content;">
@@ -770,12 +877,12 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
         <div style="width:40px;height:40px;border-radius:12px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg>
         </div>
-        <div class="pd-section-heading" style="margin-bottom:0;">PinkCity Verified™</div>
+        <div class="pd-section-title" style="margin-bottom:0;">PinkCity Verified™</div>
       </div>
       <div id="verification-list"></div>
     </div>
     <div class="pd-card" id="highlights-card" style="display:none;">
-      <div class="pd-section-heading">Highlights</div>
+      <div class="pd-section-title">Highlights</div>
       <div class="pd-chips" id="listing-highlights"></div>
     </div>
     <div class="desc-card" id="amenities-card" style="display:none;">
@@ -783,12 +890,23 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       <div id="listing-amenities" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:16px 8px;"></div>
     </div>
     <div class="pd-card" id="landmarks-card" style="display:none;">
-      <div class="pd-section-heading">Nearby Landmarks</div>
+      <div class="pd-section-title" style="font-size:18px;">Nearby Landmarks</div>
       <div id="landmarks-list"></div>
     </div>
-    <div class="pd-card" id="documents-card" style="display:none;">
-      <div class="pd-section-heading">Documents</div>
-      <div id="documents-list"></div>
+    <div id="map-card" style="display:none;margin-bottom:20px;">
+      <div class="pd-section-title" style="font-size:18px;padding:0 4px;margin-bottom:12px;">Location</div>
+      <div class="pd-card" style="padding:0;overflow:hidden;">
+        <div style="position:relative;height:210px;background:var(--secondary);">
+          <iframe id="map-embed" title="Map" style="position:absolute;inset:0;width:100%;height:100%;border:0;filter:grayscale(0.1);" loading="lazy"></iframe>
+        </div>
+        <div style="padding:20px;">
+          <div id="map-address" style="font-size:15px;font-weight:500;color:var(--foreground);"></div>
+          <a id="map-directions-btn" href="#" target="_blank" rel="noopener" style="margin-top:14px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:var(--primary-foreground);border-radius:999px;padding:13px;font-size:14px;font-weight:500;text-decoration:none;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            Get directions
+          </a>
+        </div>
+      </div>
     </div>
     <img id="project-map-img" src="" alt="" style="display:none;"/>
     <div id="availability-card" style="display:none;margin-bottom:20px;">
@@ -817,22 +935,27 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
   </div>
 </div>
 
-<div class="cta-bar">
-  <div class="cta-row">
-    <a class="btn-wa" id="wa-btn" href="#" target="_blank">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
-      WhatsApp
+<div class="pd-cta-wrap">
+  <div class="pd-cta-bar">
+    <button class="pd-cta-primary" onclick="openVisit()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Schedule Site Visit
+    </button>
+    <a class="pd-cta-icon-btn" id="wa-btn" href="#" target="_blank" aria-label="WhatsApp" style="background:#25d366;color:white;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
     </a>
-    <button class="btn-visit" onclick="openVisit()">Schedule Site Visit</button>
-    <button id="agent-menu-btn" onclick="toggleAgentMenu()" style="display:none;flex-shrink:0;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border);background:white;color:var(--foreground);align-items:center;justify-content:center;cursor:pointer;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-    </button>
-  </div>
-  <div id="agent-menu" style="display:none;padding:10px 0 2px;">
-    <button class="btn-add-visit" id="btn-add-visit" onclick="openAddVisit()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Log Visit
-    </button>
+    <div style="position:relative;" id="agent-menu-wrap">
+      <button class="pd-cta-icon-btn" id="agent-menu-btn" onclick="toggleAgentMenu()" style="display:none;" aria-label="Agent menu">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+      </button>
+      <div class="pd-agent-menu" id="agent-menu" style="display:none;">
+        <div class="pd-agent-menu-label">Agent</div>
+        <button class="pd-agent-menu-item" id="btn-add-visit" onclick="openAddVisit()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Log Visit
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -896,9 +1019,43 @@ const TYPE_LABEL = {plot:"Residential Plot",farmhouse:"Farmhouse",apartment:"Apa
 
 let listingData = null, galIndex = 0, galImages = [], selectedTime = "9–11 AM";
 
+function toast(msg){
+  const el = document.getElementById("toast");
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(function(){ el.classList.remove("on"); }, 2600);
+}
+
+function shareListingPage(){
+  const url = window.location.href;
+  const title = document.getElementById("listing-title").textContent || "PinkCity Listing";
+  if (navigator.share) {
+    navigator.share({ title, url }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(url).then(function(){ toast("✓ Link copied!"); });
+  }
+}
+
 function toggleAgentMenu(){
   const menu = document.getElementById("agent-menu");
   menu.style.display = menu.style.display === "none" ? "block" : "none";
+}
+
+function openLightboxFromThumbs(){
+  galGo(0);
+  document.getElementById("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderThumbStrip(images) {
+  const wrap = document.getElementById("gallery-thumbs-wrap");
+  if (!images.length || images.length < 2) { wrap.style.display = "none"; return; }
+  document.getElementById("gallery-thumbs").innerHTML = images.map(function(url, i){
+    return '<button class="pd-gallery-thumb" onclick="galGo(' + i + ')" style="border:none;padding:0;"><img src="' + url + '" alt=""/></button>';
+  }).join('');
+  document.getElementById("thumb-count-label").textContent = "View all " + images.length + " photos";
+  wrap.style.display = "block";
 }
 
 function galBuild(images, type) {
@@ -908,6 +1065,7 @@ function galBuild(images, type) {
   const prev  = document.getElementById("gprev");
   const next  = document.getElementById("gnext");
   galImages = images; galIndex = 0;
+  renderThumbStrip(images);
   if (!images.length) {
     track.innerHTML = `<div class="gallery-slide"><div class="gallery-slide-emoji" style="background:${GRADS[type]||GRADS.plot}">${EMOJI[type]||"🏠"}</div></div>`;
     return;
@@ -992,10 +1150,19 @@ async function load() {
   document.getElementById("listing-title").textContent = data.title;
   document.getElementById("listing-title-icon").textContent = EMOJI[data.type]||"🏠";
   document.getElementById("listing-area").textContent = (data.area||"") + ", Jaipur";
+  document.getElementById("listing-area-inline").textContent = (data.area||"") + ", Jaipur";
+  document.getElementById("qc-area-val").textContent = data.area || "Jaipur";
+  if (data.approval_type) {
+    document.getElementById("qc-approval-val").textContent = data.approval_type;
+    document.getElementById("qc-approval").style.display = "inline-flex";
+  }
   function showMeta(cardId, valId, value) {
     if (!value) return;
     document.getElementById(cardId).style.display = "";
     document.getElementById(valId).textContent = value;
+    const dividerId = cardId.replace("meta-", "div-");
+    const divider = document.getElementById(dividerId);
+    if (divider) divider.style.display = "block";
   }
   showMeta("meta-approval", "listing-approval", data.approval_type);
   if (data.type !== "colony") {
@@ -1004,6 +1171,8 @@ async function load() {
     showMeta("meta-agreement-value", "listing-agreement-value", data.agreement_value);
     if (data.plot_size) {
       showMeta("meta-plot-size", "listing-plot-size", data.plot_size + " " + (data.plot_size_unit || "Gaj"));
+      document.getElementById("qc-size-val").textContent = data.plot_size + " " + (data.plot_size_unit || "Gaj");
+      document.getElementById("qc-size").style.display = "inline-flex";
       const gajVal = (data.plot_size_unit||"Gaj").toLowerCase().includes("gaj") ? Number(data.plot_size) : null;
       if (gajVal) {
         const sizeTag = document.getElementById("meta-size-tag");
@@ -1019,6 +1188,10 @@ async function load() {
   if (data.type === "colony") {
     document.getElementById("gallery").classList.add("gallery-contain");
     showMeta("meta-no-units", "listing-no-units", data.no_of_units);
+    if (data.no_of_units) {
+      document.getElementById("qc-units-val").textContent = data.no_of_units + " Units";
+      document.getElementById("qc-units").style.display = "inline-flex";
+    }
     showMeta("meta-project-area", "listing-project-area", data.total_project_area);
     showMeta("meta-colony-road-type", "listing-colony-road-type", data.colony_road_type);
     showMeta("meta-approach-road", "listing-approach-road", data.approach_road);
@@ -1026,8 +1199,15 @@ async function load() {
   }
   if (data.amenities) renderAmenities(data.amenities);
   if (data.highlights) renderHighlights(data.highlights);
-  renderDocuments(data);
-  if (data.latitude && data.longitude) renderNearbyLandmarks(Number(data.latitude), Number(data.longitude));
+  if (data.nearby_landmarks) renderNearbyLandmarks(data.nearby_landmarks);
+  if (data.latitude && data.longitude) {
+    const lat = Number(data.latitude), lng = Number(data.longitude);
+    const d = 0.01;
+    document.getElementById("map-embed").src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-d}%2C${lat-d}%2C${lng+d}%2C${lat+d}&layer=mapnik&marker=${lat}%2C${lng}`;
+    document.getElementById("map-address").textContent = data.area || data.title;
+    document.getElementById("map-directions-btn").href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    document.getElementById("map-card").style.display = "block";
+  }
   document.getElementById("listing-desc").textContent = data.desc || data.description || "Contact us for full property details.";
   document.getElementById("wa-btn").href = `https://wa.me/919358830405?text=${encodeURIComponent("Hi, I am interested in: "+data.title+" ("+data.price+") in "+(data.area||""))}`;
   const today = new Date().toISOString().split("T")[0];
@@ -1094,8 +1274,8 @@ function renderAmenities(text) {
 }
 
 function renderVerificationChecklist() {
-  const CHECK_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 7"/></svg>';
-  const items = ["Ownership Verified", "Site Personally Inspected", "Legal Documents Checked", "Connectivity Verified"];
+  const CHECK_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 7"/></svg>';
+  const items = ["Ownership Verified", "Site Personally Inspected", "Legal Documents Checked", "Connectivity Verified", "Market Value Reviewed"];
   document.getElementById("verification-list").innerHTML = items.map(function(t){
     return '<div class="pd-check-row"><div class="pd-check-icon">' + CHECK_SVG + '</div><div class="pd-check-text">' + t + '</div></div>';
   }).join('');
@@ -1105,57 +1285,26 @@ function renderVerificationChecklist() {
 function renderHighlights(text) {
   const items = text.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
   if (!items.length) return;
-  const CHIP_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 7"/></svg>';
   document.getElementById("listing-highlights").innerHTML = items.map(function(t){
-    return '<span class="pd-chip">' + CHIP_SVG + t + '</span>';
+    return '<span class="pd-chip pd-chip-surface">' + t + '</span>';
   }).join('');
   document.getElementById("highlights-card").style.display = "block";
 }
 
-function renderDocuments(data) {
-  const docs = [];
-  if (data.location_map_url) docs.push({ name: "Site Map", sub: "PDF document", url: data.location_map_url,
-    icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>' });
-  if (data.project_map_url) docs.push({ name: "Project Map", sub: "Layout image", url: data.project_map_url,
-    icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>' });
-  if (!docs.length) return;
-  document.getElementById("documents-list").innerHTML = docs.map(function(d){
-    return '<a class="pd-doc-row" href="' + d.url + '" target="_blank" rel="noopener">'
-      + '<div class="pd-doc-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + d.icon + '</svg></div>'
-      + '<div style="flex:1;"><div class="pd-doc-name">' + d.name + '</div><div class="pd-doc-sub">' + d.sub + '</div></div>'
-      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted-foreground);flex-shrink:0;"><path d="M7 17 17 7M7 7h10v10"/></svg>'
-      + '</a>';
-  }).join('');
-  document.getElementById("documents-card").style.display = "block";
-}
-
-// Real landmarks with verified, fixed real-world coordinates only — no vague
-// areas like "Ring Road" or "Educational Institutes" that don't have one true point.
-const JAIPUR_LANDMARKS = [
-  { name: "Jaipur Airport", lat: 26.82417, lng: 75.81222,
-    icon: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.7.7c-.5.5-.3 1.4.4 1.6L9 11l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 1.9 6.1c.2.7 1.1.9 1.6.4l.7-.7c.4-.3.6-.8.5-1.3z"/>' },
-  { name: "Muhana Mandi", lat: 26.811207, lng: 75.7831659,
-    icon: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>' },
-  { name: "Mahindra World City (SEZ)", lat: 26.806486, lng: 75.686874,
-    icon: '<rect x="2" y="7" width="20" height="14" rx="1"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>' },
-];
-function haversineKm(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-function renderNearbyLandmarks(lat, lng) {
-  const rows = JAIPUR_LANDMARKS.map(function(l){
-    const km = haversineKm(lat, lng, l.lat, l.lng);
-    return { name: l.name, icon: l.icon, km: km };
-  }).sort(function(a,b){ return a.km - b.km; });
+// Nearby Landmarks — filled in manually by the team (name + time/distance),
+// not calculated. Format: "Name - value", comma-separated.
+const LANDMARK_ICON = '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>';
+function renderNearbyLandmarks(text) {
+  const items = text.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+  if (!items.length) return;
+  const rows = items.map(function(item){
+    const parts = item.split(" - ");
+    return { name: parts[0] ? parts[0].trim() : item, value: parts[1] ? parts[1].trim() : "" };
+  });
   document.getElementById("landmarks-list").innerHTML = rows.map(function(r){
-    return '<div class="pd-landmark-row">'
-      + '<div class="pd-landmark-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + r.icon + '</svg></div>'
-      + '<div style="flex:1;font-size:15px;color:var(--foreground);">' + r.name + '</div>'
-      + '<div style="font-size:14px;font-weight:600;color:var(--muted-foreground);">' + r.km.toFixed(1) + ' km</div>'
+    return '<div class="pd-row">'
+      + '<div class="pd-row-left"><div class="pd-row-icon pd-row-icon-muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + LANDMARK_ICON + '</svg></div><span style="font-size:15px;color:var(--foreground);">' + r.name + '</span></div>'
+      + (r.value ? '<div class="pd-row-value">' + r.value + '</div>' : '')
       + '</div>';
   }).join('');
   document.getElementById("landmarks-card").style.display = "block";

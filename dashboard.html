@@ -877,7 +877,13 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <div><label class="fl">Latitude</label><input class="fi" id="f-lat" type="number" step="any" placeholder="e.g. 26.8112"/></div>
         <div><label class="fl">Longitude</label><input class="fi" id="f-lng" type="number" step="any" placeholder="e.g. 75.7832"/></div>
       </div>
-      <div style="font-size:11.5px;color:var(--muted-foreground);margin-top:-8px;">Optional, but powers real distance-to-landmark info on the listing page. Right-click the spot on Google Maps → tap the coordinates to copy them.</div>
+      <div style="font-size:11.5px;color:var(--muted-foreground);margin-top:-8px;">Optional — powers the map on the listing page. Right-click the spot on Google Maps → tap the coordinates to copy them.</div>
+      <div><label class="fl">Highlights</label><input class="fi" id="f-highlights" placeholder="e.g. Ring Road Nearby, 100 Ft Road, Gated Colony, Ready Registry"/></div>
+      <div>
+        <label class="fl">Nearby Landmarks</label>
+        <input class="fi" id="f-landmarks" placeholder="e.g. Ring Road - 4 min, Airport - 25 min, Muhana Mandi - 5 min"/>
+        <div style="font-size:11.5px;color:var(--muted-foreground);margin-top:6px;">Format: Name - time or distance, separated by commas.</div>
+      </div>
       <div id="plot-only-fields">
       <div class="form-row">
         <div><label class="fl">Plot Size</label>
@@ -1940,7 +1946,7 @@ window.openAdd = () => {
   editId = null; pendingFiles = []; savedUrls = []; pendingMapPdfFile = null; savedMapPdfUrl = null; removeMapPdfFlag = false;
   renderMapPdfStatus();
   document.getElementById("modal-title").textContent = "Add New Listing";
-  ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width","f-no-units","f-project-area","f-amenities","f-project-map","f-lat","f-lng"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width","f-no-units","f-project-area","f-amenities","f-project-map","f-lat","f-lng","f-highlights","f-landmarks"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   document.querySelectorAll('#f-colony-road-widths input').forEach(function(cb){ cb.checked = false; });
   const far=document.getElementById("f-approach-road");if(far)far.selectedIndex=0;
   const ft=document.getElementById("f-type");if(ft)ft.selectedIndex=0;
@@ -1996,6 +2002,8 @@ window.adminEdit = async (id) => {
   document.getElementById("f-approach-road").value = data.approach_road || "";
   document.getElementById("f-lat").value = data.latitude || "";
   document.getElementById("f-lng").value = data.longitude || "";
+  document.getElementById("f-highlights").value = data.highlights || "";
+  document.getElementById("f-landmarks").value = data.nearby_landmarks || "";
   const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=!!data.corner_plot;
   const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=!!data.park_facing;
   const fr=document.getElementById("f-rera");if(fr)fr.checked=!!data.rera_approved;
@@ -2036,6 +2044,8 @@ window.submitListing = async () => {
   const approachRoad = document.getElementById("f-approach-road").value;
   const lat = document.getElementById("f-lat").value.trim();
   const lng = document.getElementById("f-lng").value.trim();
+  const highlights = document.getElementById("f-highlights").value.trim();
+  const landmarks = document.getElementById("f-landmarks").value.trim();
   const isColony = type === "colony";
   if (isColony) {
     roadWidth = ""; facing = ""; agreementValue = "";
@@ -2060,7 +2070,7 @@ window.submitListing = async () => {
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
-        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, approach_road: approachRoad || null, location_map_url: mapPdfUrl || null, latitude: lat ? Number(lat) : null, longitude: lng ? Number(lng) : null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, approach_road: approachRoad || null, location_map_url: mapPdfUrl || null, latitude: lat ? Number(lat) : null, longitude: lng ? Number(lng) : null, highlights: highlights || null, nearby_landmarks: landmarks || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         submitter_phone: phone,
@@ -2075,7 +2085,7 @@ window.submitListing = async () => {
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
-        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, approach_road: approachRoad || null, location_map_url: mapPdfUrl || null, latitude: lat ? Number(lat) : null, longitude: lng ? Number(lng) : null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, approach_road: approachRoad || null, location_map_url: mapPdfUrl || null, latitude: lat ? Number(lat) : null, longitude: lng ? Number(lng) : null, highlights: highlights || null, nearby_landmarks: landmarks || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         status: "pending",
