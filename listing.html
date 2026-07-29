@@ -937,10 +937,10 @@ async function load() {
     document.getElementById(cardId).style.display = "";
     document.getElementById(valId).textContent = value;
   }
+  showMeta("meta-approval", "listing-approval", data.approval_type);
   if (data.type !== "colony") {
     showMeta("meta-road-width", "listing-road-width", data.road_width);
     showMeta("meta-facing", "listing-facing", data.facing);
-    showMeta("meta-approval", "listing-approval", data.approval_type);
     showMeta("meta-agreement-value", "listing-agreement-value", data.agreement_value);
     if (data.plot_size) {
       showMeta("meta-plot-size", "listing-plot-size", data.plot_size + " " + (data.plot_size_unit || "Gaj"));

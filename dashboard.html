@@ -862,6 +862,12 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
         <div><label class="fl">Area / Locality *</label><input class="fi" id="f-area" placeholder="e.g. Mansarovar, Jaipur"/></div>
         <div><label class="fl">Price *</label><input class="fi" id="f-price" placeholder="e.g. ₹68 Lakh"/></div>
       </div>
+      <div><label class="fl">Approval</label><select class="fsel" id="f-approval">
+        <option value="">Select</option>
+        <option value="JDA">JDA</option>
+        <option value="90A">90A</option>
+        <option value="Society Patta">Society Patta</option>
+      </select></div>
       <div id="plot-only-fields">
       <div class="form-row">
         <div><label class="fl">Plot Size</label>
@@ -904,15 +910,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
           <option value="South">South</option>
         </select></div>
       </div>
-      <div class="form-row">
-        <div><label class="fl">Agreement Value</label><input class="fi" id="f-agreement-value" placeholder="e.g. ₹55 Lakh"/></div>
-        <div><label class="fl">Approval</label><select class="fsel" id="f-approval">
-          <option value="">Select</option>
-          <option value="JDA">JDA</option>
-          <option value="90A">90A</option>
-          <option value="Society Patta">Society Patta</option>
-        </select></div>
-      </div>
+      <div><label class="fl">Agreement Value</label><input class="fi" id="f-agreement-value" placeholder="e.g. ₹55 Lakh"/></div>
       <div class="form-row">
         <div class="verified-row" style="margin-bottom:0;">
           <input type="checkbox" id="f-corner-plot"/>
@@ -1961,7 +1959,7 @@ window.submitListing = async () => {
   const colonyRoadType = Array.from(document.querySelectorAll('#f-colony-road-widths input:checked')).map(function(cb){ return cb.value; }).join(", ");
   const isColony = type === "colony";
   if (isColony) {
-    roadWidth = ""; facing = ""; agreementValue = ""; approvalType = "";
+    roadWidth = ""; facing = ""; agreementValue = "";
     plotSize = ""; plotSizeUnit = "Gaj"; plotLength = ""; plotWidth = "";
   }
   const size = (!isColony && plotSize) ? plotSize + " " + plotSizeUnit : "";
