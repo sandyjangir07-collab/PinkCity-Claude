@@ -926,6 +926,14 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
           <div><label class="fl">No. of Units</label><input class="fi" id="f-no-units" type="number" placeholder="e.g. 120"/></div>
           <div><label class="fl">Total Project Area</label><input class="fi" id="f-project-area" placeholder="e.g. 25 Acres"/></div>
         </div>
+        <div><label class="fl">Road Type</label><select class="fsel" id="f-colony-road-type">
+          <option value="">Select</option>
+          <option value="Interlocking Tile Road">Interlocking Tile Road</option>
+          <option value="Concrete Road">Concrete Road</option>
+          <option value="Tar / Asphalt Road">Tar / Asphalt Road</option>
+          <option value="WBM Road">WBM Road (Water Bound Macadam)</option>
+          <option value="Kutcha Road">Kutcha Road</option>
+        </select></div>
         <div><label class="fl">Amenities</label><input class="fi" id="f-amenities" placeholder="e.g. Clubhouse, Park, 24x7 Security, Underground Wiring"/></div>
         <div><label class="fl">Project Map (image URL)</label><input class="fi" id="f-project-map" placeholder="Paste a link to the layout/map image"/></div>
       </div>
@@ -1862,6 +1870,7 @@ window.openAdd = () => {
   editId = null; pendingFiles = []; savedUrls = [];
   document.getElementById("modal-title").textContent = "Add New Listing";
   ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width","f-no-units","f-project-area","f-amenities","f-project-map"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  const fcrt=document.getElementById("f-colony-road-type");if(fcrt)fcrt.selectedIndex=0;
   const ft=document.getElementById("f-type");if(ft)ft.selectedIndex=0;
   toggleColonyFields();
   const frw=document.getElementById("f-road-width");if(frw)frw.selectedIndex=0;
@@ -1904,6 +1913,7 @@ window.adminEdit = async (id) => {
   document.getElementById("f-project-area").value = data.total_project_area||"";
   document.getElementById("f-amenities").value = data.amenities||"";
   document.getElementById("f-project-map").value = data.project_map_url||"";
+  document.getElementById("f-colony-road-type").value = data.colony_road_type||"";
   const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=!!data.corner_plot;
   const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=!!data.park_facing;
   const fr=document.getElementById("f-rera");if(fr)fr.checked=!!data.rera_approved;
@@ -1928,19 +1938,25 @@ window.submitListing = async () => {
   const price = document.getElementById("f-price").value.trim();
   const desc  = document.getElementById("f-desc").value.trim();
   const phone = document.getElementById("f-phone").value.trim();
-  const roadWidth = document.getElementById("f-road-width").value;
-  const facing = document.getElementById("f-facing").value;
-  const agreementValue = document.getElementById("f-agreement-value").value.trim();
-  const approvalType = document.getElementById("f-approval").value;
-  const plotSize = document.getElementById("f-plot-size").value.trim();
-  const plotSizeUnit = document.getElementById("f-plot-size-unit").value;
-  const plotLength = document.getElementById("f-plot-length").value.trim();
-  const plotWidth = document.getElementById("f-plot-width").value.trim();
+  let roadWidth = document.getElementById("f-road-width").value;
+  let facing = document.getElementById("f-facing").value;
+  let agreementValue = document.getElementById("f-agreement-value").value.trim();
+  let approvalType = document.getElementById("f-approval").value;
+  let plotSize = document.getElementById("f-plot-size").value.trim();
+  let plotSizeUnit = document.getElementById("f-plot-size-unit").value;
+  let plotLength = document.getElementById("f-plot-length").value.trim();
+  let plotWidth = document.getElementById("f-plot-width").value.trim();
   const noOfUnits = document.getElementById("f-no-units").value.trim();
   const totalProjectArea = document.getElementById("f-project-area").value.trim();
   const amenities = document.getElementById("f-amenities").value.trim();
   const projectMapUrl = document.getElementById("f-project-map").value.trim();
-  const size = plotSize ? plotSize + " " + plotSizeUnit : "";
+  const colonyRoadType = document.getElementById("f-colony-road-type").value;
+  const isColony = type === "colony";
+  if (isColony) {
+    roadWidth = ""; facing = ""; agreementValue = ""; approvalType = "";
+    plotSize = ""; plotSizeUnit = "Gaj"; plotLength = ""; plotWidth = "";
+  }
+  const size = (!isColony && plotSize) ? plotSize + " " + plotSizeUnit : "";
   const cornerPlot = document.getElementById("f-corner-plot")?.checked || false;
   const parkFacing = document.getElementById("f-park-facing")?.checked || false;
   const reraApproved = document.getElementById("f-rera")?.checked || false;
@@ -1958,7 +1974,7 @@ window.submitListing = async () => {
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
-        amenities: amenities || null, project_map_url: projectMapUrl || null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         submitter_phone: phone,
@@ -1973,7 +1989,7 @@ window.submitListing = async () => {
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
-        amenities: amenities || null, project_map_url: projectMapUrl || null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         status: "pending",

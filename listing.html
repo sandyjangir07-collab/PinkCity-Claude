@@ -700,6 +700,7 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       <div class="meta-card" id="meta-agreement-value" style="display:none;"><div class="meta-label">Agreement Value</div><div class="meta-val" id="listing-agreement-value">—</div></div>
       <div class="meta-card" id="meta-no-units" style="display:none;"><div class="meta-label">No. of Units</div><div class="meta-val" id="listing-no-units">—</div></div>
       <div class="meta-card" id="meta-project-area" style="display:none;"><div class="meta-label">Total Project Area</div><div class="meta-val" id="listing-project-area">—</div></div>
+      <div class="meta-card" id="meta-colony-road-type" style="display:none;"><div class="meta-label">Road Type</div><div class="meta-val" id="listing-colony-road-type">—</div></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
       <div id="rera-badge" style="display:none;align-items:center;gap:7px;background:rgba(34,197,94,0.12);color:#15803d;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;width:fit-content;">
@@ -929,26 +930,29 @@ async function load() {
     document.getElementById(cardId).style.display = "";
     document.getElementById(valId).textContent = value;
   }
-  showMeta("meta-road-width", "listing-road-width", data.road_width);
-  showMeta("meta-facing", "listing-facing", data.facing);
-  showMeta("meta-approval", "listing-approval", data.approval_type);
-  showMeta("meta-agreement-value", "listing-agreement-value", data.agreement_value);
-  if (data.plot_size) {
-    showMeta("meta-plot-size", "listing-plot-size", data.plot_size + " " + (data.plot_size_unit || "Gaj"));
-    const gajVal = (data.plot_size_unit||"Gaj").toLowerCase().includes("gaj") ? Number(data.plot_size) : null;
-    if (gajVal) {
-      const sizeTag = document.getElementById("meta-size-tag");
-      sizeTag.textContent = gajVal >= 200 ? "Spacious Plot" : gajVal >= 100 ? "Standard Plot" : "Compact Plot";
-      sizeTag.style.display = "inline-flex";
+  if (data.type !== "colony") {
+    showMeta("meta-road-width", "listing-road-width", data.road_width);
+    showMeta("meta-facing", "listing-facing", data.facing);
+    showMeta("meta-approval", "listing-approval", data.approval_type);
+    showMeta("meta-agreement-value", "listing-agreement-value", data.agreement_value);
+    if (data.plot_size) {
+      showMeta("meta-plot-size", "listing-plot-size", data.plot_size + " " + (data.plot_size_unit || "Gaj"));
+      const gajVal = (data.plot_size_unit||"Gaj").toLowerCase().includes("gaj") ? Number(data.plot_size) : null;
+      if (gajVal) {
+        const sizeTag = document.getElementById("meta-size-tag");
+        sizeTag.textContent = gajVal >= 200 ? "Spacious Plot" : gajVal >= 100 ? "Standard Plot" : "Compact Plot";
+        sizeTag.style.display = "inline-flex";
+      }
     }
+    if (data.plot_length && data.plot_width) showMeta("meta-plot-dims", "listing-plot-dims", data.plot_length + " × " + data.plot_width + " Ft");
   }
-  if (data.plot_length && data.plot_width) showMeta("meta-plot-dims", "listing-plot-dims", data.plot_length + " × " + data.plot_width + " Ft");
   if (data.rera_approved) document.getElementById("rera-badge").style.display = "inline-flex";
   if (data.corner_plot) document.getElementById("corner-badge").style.display = "inline-flex";
   if (data.park_facing) document.getElementById("park-badge").style.display = "inline-flex";
   if (data.type === "colony") {
     showMeta("meta-no-units", "listing-no-units", data.no_of_units);
     showMeta("meta-project-area", "listing-project-area", data.total_project_area);
+    showMeta("meta-colony-road-type", "listing-colony-road-type", data.colony_road_type);
     if (data.amenities) {
       document.getElementById("listing-amenities").textContent = data.amenities;
       document.getElementById("amenities-card").style.display = "block";
@@ -975,15 +979,18 @@ async function load() {
 async function loadAvailability(listingId) {
   const { data: units, error } = await sb.from("colony_units").select("*").eq("listing_id", listingId).order("created_at", { ascending: true });
   if (error || !units || !units.length) return;
-  const STATUS_COLOR = { available: "#22c55e", token: "#eab308", sold: "#ef4444" };
+  const STATUS_STYLE = {
+    available: { bg: "#dcfce7", border: "#86efac", text: "#166534" },
+    token:     { bg: "#fef9c3", border: "#fde047", text: "#854d0e" },
+    sold:      { bg: "#fee2e2", border: "#fca5a5", text: "#991b1b" },
+  };
   const STATUS_TEXT = { available: "Available", token: "Token Received", sold: "Sold" };
   const grid = document.getElementById("availability-grid");
   grid.innerHTML = units.map(function(u) {
-    const color = STATUS_COLOR[u.status] || "#9ca3af";
-    return '<div style="border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center;background:white;" title="' + (STATUS_TEXT[u.status] || u.status) + '">'
-      + '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';margin:0 auto 6px;"></div>'
-      + '<div style="font-size:12.5px;font-weight:600;color:var(--foreground);">' + (u.unit_number || "—") + '</div>'
-      + (u.unit_size ? '<div style="font-size:10.5px;color:var(--muted-foreground);margin-top:2px;">' + u.unit_size + '</div>' : '')
+    const s = STATUS_STYLE[u.status] || { bg: "#f3f4f6", border: "#d1d5db", text: "#374151" };
+    return '<div style="border:1px solid ' + s.border + ';border-radius:12px;padding:10px 8px;text-align:center;background:' + s.bg + ';" title="' + (STATUS_TEXT[u.status] || u.status) + '">'
+      + '<div style="font-size:12.5px;font-weight:700;color:' + s.text + ';">' + (u.unit_number || "—") + '</div>'
+      + (u.unit_size ? '<div style="font-size:10.5px;color:' + s.text + ';opacity:0.75;margin-top:2px;">' + u.unit_size + '</div>' : '')
       + '</div>';
   }).join('');
   document.getElementById("availability-card").style.display = "block";
