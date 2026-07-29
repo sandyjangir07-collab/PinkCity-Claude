@@ -515,8 +515,7 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .gallery-track{display:flex;height:100%;transition:transform 0.45s cubic-bezier(0.22,1,0.36,1);will-change:transform;}
 .gallery-slide{min-width:100%;height:100%;flex-shrink:0;}
 .gallery-slide img{width:100%;height:100%;object-fit:cover;}
-.gallery.gallery-contain{height:340px;}
-.gallery.gallery-contain .gallery-slide img{object-fit:contain;background:var(--secondary);}
+.gallery.gallery-contain{height:380px;}
 .gallery-slide-emoji{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:80px;}
 .gallery-prev,.gallery-next{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 10px rgba(20,16,18,0.15);transition:all 0.2s;}
 .gallery-prev{left:14px;}.gallery-next{right:14px;}
@@ -702,7 +701,8 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       <div class="meta-card" id="meta-agreement-value" style="display:none;"><div class="meta-label">Agreement Value</div><div class="meta-val" id="listing-agreement-value">—</div></div>
       <div class="meta-card" id="meta-no-units" style="display:none;"><div class="meta-label">No. of Units</div><div class="meta-val" id="listing-no-units">—</div></div>
       <div class="meta-card" id="meta-project-area" style="display:none;"><div class="meta-label">Total Project Area</div><div class="meta-val" id="listing-project-area">—</div></div>
-      <div class="meta-card" id="meta-colony-road-type" style="display:none;"><div class="meta-label">Road Widths</div><div class="meta-val" id="listing-colony-road-type">—</div></div>
+      <div class="meta-card" id="meta-colony-road-type" style="display:none;"><div class="meta-label">Internal Roads</div><div class="meta-val" id="listing-colony-road-type">—</div></div>
+      <div class="meta-card" id="meta-approach-road" style="display:none;"><div class="meta-label">Approach Road</div><div class="meta-val" id="listing-approach-road">—</div></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
       <div id="rera-badge" style="display:none;align-items:center;gap:7px;background:rgba(34,197,94,0.12);color:#15803d;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;width:fit-content;">
@@ -846,7 +846,7 @@ const sb = window.supabase.createClient(
   "https://mfpnndrszjygespcfdbo.supabase.co",
   "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf"
 );
-const GRADS = {plot:"linear-gradient(135deg,#c8a98a,#9a7050)",farmhouse:"linear-gradient(135deg,#5a8a6a,#2a5a3a)",apartment:"linear-gradient(135deg,#8090b0,#506080)",villa:"linear-gradient(135deg,#c4a870,#8a6a40)",land:"linear-gradient(135deg,#8aaa7a,#4a7a4a)",commercial:"linear-gradient(135deg,#6a8faf,#3a5f7f)"};
+const GRADS = {plot:"linear-gradient(135deg,#c8a98a,#9a7050)",apartment:"linear-gradient(135deg,#8090b0,#506080)",villa:"linear-gradient(135deg,#c4a870,#8a6a40)",colony:"linear-gradient(135deg,#a88ab0,#6a4a7a)"};
 const EMOJI = {plot:"🏜️",apartment:"🏢",villa:"🏯",colony:"🏘️"};
 const TYPE_LABEL = {plot:"Residential Plot",farmhouse:"Farmhouse",apartment:"Apartment",villa:"Luxury Villa",land:"Investment Land",commercial:"Commercial Plot"};
 
@@ -976,6 +976,7 @@ async function load() {
     showMeta("meta-no-units", "listing-no-units", data.no_of_units);
     showMeta("meta-project-area", "listing-project-area", data.total_project_area);
     showMeta("meta-colony-road-type", "listing-colony-road-type", data.colony_road_type);
+    showMeta("meta-approach-road", "listing-approach-road", data.approach_road);
     if (data.amenities) {
       renderAmenities(data.amenities);
       document.getElementById("amenities-card").style.display = "block";

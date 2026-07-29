@@ -933,7 +933,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
           <div><label class="fl">Total Project Area</label><input class="fi" id="f-project-area" placeholder="e.g. 25 Acres"/></div>
         </div>
         <div>
-          <label class="fl">Road Widths (select all that apply)</label>
+          <label class="fl">Internal Roads (select all that apply)</label>
           <div style="display:flex;flex-wrap:wrap;gap:8px;" id="f-colony-road-widths">
             <label class="road-width-pill"><input type="checkbox" value="30 Ft"/>30 Ft</label>
             <label class="road-width-pill"><input type="checkbox" value="40 Ft"/>40 Ft</label>
@@ -942,6 +942,13 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
             <label class="road-width-pill"><input type="checkbox" value="100 Ft"/>100 Ft</label>
           </div>
         </div>
+        <div><label class="fl">Approach Road</label><select class="fsel" id="f-approach-road">
+          <option value="">Select</option>
+          <option value="40 Ft">40 Feet</option>
+          <option value="60 Ft">60 Feet</option>
+          <option value="80 Ft">80 Feet</option>
+          <option value="100 Ft">100 Feet</option>
+        </select></div>
         <div><label class="fl">Amenities</label><input class="fi" id="f-amenities" placeholder="e.g. Clubhouse, Park, 24x7 Security, Underground Wiring"/></div>
         <div><label class="fl">Project Map (image URL)</label><input class="fi" id="f-project-map" placeholder="Paste a link to the layout/map image"/></div>
       </div>
@@ -1930,6 +1937,7 @@ window.openAdd = () => {
   document.getElementById("modal-title").textContent = "Add New Listing";
   ["f-title","f-area","f-price","f-desc","f-phone","f-agreement-value","f-plot-size","f-plot-length","f-plot-width","f-no-units","f-project-area","f-amenities","f-project-map"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   document.querySelectorAll('#f-colony-road-widths input').forEach(function(cb){ cb.checked = false; });
+  const far=document.getElementById("f-approach-road");if(far)far.selectedIndex=0;
   const ft=document.getElementById("f-type");if(ft)ft.selectedIndex=0;
   toggleColonyFields();
   const frw=document.getElementById("f-road-width");if(frw)frw.selectedIndex=0;
@@ -1980,6 +1988,7 @@ window.adminEdit = async (id) => {
     const savedWidths = (data.colony_road_type || "").split(",").map(function(s){ return s.trim(); });
     document.querySelectorAll('#f-colony-road-widths input').forEach(function(cb){ cb.checked = savedWidths.includes(cb.value); });
   }
+  document.getElementById("f-approach-road").value = data.approach_road || "";
   const fcp=document.getElementById("f-corner-plot");if(fcp)fcp.checked=!!data.corner_plot;
   const fpf=document.getElementById("f-park-facing");if(fpf)fpf.checked=!!data.park_facing;
   const fr=document.getElementById("f-rera");if(fr)fr.checked=!!data.rera_approved;
@@ -2017,6 +2026,7 @@ window.submitListing = async () => {
   const amenities = document.getElementById("f-amenities").value.trim();
   const projectMapUrl = document.getElementById("f-project-map").value.trim();
   const colonyRoadType = Array.from(document.querySelectorAll('#f-colony-road-widths input:checked')).map(function(cb){ return cb.value; }).join(", ");
+  const approachRoad = document.getElementById("f-approach-road").value;
   const isColony = type === "colony";
   if (isColony) {
     roadWidth = ""; facing = ""; agreementValue = "";
@@ -2041,7 +2051,7 @@ window.submitListing = async () => {
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
-        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, location_map_url: mapPdfUrl || null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, approach_road: approachRoad || null, location_map_url: mapPdfUrl || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         submitter_phone: phone,
@@ -2056,7 +2066,7 @@ window.submitListing = async () => {
         approval_type: approvalType, rera_approved: reraApproved,
         plot_size: plotSize, plot_size_unit: plotSizeUnit, plot_length: plotLength, plot_width: plotWidth,
         no_of_units: noOfUnits ? Number(noOfUnits) : null, total_project_area: totalProjectArea || null,
-        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, location_map_url: mapPdfUrl || null,
+        amenities: amenities || null, project_map_url: projectMapUrl || null, colony_road_type: colonyRoadType || null, approach_road: approachRoad || null, location_map_url: mapPdfUrl || null,
         corner_plot: cornerPlot, park_facing: parkFacing,
         image_url, images: imageUrls,
         status: "pending",
