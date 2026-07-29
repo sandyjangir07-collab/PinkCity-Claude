@@ -60,7 +60,7 @@
 .pd-chip-quiet{background:var(--secondary);color:var(--foreground);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);}
 .pd-chip-surface{background:var(--card);color:var(--foreground);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);box-shadow:var(--pd-shadow-soft);}
 .pd-chip-primary{background:var(--primary-soft);color:var(--primary);border:1px solid color-mix(in oklab,var(--primary) 15%,transparent);}
-.pd-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none;}
+.pd-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,black calc(100% - 28px),transparent 100%);mask-image:linear-gradient(to right,black calc(100% - 28px),transparent 100%);}
 .pd-scroll::-webkit-scrollbar{display:none;}
 .pd-pill{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid color-mix(in oklab,var(--border) 60%,transparent);border-radius:999px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--foreground);box-shadow:var(--pd-shadow-soft);transition:transform 0.18s ease;}
 .pd-pill:active{transform:translateY(1px);}
@@ -756,16 +756,16 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
     <div class="pd-title-card">
       <div class="pd-card">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-          <div style="min-width:0;">
+          <div style="min-width:0;flex:1 1 auto;">
             <div class="detail-title" style="margin-top:0;"><span id="listing-title-icon"></span><span id="listing-title">—</span></div>
             <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted-foreground);">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               <span id="listing-area-inline">—</span>
             </div>
           </div>
-          <div style="text-align:right;flex-shrink:0;">
+          <div style="text-align:right;flex:0 1 auto;max-width:42%;">
             <div class="price-eyebrow" style="margin-bottom:2px;">Starting</div>
-            <div class="price" id="listing-price" style="font-size:22px;">—</div>
+            <div class="price" id="listing-price" style="font-size:20px;line-height:1.2;overflow-wrap:break-word;">—</div>
           </div>
         </div>
         <div class="pd-scroll" style="margin-top:18px;">
@@ -1098,7 +1098,8 @@ window.galGo = i => {
 
 function formatPriceHTML(text) {
   if (!text) return '—';
-  const escaped = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const cleaned = String(text).replace(/^\s*starting\s*/i, '').trim();
+  const escaped = cleaned.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   // Fraunces (--font-display) doesn't include the ₹ glyph, so it silently falls back to a
   // mismatched system serif for just that character. Rendering it in the sans-serif font
   // keeps the whole price visually consistent.
