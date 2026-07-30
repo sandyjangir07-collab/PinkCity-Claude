@@ -1347,7 +1347,7 @@ function renderAvailabilityGrid() {
   const grid = document.getElementById("availability-grid");
   grid.innerHTML = availabilityUnits.map(function(u) {
     const s = STATUS_STYLE[u.status] || { bg: "#f3f4f6", border: "#d1d5db", text: "#374151" };
-    const tappable = (isTeamViewer && !isAdminViewer && u.status === "available") || (isAdminViewer && u.status === "token");
+    const tappable = (isTeamViewer && u.status === "available") || (isAdminViewer && u.status === "token");
     const handler = !tappable ? "" :
       (u.status === "available"
         ? " onclick=\"openSubmitTokenPublic('" + u.id + "','" + (u.unit_number||"").replace(/'/g,"\\'") + "')\""
@@ -1359,7 +1359,7 @@ function renderAvailabilityGrid() {
       + '</div>';
   }).join('');
   const hint = document.getElementById("availability-team-hint");
-  if (isAdminViewer) { hint.style.display = "block"; hint.textContent = "Yellow plots are waiting on your review — tap one to see the token photo."; }
+  if (isAdminViewer) { hint.style.display = "block"; hint.textContent = "Tap a green plot to submit a token, or a yellow plot to review one."; }
   else if (isTeamViewer) { hint.style.display = "block"; hint.textContent = "Tap a green plot to submit a token for it."; }
   else { hint.style.display = "none"; }
 }
