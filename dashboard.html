@@ -1831,7 +1831,12 @@ window.submitToken = async function(){
   try {
     const ext = tokenPhotoFile.name.split('.').pop();
     const path = `tokens/${currentTokenUnitId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error: upErr } = await sb.storage.from('property-images').upload(path, tokenPhotoFile, {cacheControl:'3600', upsert:false});
+    // Read the bytes into memory explicitly rather than handing Supabase the raw File
+    // object — iOS can hand out a File reference before its data is fully available,
+    // and any delay before upload can cause it to silently send an empty body.
+    const buffer = await tokenPhotoFile.arrayBuffer();
+    if (!buffer.byteLength) throw new Error('Photo appears to be empty (0 bytes) — please try selecting it again.');
+    const { error: upErr } = await sb.storage.from('property-images').upload(path, buffer, {cacheControl:'3600', upsert:false, contentType: tokenPhotoFile.type || `image/${ext}`});
     if (upErr) throw upErr;
     const { data: pub } = sb.storage.from('property-images').getPublicUrl(path);
     const meta = currentUser.user_metadata || {};
