@@ -674,6 +674,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
 .unit-status-sel{border:1px solid var(--border);border-radius:999px;font-size:11px;padding:5px 10px;background:var(--secondary);font-family:var(--font-sans);}
 .unit-del-btn{width:26px;height:26px;border-radius:50%;border:none;background:var(--secondary);color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 .unit-del-btn:hover{background:#fee2e2;color:#ef4444;}
+.unit-badge{display:inline-flex;align-items:center;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
 /* Blog post cards in dashboard */
 .blog-post-card{background:white;border:1px solid var(--border);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px;transition:all 0.2s;}
 .blog-post-card:hover{box-shadow:var(--shadow-soft);transform:translateY(-1px);}
@@ -1492,6 +1493,52 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
   </div>
 </div>
 
+<!-- SUBMIT TOKEN MODAL (team) -->
+<div class="overlay" id="submit-token-overlay" onclick="if(event.target===this)closeSubmitToken()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="submit-token-title">Submit Token</div>
+    <div class="form-err" id="submit-token-err" style="opacity:0;"></div>
+    <div class="form-grid">
+      <div class="form-row">
+        <div><label class="fl">Buyer Name</label><input class="fi" id="tk-buyer-name" placeholder="e.g. Rajesh Kumar"/></div>
+        <div><label class="fl">Buyer Phone</label><input class="fi" id="tk-buyer-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
+      </div>
+      <div><label class="fl">Token Amount (₹)</label><input class="fi" id="tk-amount" type="number" placeholder="e.g. 50000"/></div>
+      <div>
+        <label class="fl">Token Photo *</label>
+        <input type="file" id="tk-photo" accept="image/*" style="display:none;" onchange="previewTokenPhoto(this)"/>
+        <div class="vlog-photo-wrap" onclick="document.getElementById('tk-photo').click()" id="tk-photo-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+          <div class="vlog-photo-label">Tap to add photo — required</div>
+        </div>
+      </div>
+      <div><label class="fl">Notes (optional)</label><textarea class="ftextarea" id="tk-notes" placeholder="Anything the admin should know"></textarea></div>
+      <button class="btn-submit" id="tk-submit-btn" onclick="submitToken()">Submit for Approval</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW TOKEN MODAL (admin) -->
+<div class="overlay" id="review-token-overlay" onclick="if(event.target===this)closeReviewToken()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Review Token Submission</div>
+    <div class="form-err" id="review-token-err" style="opacity:0;"></div>
+    <div id="review-token-body" style="display:flex;flex-direction:column;gap:14px;"></div>
+    <div id="review-reject-wrap" style="display:none;margin-top:14px;">
+      <label class="fl">Reason for rejection</label>
+      <textarea class="ftextarea" id="review-reject-reason" placeholder="Let the team member know why"></textarea>
+      <button class="btn-reject" style="width:100%;margin-top:8px;padding:12px;" onclick="decideToken(false)">Confirm Reject</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;" id="review-actions">
+      <button class="btn-approve" style="flex:1;padding:12px;" onclick="decideToken(true)">✓ Approve</button>
+      <button class="btn-reject" style="flex:1;padding:12px;" onclick="document.getElementById('review-reject-wrap').style.display='block';document.getElementById('review-actions').style.display='none';">✕ Reject</button>
+    </div>
+    <button class="btn-ghost" onclick="closeReviewToken()" style="margin-top:12px;width:100%;">Close</button>
+  </div>
+</div>
+
 <!-- BLOG EDITOR MODAL -->
 <div class="blog-editor-overlay" id="blog-editor-overlay" onclick="if(event.target===this)closeBlogEditor()">
   <div class="blog-editor">
@@ -1715,17 +1762,151 @@ async function renderUnits(){
     return;
   }
   const STATUS_TEXT = { available:'Available', token:'Token Received', sold:'Sold' };
+  const delBtn = function(u){ return '<button class="unit-del-btn" onclick="deleteUnit(\'' + u.id + '\')" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'; };
   list.innerHTML = units.map(function(u){
-    return '<div class="unit-row">'
-      + '<div class="unit-row-info"><span class="unit-dot ' + u.status + '"></span><strong>' + (u.unit_number||'—') + '</strong>' + (u.unit_size ? ' · ' + u.unit_size : '') + '</div>'
-      + '<div style="display:flex;align-items:center;gap:8px;">'
-      + '<select class="unit-status-sel" onchange="updateUnitStatus(\'' + u.id + '\',this.value)">'
-      + Object.keys(STATUS_TEXT).map(function(s){ return '<option value="'+s+'"'+(u.status===s?' selected':'')+'>'+STATUS_TEXT[s]+'</option>'; }).join('')
-      + '</select>'
-      + '<button class="unit-del-btn" onclick="deleteUnit(\'' + u.id + '\')" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
-      + '</div></div>';
+    const info = '<div class="unit-row-info"><span class="unit-dot ' + u.status + '"></span><strong>' + (u.unit_number||'—') + '</strong>' + (u.unit_size ? ' · ' + u.unit_size : '') + '</div>';
+    let actions;
+    if (isAdmin) {
+      // Pending tokens must be opened and reviewed (with photo + buyer info) — no blind status flip.
+      actions = u.status === 'token'
+        ? '<button class="btn-edit" onclick="openReviewToken(\'' + u.id + '\')">🔍 Review</button>' + delBtn(u)
+        : '<select class="unit-status-sel" onchange="updateUnitStatus(\'' + u.id + '\',this.value)">'
+          + Object.keys(STATUS_TEXT).map(function(s){ return '<option value="'+s+'"'+(u.status===s?' selected':'')+'>'+STATUS_TEXT[s]+'</option>'; }).join('')
+          + '</select>' + delBtn(u);
+    } else {
+      // Team members can only move a plot forward by submitting a token — never set status directly.
+      if (u.status === 'available') {
+        actions = '<button class="btn-edit" onclick="openSubmitToken(\'' + u.id + '\',\'' + (u.unit_number||'').replace(/'/g,"\\'") + '\')">📝 Submit Token</button>' + delBtn(u);
+      } else if (u.status === 'token') {
+        actions = '<span class="unit-badge" style="background:rgba(234,179,8,0.14);color:#854d0e;">⏳ Pending review</span>';
+      } else {
+        actions = '<span class="unit-badge" style="background:rgba(239,68,68,0.12);color:#991b1b;">Sold</span>';
+      }
+    }
+    return '<div class="unit-row">' + info + '<div style="display:flex;align-items:center;gap:8px;">' + actions + '</div></div>';
   }).join('');
 }
+
+// ── TOKEN SUBMISSION (team): tap an available plot, attach a mandatory photo ──
+let currentTokenUnitId = null, tokenPhotoFile = null;
+
+window.openSubmitToken = function(unitId, unitNumber){
+  currentTokenUnitId = unitId;
+  tokenPhotoFile = null;
+  document.getElementById('submit-token-title').textContent = 'Submit Token' + (unitNumber ? ' — ' + unitNumber : '');
+  document.getElementById('tk-buyer-name').value = '';
+  document.getElementById('tk-buyer-phone').value = '';
+  document.getElementById('tk-amount').value = '';
+  document.getElementById('tk-notes').value = '';
+  document.getElementById('tk-photo').value = '';
+  document.getElementById('tk-photo-wrap').innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><div class="vlog-photo-label">Tap to add photo — required</div>';
+  document.getElementById('submit-token-err').style.opacity = '0';
+  document.getElementById('submit-token-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeSubmitToken = function(){
+  document.getElementById('submit-token-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+};
+
+window.previewTokenPhoto = function(input){
+  const file = input.files[0];
+  if (!file) return;
+  tokenPhotoFile = file;
+  const url = URL.createObjectURL(file);
+  document.getElementById('tk-photo-wrap').innerHTML = '<img src="' + url + '"/>';
+};
+
+window.submitToken = async function(){
+  const errEl = document.getElementById('submit-token-err');
+  if (!tokenPhotoFile) {
+    errEl.textContent = 'A photo is required — please add one before submitting.';
+    errEl.style.opacity = '1';
+    setTimeout(function(){ errEl.style.opacity = '0'; }, 4000);
+    return;
+  }
+  const btn = document.getElementById('tk-submit-btn');
+  btn.textContent = 'Submitting…'; btn.disabled = true;
+  try {
+    const ext = tokenPhotoFile.name.split('.').pop();
+    const path = `tokens/${currentTokenUnitId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error: upErr } = await sb.storage.from('property-images').upload(path, tokenPhotoFile, {cacheControl:'3600', upsert:false});
+    if (upErr) throw upErr;
+    const { data: pub } = sb.storage.from('property-images').getPublicUrl(path);
+    const meta = currentUser.user_metadata || {};
+    const submitterName = meta.full_name || meta.name || currentUser.email;
+    const { error: rpcErr } = await sb.rpc('submit_token_request', {
+      p_unit_id: currentTokenUnitId,
+      p_submitted_by_name: submitterName,
+      p_buyer_name: document.getElementById('tk-buyer-name').value.trim() || null,
+      p_buyer_phone: document.getElementById('tk-buyer-phone').value.trim() || null,
+      p_token_amount: document.getElementById('tk-amount').value ? Number(document.getElementById('tk-amount').value) : null,
+      p_photo_url: pub.publicUrl,
+      p_notes: document.getElementById('tk-notes').value.trim() || null
+    });
+    if (rpcErr) throw rpcErr;
+    closeSubmitToken();
+    await renderUnits();
+    toast('✓ Token submitted — waiting for admin approval.');
+  } catch(e) {
+    errEl.textContent = e.message || 'Something went wrong. Please try again.';
+    errEl.style.opacity = '1';
+  } finally {
+    btn.textContent = 'Submit for Approval'; btn.disabled = false;
+  }
+};
+
+// ── TOKEN REVIEW (admin): see the photo + buyer info, then approve or reject ──
+let currentReviewSubmissionId = null;
+
+window.openReviewToken = async function(unitId){
+  const { data, error } = await sb.from('token_submissions').select('*').eq('unit_id', unitId).eq('status','pending').order('submitted_at',{ascending:false}).limit(1).maybeSingle();
+  if (error || !data) { toast('Could not load this submission.'); return; }
+  currentReviewSubmissionId = data.id;
+  const submittedDate = new Date(data.submitted_at).toLocaleString('en-IN', {day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'});
+  document.getElementById('review-token-body').innerHTML =
+    '<img src="' + data.photo_url + '" style="width:100%;border-radius:14px;max-height:320px;object-fit:cover;cursor:zoom-in;" onclick="window.open(\'' + data.photo_url + '\',\'_blank\')"/>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;font-size:14px;">'
+    + '<div><strong>Buyer:</strong> ' + (data.buyer_name || '—') + (data.buyer_phone ? ' · ' + data.buyer_phone : '') + '</div>'
+    + (data.token_amount ? '<div><strong>Token amount:</strong> ' + fINRq(data.token_amount) + '</div>' : '')
+    + '<div><strong>Submitted by:</strong> ' + (data.submitted_by_name || '—') + ' · ' + submittedDate + '</div>'
+    + (data.notes ? '<div><strong>Notes:</strong> ' + data.notes + '</div>' : '')
+    + '</div>';
+  document.getElementById('review-reject-wrap').style.display = 'none';
+  document.getElementById('review-reject-reason').value = '';
+  document.getElementById('review-actions').style.display = 'flex';
+  document.getElementById('review-token-err').style.opacity = '0';
+  document.getElementById('review-token-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeReviewToken = function(){
+  document.getElementById('review-token-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+};
+
+window.decideToken = async function(approve){
+  const errEl = document.getElementById('review-token-err');
+  const meta = currentUser.user_metadata || {};
+  const reviewerName = meta.full_name || meta.name || currentUser.email;
+  const reason = document.getElementById('review-reject-reason').value.trim();
+  if (!approve && !reason) {
+    errEl.textContent = 'Please add a reason for rejecting.';
+    errEl.style.opacity = '1';
+    return;
+  }
+  const { error } = await sb.rpc('review_token_submission', {
+    p_submission_id: currentReviewSubmissionId,
+    p_approve: approve,
+    p_reviewer_name: reviewerName,
+    p_rejection_reason: approve ? null : reason
+  });
+  if (error) { errEl.textContent = error.message; errEl.style.opacity = '1'; return; }
+  closeReviewToken();
+  await renderUnits();
+  toast(approve ? '✓ Token approved — plot marked Sold.' : 'Submission rejected — plot is Available again.');
+};
 
 window.switchAddMode = function(mode){
   const isOne = mode === 'one';
