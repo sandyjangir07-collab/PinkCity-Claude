@@ -1833,14 +1833,15 @@ window.submitToken = async function(){
   const btn = document.getElementById('tk-submit-btn');
   btn.textContent = 'Submitting…'; btn.disabled = true;
   try {
-    const ext = tokenPhotoFile.name.split('.').pop();
+    const compressedToken = await compressImageFile(tokenPhotoFile);
+    const ext = compressedToken.name.split('.').pop();
     const path = `tokens/${currentTokenUnitId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     // Read the bytes into memory explicitly rather than handing Supabase the raw File
     // object — iOS can hand out a File reference before its data is fully available,
     // and any delay before upload can cause it to silently send an empty body.
-    const buffer = await tokenPhotoFile.arrayBuffer();
+    const buffer = await compressedToken.arrayBuffer();
     if (!buffer.byteLength) throw new Error('Photo appears to be empty (0 bytes) — please try selecting it again.');
-    const { error: upErr } = await sb.storage.from('property-images').upload(path, buffer, {cacheControl:'3600', upsert:false, contentType: tokenPhotoFile.type || `image/${ext}`});
+    const { error: upErr } = await sb.storage.from('property-images').upload(path, buffer, {cacheControl:'3600', upsert:false, contentType: compressedToken.type || `image/${ext}`});
     if (upErr) throw upErr;
     const { data: pub } = sb.storage.from('property-images').getPublicUrl(path);
     const meta = currentUser.user_metadata || {};
@@ -2092,10 +2093,39 @@ function renderImageGrid() {
 window.removeSaved = (i) => { savedUrls.splice(i, 1); renderImageGrid(); };
 window.removePending = (i) => { pendingFiles.splice(i, 1); renderImageGrid(); };
 
+// Downscale + re-encode photos before they ever leave the device. Phone camera
+// shots are routinely 3-8MB at 3000px+ — displayed at a few hundred px on a card,
+// that's wasted bandwidth AND a real decode/memory cost on iOS Safari once there
+// are several on a page. Falls back to the original file if anything goes wrong.
+async function compressImageFile(file, maxDimension = 1600, quality = 0.85) {
+  if (!file || !file.type || !file.type.startsWith("image/") || file.type === "image/gif") return file;
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const { width, height } = bitmap;
+    if (width <= maxDimension && height <= maxDimension && file.size < 500 * 1024) {
+      bitmap.close && bitmap.close();
+      return file;
+    }
+    const scale = Math.min(1, maxDimension / Math.max(width, height));
+    const targetW = Math.round(width * scale), targetH = Math.round(height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = targetW; canvas.height = targetH;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, targetW, targetH);
+    bitmap.close && bitmap.close();
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
+  } catch (e) {
+    console.error("Image compression skipped:", e);
+    return file;
+  }
+}
+
 async function uploadAllImages() {
   const uploaded = [...savedUrls];
   const failed = [];
-  for (const file of pendingFiles) {
+  for (const rawFile of pendingFiles) {
+    const file = await compressImageFile(rawFile);
     const ext = file.name.split(".").pop();
     const path = `listings/${currentUser.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     let error;
@@ -2406,9 +2436,11 @@ window.submitVisitLog = async () => {
   try {
     let photoUrl = "";
     if (visitPhotoFile) {
-      const ext = visitPhotoFile.name.split(".").pop();
+      const compressed = await compressImageFile(visitPhotoFile);
+      const ext = compressed.name.split(".").pop();
       const path = `visits/${currentUser.id}-${Date.now()}.${ext}`;
-      const { error: upErr } = await sb.storage.from("property-images").upload(path, visitPhotoFile, {cacheControl:"3600",upsert:false});
+      const buffer = await compressed.arrayBuffer();
+      const { error: upErr } = await sb.storage.from("property-images").upload(path, buffer, {cacheControl:"3600",upsert:false,contentType: compressed.type || `image/${ext}`});
       if (!upErr) { const { data } = sb.storage.from("property-images").getPublicUrl(path); photoUrl = data.publicUrl; }
     }
     const meta = currentUser.user_metadata;

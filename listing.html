@@ -1364,6 +1364,34 @@ function renderAvailabilityGrid() {
   else { hint.style.display = "none"; }
 }
 
+// Downscale + re-encode photos before they ever leave the device. Phone camera
+// shots are routinely 3-8MB at 3000px+ — displayed at a few hundred px, that's
+// wasted bandwidth AND a real decode/memory cost on iOS Safari. Falls back to
+// the original file if anything goes wrong.
+async function compressImageFile(file, maxDimension = 1600, quality = 0.85) {
+  if (!file || !file.type || !file.type.startsWith("image/") || file.type === "image/gif") return file;
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const { width, height } = bitmap;
+    if (width <= maxDimension && height <= maxDimension && file.size < 500 * 1024) {
+      bitmap.close && bitmap.close();
+      return file;
+    }
+    const scale = Math.min(1, maxDimension / Math.max(width, height));
+    const targetW = Math.round(width * scale), targetH = Math.round(height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = targetW; canvas.height = targetH;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, targetW, targetH);
+    bitmap.close && bitmap.close();
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
+  } catch (e) {
+    console.error("Image compression skipped:", e);
+    return file;
+  }
+}
+
 // ── TOKEN SUBMISSION (team): tap an available plot, attach a mandatory photo ──
 window.openSubmitTokenPublic = function(unitId, unitNumber) {
   currentTokenUnitId = unitId;
@@ -1413,15 +1441,16 @@ window.submitTokenPublic = async function() {
   const btn = document.getElementById("tksub-submit-btn");
   btn.textContent = "Submitting…"; btn.disabled = true;
   try {
-    const ext = tokenPhotoFile.name.split(".").pop();
+    const compressedToken = await compressImageFile(tokenPhotoFile);
+    const ext = compressedToken.name.split(".").pop();
     const path = `tokens/${currentTokenUnitId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     // Read the bytes into memory explicitly rather than handing Supabase the raw File
     // object — iOS can hand out a File reference before its data is fully available
     // (esp. iCloud-optimized photos or camera captures), and any delay before upload
     // can cause it to silently send an empty body ("No content provided").
-    const buffer = await tokenPhotoFile.arrayBuffer();
+    const buffer = await compressedToken.arrayBuffer();
     if (!buffer.byteLength) throw new Error("Photo appears to be empty (0 bytes) — please try selecting it again.");
-    const { error: upErr } = await sb.storage.from("property-images").upload(path, buffer, {cacheControl:"3600", upsert:false, contentType: tokenPhotoFile.type || `image/${ext}`});
+    const { error: upErr } = await sb.storage.from("property-images").upload(path, buffer, {cacheControl:"3600", upsert:false, contentType: compressedToken.type || `image/${ext}`});
     if (upErr) throw upErr;
     const { data: pub } = sb.storage.from("property-images").getPublicUrl(path);
     const meta = currentSessionUser.user_metadata || {};
@@ -1661,9 +1690,11 @@ window.submitAddVisit = async () => {
     const meta = user.user_metadata;
     let photoUrl = "";
     if (avPhotoFile) {
-      const ext = avPhotoFile.name.split(".").pop();
+      const compressedAv = await compressImageFile(avPhotoFile);
+      const ext = compressedAv.name.split(".").pop();
       const path = `visits/${user.id}-${Date.now()}.${ext}`;
-      const { error: upErr } = await sb.storage.from("property-images").upload(path, avPhotoFile, {cacheControl:"3600",upsert:false});
+      const buffer = await compressedAv.arrayBuffer();
+      const { error: upErr } = await sb.storage.from("property-images").upload(path, buffer, {cacheControl:"3600",upsert:false,contentType: compressedAv.type || `image/${ext}`});
       if (!upErr) { const { data } = sb.storage.from("property-images").getPublicUrl(path); photoUrl = data.publicUrl; }
     }
     const { error } = await sb.from("visits").insert({
