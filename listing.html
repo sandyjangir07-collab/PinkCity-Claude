@@ -1451,7 +1451,11 @@ window.submitTokenPublic = async function() {
 // ── TOKEN REVIEW (admin): see the photo + buyer info, then approve or reject ──
 window.openReviewTokenPublic = async function(unitId) {
   const { data, error } = await sb.from("token_submissions").select("*").eq("unit_id", unitId).eq("status","pending").order("submitted_at",{ascending:false}).limit(1).maybeSingle();
-  if (error || !data) { toast("Could not load this submission."); return; }
+  if (error || !data) {
+    toast("That submission is no longer pending — refreshing the list.");
+    if (availabilityListingId) await loadAvailability(availabilityListingId);
+    return;
+  }
   currentReviewSubmissionId = data.id;
   const submittedDate = new Date(data.submitted_at).toLocaleString("en-IN", {day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"});
   document.getElementById("reviewtoken-body").innerHTML =

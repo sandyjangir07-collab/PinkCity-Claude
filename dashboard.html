@@ -1023,6 +1023,10 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
       <div class="stat-card"><div class="stat-n" id="today-overdue-count" style="color:#b91c1c;">0</div><div class="stat-l">Overdue</div></div>
       <div class="stat-card"><div class="stat-n" id="today-visit-count" style="color:var(--primary);">0</div><div class="stat-l">Visits today</div></div>
     </div>
+    <div id="today-tokens-section" style="display:none;margin-bottom:36px;">
+      <div style="font-size:16px;font-family:var(--font-display);color:var(--foreground);margin-bottom:14px;">Token Submissions</div>
+      <div id="today-tokens-list"><div class="empty"><img src="/logo.png" alt="" class="empty-logo"/><p style="font-size:13px;">Loading…</p></div></div>
+    </div>
     <div style="margin-bottom:36px;">
       <div style="font-size:16px;font-family:var(--font-display);color:var(--foreground);margin-bottom:14px;">Follow-ups</div>
       <div id="today-followups-list"><div class="empty"><img src="/logo.png" alt="" class="empty-logo"/><p style="font-size:13px;">Loading…</p></div></div>
@@ -1867,13 +1871,19 @@ let currentReviewSubmissionId = null;
 
 window.openReviewToken = async function(unitId){
   const { data, error } = await sb.from('token_submissions').select('*').eq('unit_id', unitId).eq('status','pending').order('submitted_at',{ascending:false}).limit(1).maybeSingle();
-  if (error || !data) { toast('Could not load this submission.'); return; }
+  if (error || !data) {
+    toast('That submission is no longer pending — refreshing the list.');
+    if (currentAvailabilityListingId) await renderUnits();
+    if (typeof loadToday === 'function' && document.getElementById('today-section').style.display !== 'none') loadToday();
+    return;
+  }
   currentReviewSubmissionId = data.id;
   const submittedDate = new Date(data.submitted_at).toLocaleString('en-IN', {day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'});
   document.getElementById('review-token-body').innerHTML =
     '<img src="' + data.photo_url + '" style="width:100%;border-radius:14px;max-height:320px;object-fit:cover;cursor:zoom-in;" onclick="window.open(\'' + data.photo_url + '\',\'_blank\')"/>'
     + '<div style="display:flex;flex-direction:column;gap:6px;font-size:14px;">'
-    + '<div><strong>Buyer:</strong> ' + (data.buyer_name || '—') + (data.buyer_phone ? ' · ' + data.buyer_phone : '') + '</div>'
+    + '<div><strong>Client:</strong> ' + (data.buyer_name || '—') + (data.buyer_phone ? ' · ' + data.buyer_phone : '') + '</div>'
+    + (data.associate_name ? '<div><strong>Associate:</strong> ' + data.associate_name + '</div>' : '')
     + (data.token_amount ? '<div><strong>Token amount:</strong> ' + fINRq(data.token_amount) + '</div>' : '')
     + '<div><strong>Submitted by:</strong> ' + (data.submitted_by_name || '—') + ' · ' + submittedDate + '</div>'
     + (data.notes ? '<div><strong>Notes:</strong> ' + data.notes + '</div>' : '')
@@ -2823,6 +2833,40 @@ window.loadToday = async function() {
         + '<a class="lead-icon-btn" href="https://wa.me/'+waNum+'" target="_blank" rel="noopener" title="WhatsApp">💬</a>'
         + '</div></div>';
     }).join('');
+  }
+
+  if (isAdmin) {
+    const tokenSection = document.getElementById('today-tokens-section');
+    tokenSection.style.display = 'block';
+    const { data: pendingTokens } = await sb.from('token_submissions')
+      .select('*, colony_units(unit_number)')
+      .eq('status','pending')
+      .order('submitted_at',{ascending:true});
+    const tokens = pendingTokens || [];
+    const listingIds = [...new Set(tokens.map(function(t){return t.listing_id;}).filter(Boolean))];
+    let listingTitles = {};
+    if (listingIds.length) {
+      const { data: listingsData } = await sb.from('listings').select('id,title').in('id', listingIds);
+      (listingsData||[]).forEach(function(l){ listingTitles[l.id] = l.title; });
+    }
+    const tokensEl = document.getElementById('today-tokens-list');
+    if (!tokens.length) {
+      tokensEl.innerHTML = '<div class="empty"><p style="font-size:13px;">No token submissions waiting on you.</p></div>';
+    } else {
+      tokensEl.innerHTML = tokens.map(function(t){
+        const unitLabel = (t.colony_units && t.colony_units.unit_number) ? 'Plot ' + t.colony_units.unit_number : 'Plot';
+        const listingTitle = listingTitles[t.listing_id] || '';
+        return '<div class="lead-card" onclick="openReviewToken(\''+t.unit_id+'\')" style="cursor:pointer;">'
+          + '<div class="lead-av">🔑</div>'
+          + '<div style="flex:1;min-width:0;">'
+          + '<div class="lead-name">'+unitLabel+(listingTitle?' · '+listingTitle:'')+'</div>'
+          + '<div class="lead-meta">'+(t.buyer_name||'—')+(t.associate_name?' · '+t.associate_name:'')+'</div>'
+          + '<div style="font-size:11px;color:var(--muted-foreground);margin-top:5px;">Submitted '+timeAgo(t.submitted_at)+'</div>'
+          + '</div>'
+          + '<span class="btn-edit" style="flex:0 0 auto;pointer-events:none;">🔍 Review</span>'
+          + '</div>';
+      }).join('');
+    }
   }
 };
 
