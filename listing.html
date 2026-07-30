@@ -1368,14 +1368,13 @@ function renderAvailabilityGrid() {
 window.openSubmitTokenPublic = function(unitId, unitNumber) {
   currentTokenUnitId = unitId;
   tokenPhotoFile = null;
-  document.getElementById("tksub-title").textContent = "Submit Token" + (unitNumber ? " — " + unitNumber : "");
-  document.getElementById("tksub-buyer-name").value = "";
-  document.getElementById("tksub-buyer-phone").value = "";
-  document.getElementById("tksub-amount").value = "";
-  document.getElementById("tksub-notes").value = "";
+  document.getElementById("tksub-client-name").value = "";
+  document.getElementById("tksub-associate-name").value = "";
   document.getElementById("tksub-photo-input").value = "";
-  document.getElementById("tksub-photo-wrap").innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><div class="addvisit-photo-label">Tap to add photo — required</div>';
+  document.getElementById("tksub-photo-camera-input").value = "";
+  document.getElementById("tksub-photo-wrap").innerHTML = '<span style="width:48px;height:48px;border-radius:50%;background:var(--card);box-shadow:var(--shadow-soft);display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></span><span style="font-size:14px;font-weight:600;color:var(--foreground);">Add a photo</span><span style="font-size:12px;color:var(--muted-foreground);">Upload from gallery</span>';
   document.getElementById("tksub-err").style.opacity = "0";
+  checkTokenFormReady();
   document.getElementById("tokensubmit-overlay").classList.add("on");
   document.body.style.overflow = "hidden";
 };
@@ -1385,12 +1384,22 @@ window.closeSubmitTokenPublic = function() {
   document.body.style.overflow = "";
 };
 
+window.checkTokenFormReady = function() {
+  const ready = document.getElementById("tksub-client-name").value.trim()
+    && document.getElementById("tksub-associate-name").value.trim()
+    && tokenPhotoFile;
+  const btn = document.getElementById("tksub-submit-btn");
+  btn.disabled = !ready;
+  btn.style.opacity = ready ? "1" : "0.4";
+};
+
 window.previewTokenPhotoPublic = function(input) {
   const file = input.files[0];
   if (!file) return;
   tokenPhotoFile = file;
   const url = URL.createObjectURL(file);
   document.getElementById("tksub-photo-wrap").innerHTML = '<img src="' + url + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>';
+  checkTokenFormReady();
 };
 
 window.submitTokenPublic = async function() {
@@ -1414,11 +1423,12 @@ window.submitTokenPublic = async function() {
     const { error: rpcErr } = await sb.rpc("submit_token_request", {
       p_unit_id: currentTokenUnitId,
       p_submitted_by_name: submitterName,
-      p_buyer_name: document.getElementById("tksub-buyer-name").value.trim() || null,
-      p_buyer_phone: document.getElementById("tksub-buyer-phone").value.trim() || null,
-      p_token_amount: document.getElementById("tksub-amount").value ? Number(document.getElementById("tksub-amount").value) : null,
+      p_buyer_name: document.getElementById("tksub-client-name").value.trim() || null,
+      p_buyer_phone: null,
+      p_token_amount: null,
       p_photo_url: pub.publicUrl,
-      p_notes: document.getElementById("tksub-notes").value.trim() || null
+      p_notes: null,
+      p_associate_name: document.getElementById("tksub-associate-name").value.trim() || null
     });
     if (rpcErr) throw rpcErr;
     closeSubmitTokenPublic();
@@ -1428,7 +1438,7 @@ window.submitTokenPublic = async function() {
     errEl.textContent = e.message || "Something went wrong. Please try again.";
     errEl.style.opacity = "1";
   } finally {
-    btn.textContent = "Submit for Approval"; btn.disabled = false;
+    btn.textContent = "Submit Token"; btn.disabled = !tokenPhotoFile;
   }
 };
 
@@ -1441,7 +1451,8 @@ window.openReviewTokenPublic = async function(unitId) {
   document.getElementById("reviewtoken-body").innerHTML =
     '<img src="' + data.photo_url + '" style="width:100%;border-radius:14px;max-height:320px;object-fit:cover;cursor:zoom-in;" onclick="window.open(\'' + data.photo_url + '\',\'_blank\')"/>'
     + '<div style="display:flex;flex-direction:column;gap:6px;font-size:14px;text-align:left;">'
-    + '<div><strong>Buyer:</strong> ' + (data.buyer_name || "—") + (data.buyer_phone ? " · " + data.buyer_phone : "") + '</div>'
+    + '<div><strong>Client:</strong> ' + (data.buyer_name || "—") + (data.buyer_phone ? " · " + data.buyer_phone : "") + '</div>'
+    + (data.associate_name ? '<div><strong>Associate:</strong> ' + data.associate_name + '</div>' : '')
     + (data.token_amount ? '<div><strong>Token amount:</strong> ₹' + Number(data.token_amount).toLocaleString("en-IN") + '</div>' : '')
     + '<div><strong>Submitted by:</strong> ' + (data.submitted_by_name || "—") + ' · ' + submittedDate + '</div>'
     + (data.notes ? '<div><strong>Notes:</strong> ' + data.notes + '</div>' : '')
@@ -1736,35 +1747,61 @@ window.closeAddVisit = () => {
   <div class="addvisit-modal">
     <div class="addvisit-handle"></div>
     <div class="addvisit-hero">
-      <div class="addvisit-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      <div style="width:80px;height:80px;margin:0 auto;border-radius:26px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow-card);display:flex;align-items:center;justify-content:center;">
+        <img src="/logo-mark.png" alt="" width="52" height="52" style="width:52px;height:52px;object-fit:contain;"/>
       </div>
-      <div class="addvisit-title" id="tksub-title">Submit Token</div>
-      <div class="addvisit-sub">A photo is required — the admin reviews every submission before it's confirmed.</div>
+      <div style="margin-top:14px;font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.50 0.18 8 / 0.8);">PinkCity Properties</div>
+      <div class="addvisit-title" id="tksub-title" style="margin-top:6px;">Token Submission</div>
+      <div class="addvisit-sub">Share the client, associate and payment proof. Our team verifies every token within 24 hours.</div>
+    </div>
+    <div style="padding:18px 22px 0;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(74,222,128,0.25);background:rgba(74,222,128,0.12);border-radius:999px;padding:10px 16px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        <span style="font-size:12px;font-weight:500;color:#166534;">Encrypted &amp; Verified by PinkCity</span>
+      </div>
     </div>
     <div class="addvisit-divider"></div>
     <div class="addvisit-body">
       <div class="addvisit-grid">
-        <div class="addvisit-row">
-          <div><label class="fl">Buyer Name</label><input class="fi" id="tksub-buyer-name" placeholder="e.g. Rajesh Kumar"/></div>
-          <div><label class="fl">Buyer Phone</label><input class="fi" id="tksub-buyer-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
-        </div>
-        <div><label class="fl">Token Amount (₹)</label><input class="fi" id="tksub-amount" type="number" placeholder="e.g. 50000"/></div>
         <div>
-          <label class="fl">Token Photo *</label>
+          <label class="fl" style="display:flex;align-items:center;gap:7px;text-transform:none;font-size:13px;font-weight:600;letter-spacing:0;color:var(--foreground);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Client Name</label>
+          <input class="fi" id="tksub-client-name" placeholder="e.g. Rohit Agarwal" oninput="checkTokenFormReady()"/>
+        </div>
+        <div>
+          <label class="fl" style="display:flex;align-items:center;gap:7px;text-transform:none;font-size:13px;font-weight:600;letter-spacing:0;color:var(--foreground);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>Associate Name</label>
+          <input class="fi" id="tksub-associate-name" placeholder="e.g. Meenal Sharma" oninput="checkTokenFormReady()"/>
+          <p style="margin-top:6px;font-size:11.5px;color:var(--muted-foreground);">PinkCity associate handling this deal</p>
+        </div>
+        <div>
+          <label class="fl" style="display:flex;align-items:center;gap:7px;text-transform:none;font-size:13px;font-weight:600;letter-spacing:0;color:var(--foreground);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>Payment Screenshot</label>
           <input type="file" id="tksub-photo-input" accept="image/*" style="display:none;" onchange="previewTokenPhotoPublic(this)"/>
-          <div class="addvisit-photo-wrap" id="tksub-photo-wrap" onclick="document.getElementById('tksub-photo-input').click()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-            <div class="addvisit-photo-label">Tap to add photo — required</div>
+          <input type="file" id="tksub-photo-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="previewTokenPhotoPublic(this)"/>
+          <div id="tksub-photo-wrap" onclick="document.getElementById('tksub-photo-input').click()" style="width:100%;border-radius:16px;border:1.5px dashed rgba(157,29,76,0.3);background:var(--primary-soft);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:36px 16px;cursor:pointer;position:relative;">
+            <span style="width:48px;height:48px;border-radius:50%;background:var(--card);box-shadow:var(--shadow-soft);display:flex;align-items:center;justify-content:center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            </span>
+            <span style="font-size:14px;font-weight:600;color:var(--foreground);">Add a photo</span>
+            <span style="font-size:12px;color:var(--muted-foreground);">Upload from gallery</span>
           </div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <button type="button" onclick="document.getElementById('tksub-photo-input').click()" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border);background:white;border-radius:14px;padding:12px;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--foreground);cursor:pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>Gallery
+            </button>
+            <button type="button" onclick="document.getElementById('tksub-photo-camera-input').click()" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border);background:white;border-radius:14px;padding:12px;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--foreground);cursor:pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>Camera
+            </button>
+          </div>
+          <p style="margin-top:8px;font-size:11.5px;color:var(--muted-foreground);">JPG or PNG, clearly showing UTR / transaction ID</p>
         </div>
-        <div><label class="fl">Notes (optional)</label><textarea class="visit-textarea" id="tksub-notes" placeholder="Anything the admin should know" style="min-height:72px;"></textarea></div>
         <div class="form-err" id="tksub-err" style="opacity:0;text-align:center;"></div>
-        <div style="display:flex;gap:10px;">
-          <button style="flex:0 0 auto;padding:14px 18px;border-radius:999px;border:1.5px solid var(--border);background:white;color:var(--muted-foreground);font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer;" onclick="closeSubmitTokenPublic()">Cancel</button>
-          <button class="btn-submit" id="tksub-submit-btn" onclick="submitTokenPublic()" style="flex:1;">Submit for Approval</button>
-        </div>
       </div>
+    </div>
+    <p style="display:flex;align-items:center;justify-content:center;gap:6px;margin:16px 22px 0;font-size:11px;color:var(--muted-foreground);">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Details are shared only with PinkCity's verification desk
+    </p>
+    <div style="padding:20px 22px 4px;">
+      <button class="btn-submit" id="tksub-submit-btn" onclick="submitTokenPublic()" disabled style="opacity:0.4;">Submit Token</button>
     </div>
   </div>
 </div>
