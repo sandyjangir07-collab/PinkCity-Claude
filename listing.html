@@ -677,6 +677,12 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .visit-past-meta{font-size:12px;color:var(--muted-foreground);margin-top:2px;}
 .visit-past-note{font-size:13px;color:var(--foreground);margin-top:4px;line-height:1.5;}
 
+/* ── Tappable availability boxes (team/admin only) ── */
+.av-box-tappable{transition:transform 0.12s;}
+.av-box-tappable:active{transform:scale(0.94);}
+.btn-approve-lg{flex:1;background:rgba(74,222,128,0.12);color:#166534;border:1px solid rgba(74,222,128,0.3);border-radius:999px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font-sans);}
+.btn-reject-lg{flex:1;background:rgba(248,113,113,0.10);color:#dc2626;border:1px solid rgba(248,113,113,0.25);border-radius:999px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font-sans);}
+
 </style>
 
   <!-- PWA -->
@@ -919,6 +925,7 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
         </div>
       </div>
       <div id="availability-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;"></div>
+      <div id="availability-team-hint" style="display:none;font-size:11.5px;color:var(--muted-foreground);margin-top:10px;"></div>
     </div>
     <div id="verified-info-block" style="display:none;background:linear-gradient(135deg,oklch(0.18 0.012 30),oklch(0.14 0.009 20));border-radius:20px;padding:20px 22px;margin-bottom:20px;">
       <div style="display:flex;align-items:center;gap:12px;">
@@ -1018,6 +1025,10 @@ const EMOJI = {plot:"🏜️",apartment:"🏢",villa:"🏯",colony:"🏘️"};
 const TYPE_LABEL = {plot:"Residential Plot",farmhouse:"Farmhouse",apartment:"Apartment",villa:"Luxury Villa",land:"Investment Land",commercial:"Commercial Plot"};
 
 let listingData = null, galIndex = 0, galImages = [], selectedTime = "9–11 AM";
+const ADMIN_EMAIL = "sandyjangir07@gmail.com";
+let isTeamViewer = false, isAdminViewer = false, currentSessionUser = null;
+let availabilityUnits = [], availabilityListingId = null;
+let tokenPhotoFile = null, currentTokenUnitId = null, currentReviewSubmissionId = null;
 
 function toast(msg){
   const el = document.getElementById("toast");
@@ -1218,7 +1229,13 @@ async function load() {
   document.getElementById("content").style.display = "block";
   // Show Add Visit button (only for logged-in team members)
   sb.auth.getSession().then(({ data: { session } }) => {
-    if (session) document.getElementById("agent-menu-btn").style.display = "flex";
+    if (session) {
+      document.getElementById("agent-menu-btn").style.display = "flex";
+      currentSessionUser = session.user;
+      isTeamViewer = true;
+      isAdminViewer = session.user.email === ADMIN_EMAIL;
+      if (availabilityUnits.length) renderAvailabilityGrid();
+    }
   });
 }
 
@@ -1312,8 +1329,15 @@ function renderNearbyLandmarks(text) {
 }
 
 async function loadAvailability(listingId) {
+  availabilityListingId = listingId;
   const { data: units, error } = await sb.from("colony_units").select("*").eq("listing_id", listingId).order("created_at", { ascending: true });
   if (error || !units || !units.length) return;
+  availabilityUnits = units;
+  renderAvailabilityGrid();
+  document.getElementById("availability-card").style.display = "block";
+}
+
+function renderAvailabilityGrid() {
   const STATUS_STYLE = {
     available: { bg: "#dcfce7", border: "#86efac", text: "#166534" },
     token:     { bg: "#fef9c3", border: "#fde047", text: "#854d0e" },
@@ -1321,15 +1345,141 @@ async function loadAvailability(listingId) {
   };
   const STATUS_TEXT = { available: "Available", token: "Token Received", sold: "Sold" };
   const grid = document.getElementById("availability-grid");
-  grid.innerHTML = units.map(function(u) {
+  grid.innerHTML = availabilityUnits.map(function(u) {
     const s = STATUS_STYLE[u.status] || { bg: "#f3f4f6", border: "#d1d5db", text: "#374151" };
-    return '<div style="border:1px solid ' + s.border + ';border-radius:12px;padding:10px 8px;text-align:center;background:' + s.bg + ';" title="' + (STATUS_TEXT[u.status] || u.status) + '">'
+    const tappable = (isTeamViewer && !isAdminViewer && u.status === "available") || (isAdminViewer && u.status === "token");
+    const handler = !tappable ? "" :
+      (u.status === "available"
+        ? " onclick=\"openSubmitTokenPublic('" + u.id + "','" + (u.unit_number||"").replace(/'/g,"\\'") + "')\""
+        : " onclick=\"openReviewTokenPublic('" + u.id + "')\"");
+    return '<div style="border:1px solid ' + s.border + ';border-radius:12px;padding:10px 8px;text-align:center;background:' + s.bg + ';' + (tappable ? 'cursor:pointer;' : '') + '" class="' + (tappable ? 'av-box-tappable' : '') + '" title="' + (STATUS_TEXT[u.status] || u.status) + '"' + handler + '>'
       + '<div style="font-size:12.5px;font-weight:700;color:' + s.text + ';">' + (u.unit_number || "—") + '</div>'
       + (u.unit_size ? '<div style="font-size:10.5px;color:' + s.text + ';opacity:0.75;margin-top:2px;">' + u.unit_size + '</div>' : '')
+      + (tappable ? '<div style="font-size:9px;font-weight:600;margin-top:4px;color:' + s.text + ';opacity:0.8;">' + (u.status === 'available' ? 'Tap to submit' : 'Tap to review') + '</div>' : '')
       + '</div>';
   }).join('');
-  document.getElementById("availability-card").style.display = "block";
+  const hint = document.getElementById("availability-team-hint");
+  if (isAdminViewer) { hint.style.display = "block"; hint.textContent = "Yellow plots are waiting on your review — tap one to see the token photo."; }
+  else if (isTeamViewer) { hint.style.display = "block"; hint.textContent = "Tap a green plot to submit a token for it."; }
+  else { hint.style.display = "none"; }
 }
+
+// ── TOKEN SUBMISSION (team): tap an available plot, attach a mandatory photo ──
+window.openSubmitTokenPublic = function(unitId, unitNumber) {
+  currentTokenUnitId = unitId;
+  tokenPhotoFile = null;
+  document.getElementById("tksub-title").textContent = "Submit Token" + (unitNumber ? " — " + unitNumber : "");
+  document.getElementById("tksub-buyer-name").value = "";
+  document.getElementById("tksub-buyer-phone").value = "";
+  document.getElementById("tksub-amount").value = "";
+  document.getElementById("tksub-notes").value = "";
+  document.getElementById("tksub-photo-input").value = "";
+  document.getElementById("tksub-photo-wrap").innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><div class="addvisit-photo-label">Tap to add photo — required</div>';
+  document.getElementById("tksub-err").style.opacity = "0";
+  document.getElementById("tokensubmit-overlay").classList.add("on");
+  document.body.style.overflow = "hidden";
+};
+
+window.closeSubmitTokenPublic = function() {
+  document.getElementById("tokensubmit-overlay").classList.remove("on");
+  document.body.style.overflow = "";
+};
+
+window.previewTokenPhotoPublic = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  tokenPhotoFile = file;
+  const url = URL.createObjectURL(file);
+  document.getElementById("tksub-photo-wrap").innerHTML = '<img src="' + url + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>';
+};
+
+window.submitTokenPublic = async function() {
+  const errEl = document.getElementById("tksub-err");
+  if (!tokenPhotoFile) {
+    errEl.textContent = "A photo is required — please add one before submitting.";
+    errEl.style.opacity = "1";
+    setTimeout(function(){ errEl.style.opacity = "0"; }, 4000);
+    return;
+  }
+  const btn = document.getElementById("tksub-submit-btn");
+  btn.textContent = "Submitting…"; btn.disabled = true;
+  try {
+    const ext = tokenPhotoFile.name.split(".").pop();
+    const path = `tokens/${currentTokenUnitId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error: upErr } = await sb.storage.from("property-images").upload(path, tokenPhotoFile, {cacheControl:"3600", upsert:false});
+    if (upErr) throw upErr;
+    const { data: pub } = sb.storage.from("property-images").getPublicUrl(path);
+    const meta = currentSessionUser.user_metadata || {};
+    const submitterName = meta.full_name || meta.name || currentSessionUser.email;
+    const { error: rpcErr } = await sb.rpc("submit_token_request", {
+      p_unit_id: currentTokenUnitId,
+      p_submitted_by_name: submitterName,
+      p_buyer_name: document.getElementById("tksub-buyer-name").value.trim() || null,
+      p_buyer_phone: document.getElementById("tksub-buyer-phone").value.trim() || null,
+      p_token_amount: document.getElementById("tksub-amount").value ? Number(document.getElementById("tksub-amount").value) : null,
+      p_photo_url: pub.publicUrl,
+      p_notes: document.getElementById("tksub-notes").value.trim() || null
+    });
+    if (rpcErr) throw rpcErr;
+    closeSubmitTokenPublic();
+    await loadAvailability(availabilityListingId);
+    toast("✓ Token submitted — waiting for admin approval.");
+  } catch(e) {
+    errEl.textContent = e.message || "Something went wrong. Please try again.";
+    errEl.style.opacity = "1";
+  } finally {
+    btn.textContent = "Submit for Approval"; btn.disabled = false;
+  }
+};
+
+// ── TOKEN REVIEW (admin): see the photo + buyer info, then approve or reject ──
+window.openReviewTokenPublic = async function(unitId) {
+  const { data, error } = await sb.from("token_submissions").select("*").eq("unit_id", unitId).eq("status","pending").order("submitted_at",{ascending:false}).limit(1).maybeSingle();
+  if (error || !data) { toast("Could not load this submission."); return; }
+  currentReviewSubmissionId = data.id;
+  const submittedDate = new Date(data.submitted_at).toLocaleString("en-IN", {day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"});
+  document.getElementById("reviewtoken-body").innerHTML =
+    '<img src="' + data.photo_url + '" style="width:100%;border-radius:14px;max-height:320px;object-fit:cover;cursor:zoom-in;" onclick="window.open(\'' + data.photo_url + '\',\'_blank\')"/>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;font-size:14px;text-align:left;">'
+    + '<div><strong>Buyer:</strong> ' + (data.buyer_name || "—") + (data.buyer_phone ? " · " + data.buyer_phone : "") + '</div>'
+    + (data.token_amount ? '<div><strong>Token amount:</strong> ₹' + Number(data.token_amount).toLocaleString("en-IN") + '</div>' : '')
+    + '<div><strong>Submitted by:</strong> ' + (data.submitted_by_name || "—") + ' · ' + submittedDate + '</div>'
+    + (data.notes ? '<div><strong>Notes:</strong> ' + data.notes + '</div>' : '')
+    + '</div>';
+  document.getElementById("reviewtoken-reject-wrap").style.display = "none";
+  document.getElementById("reviewtoken-reject-reason").value = "";
+  document.getElementById("reviewtoken-actions").style.display = "flex";
+  document.getElementById("reviewtoken-err").style.opacity = "0";
+  document.getElementById("reviewtoken-overlay").classList.add("on");
+  document.body.style.overflow = "hidden";
+};
+
+window.closeReviewTokenPublic = function() {
+  document.getElementById("reviewtoken-overlay").classList.remove("on");
+  document.body.style.overflow = "";
+};
+
+window.decideTokenPublic = async function(approve) {
+  const errEl = document.getElementById("reviewtoken-err");
+  const meta = currentSessionUser.user_metadata || {};
+  const reviewerName = meta.full_name || meta.name || currentSessionUser.email;
+  const reason = document.getElementById("reviewtoken-reject-reason").value.trim();
+  if (!approve && !reason) {
+    errEl.textContent = "Please add a reason for rejecting.";
+    errEl.style.opacity = "1";
+    return;
+  }
+  const { error } = await sb.rpc("review_token_submission", {
+    p_submission_id: currentReviewSubmissionId,
+    p_approve: approve,
+    p_reviewer_name: reviewerName,
+    p_rejection_reason: approve ? null : reason
+  });
+  if (error) { errEl.textContent = error.message; errEl.style.opacity = "1"; return; }
+  closeReviewTokenPublic();
+  await loadAvailability(availabilityListingId);
+  toast(approve ? "✓ Token approved — plot marked Sold." : "Submission rejected — plot is Available again.");
+};
 
 function showErr(msg) {
   document.getElementById("skeleton").innerHTML = `<div style="text-align:center;padding:80px 24px;font-family:var(--font-sans);color:var(--muted-foreground);font-size:15px;">${msg}<br><br><a href="index.html" style="color:var(--primary);font-weight:500;">← Back to listings</a></div>`;
@@ -1577,6 +1727,73 @@ window.closeAddVisit = () => {
       <div style="font-family:var(--font-display);font-size:28px;color:var(--foreground);margin-bottom:10px;letter-spacing:-0.02em;">Visit logged!</div>
       <div style="font-size:14px;color:var(--muted-foreground);line-height:1.75;margin-bottom:28px;">The visit has been saved to your records.</div>
       <button onclick="closeAddVisit()" class="btn-primary" style="border:none;cursor:pointer;display:inline-flex;">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMIT TOKEN MODAL (team, tapped from an available plot box) -->
+<div class="addvisit-overlay" id="tokensubmit-overlay" onclick="if(event.target===this)closeSubmitTokenPublic()">
+  <div class="addvisit-modal">
+    <div class="addvisit-handle"></div>
+    <div class="addvisit-hero">
+      <div class="addvisit-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      </div>
+      <div class="addvisit-title" id="tksub-title">Submit Token</div>
+      <div class="addvisit-sub">A photo is required — the admin reviews every submission before it's confirmed.</div>
+    </div>
+    <div class="addvisit-divider"></div>
+    <div class="addvisit-body">
+      <div class="addvisit-grid">
+        <div class="addvisit-row">
+          <div><label class="fl">Buyer Name</label><input class="fi" id="tksub-buyer-name" placeholder="e.g. Rajesh Kumar"/></div>
+          <div><label class="fl">Buyer Phone</label><input class="fi" id="tksub-buyer-phone" type="tel" placeholder="+91 98XXX XXXXX"/></div>
+        </div>
+        <div><label class="fl">Token Amount (₹)</label><input class="fi" id="tksub-amount" type="number" placeholder="e.g. 50000"/></div>
+        <div>
+          <label class="fl">Token Photo *</label>
+          <input type="file" id="tksub-photo-input" accept="image/*" style="display:none;" onchange="previewTokenPhotoPublic(this)"/>
+          <div class="addvisit-photo-wrap" id="tksub-photo-wrap" onclick="document.getElementById('tksub-photo-input').click()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <div class="addvisit-photo-label">Tap to add photo — required</div>
+          </div>
+        </div>
+        <div><label class="fl">Notes (optional)</label><textarea class="visit-textarea" id="tksub-notes" placeholder="Anything the admin should know" style="min-height:72px;"></textarea></div>
+        <div class="form-err" id="tksub-err" style="opacity:0;text-align:center;"></div>
+        <div style="display:flex;gap:10px;">
+          <button style="flex:0 0 auto;padding:14px 18px;border-radius:999px;border:1.5px solid var(--border);background:white;color:var(--muted-foreground);font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer;" onclick="closeSubmitTokenPublic()">Cancel</button>
+          <button class="btn-submit" id="tksub-submit-btn" onclick="submitTokenPublic()" style="flex:1;">Submit for Approval</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW TOKEN MODAL (admin, tapped from a pending/yellow plot box) -->
+<div class="addvisit-overlay" id="reviewtoken-overlay" onclick="if(event.target===this)closeReviewTokenPublic()">
+  <div class="addvisit-modal">
+    <div class="addvisit-handle"></div>
+    <div class="addvisit-hero">
+      <div class="addvisit-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.18 8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11Z"/></svg>
+      </div>
+      <div class="addvisit-title">Review Token</div>
+      <div class="addvisit-sub">Check the photo and buyer details, then approve or reject.</div>
+    </div>
+    <div class="addvisit-divider"></div>
+    <div class="addvisit-body">
+      <div id="reviewtoken-body" style="display:flex;flex-direction:column;gap:14px;"></div>
+      <div class="form-err" id="reviewtoken-err" style="opacity:0;text-align:center;"></div>
+      <div id="reviewtoken-reject-wrap" style="display:none;margin-top:6px;">
+        <label class="fl">Reason for rejection</label>
+        <textarea class="visit-textarea" id="reviewtoken-reject-reason" placeholder="Let the team member know why" style="min-height:72px;"></textarea>
+        <button class="btn-reject-lg" style="width:100%;margin-top:10px;" onclick="decideTokenPublic(false)">Confirm Reject</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;" id="reviewtoken-actions">
+        <button class="btn-approve-lg" onclick="decideTokenPublic(true)">✓ Approve</button>
+        <button class="btn-reject-lg" onclick="document.getElementById('reviewtoken-reject-wrap').style.display='block';document.getElementById('reviewtoken-actions').style.display='none';">✕ Reject</button>
+      </div>
+      <button style="width:100%;margin-top:14px;padding:14px;border-radius:999px;border:1.5px solid var(--border);background:white;color:var(--muted-foreground);font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer;" onclick="closeReviewTokenPublic()">Close</button>
     </div>
   </div>
 </div>
