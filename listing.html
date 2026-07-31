@@ -1478,6 +1478,20 @@ window.submitTokenPublic = async function() {
 };
 
 // ── TOKEN REVIEW (admin): see the photo + buyer info, then approve or reject ──
+let cachedEmployeesForReviewPublic = null;
+async function populateAssociateSelectPublic(suggestedName){
+  if (!cachedEmployeesForReviewPublic) {
+    const { data } = await sb.from('employees').select('id,full_name').order('full_name');
+    cachedEmployeesForReviewPublic = data || [];
+  }
+  const sel = document.getElementById('reviewtoken-associate-select');
+  sel.innerHTML = '<option value="">— None —</option>' + cachedEmployeesForReviewPublic.map(e=>`<option value="${e.id}">${e.full_name}</option>`).join('');
+  if (suggestedName) {
+    const match = cachedEmployeesForReviewPublic.find(e => e.full_name.trim().toLowerCase() === suggestedName.trim().toLowerCase());
+    if (match) sel.value = match.id;
+  }
+}
+
 window.openReviewTokenPublic = async function(unitId) {
   const { data, error } = await sb.from("token_submissions").select("*").eq("unit_id", unitId).eq("status","pending").order("submitted_at",{ascending:false}).limit(1).maybeSingle();
   if (error || !data) {
@@ -1496,6 +1510,9 @@ window.openReviewTokenPublic = async function(unitId) {
     + '<div><strong>Submitted by:</strong> ' + (data.submitted_by_name || "—") + ' · ' + submittedDate + '</div>'
     + (data.notes ? '<div><strong>Notes:</strong> ' + data.notes + '</div>' : '')
     + '</div>';
+  document.getElementById("reviewtoken-approve-wrap").style.display = "none";
+  document.getElementById("reviewtoken-sale-amount").value = "";
+  populateAssociateSelectPublic(data.associate_name);
   document.getElementById("reviewtoken-reject-wrap").style.display = "none";
   document.getElementById("reviewtoken-reject-reason").value = "";
   document.getElementById("reviewtoken-actions").style.display = "flex";
@@ -1514,8 +1531,14 @@ window.decideTokenPublic = async function(approve) {
   const meta = currentSessionUser.user_metadata || {};
   const reviewerName = meta.full_name || meta.name || currentSessionUser.email;
   const reason = document.getElementById("reviewtoken-reject-reason").value.trim();
+  const saleAmount = document.getElementById("reviewtoken-sale-amount").value;
   if (!approve && !reason) {
     errEl.textContent = "Please add a reason for rejecting.";
+    errEl.style.opacity = "1";
+    return;
+  }
+  if (approve && (!saleAmount || Number(saleAmount) <= 0)) {
+    errEl.textContent = "Please enter the sale amount before approving.";
     errEl.style.opacity = "1";
     return;
   }
@@ -1523,7 +1546,9 @@ window.decideTokenPublic = async function(approve) {
     p_submission_id: currentReviewSubmissionId,
     p_approve: approve,
     p_reviewer_name: reviewerName,
-    p_rejection_reason: approve ? null : reason
+    p_rejection_reason: approve ? null : reason,
+    p_sale_amount: approve ? Number(saleAmount) : null,
+    p_associate_employee_id: approve ? (document.getElementById("reviewtoken-associate-select").value || null) : null
   });
   if (error) { errEl.textContent = error.message; errEl.style.opacity = "1"; return; }
   closeReviewTokenPublic();
@@ -1862,13 +1887,20 @@ window.closeAddVisit = () => {
     <div class="addvisit-body">
       <div id="reviewtoken-body" style="display:flex;flex-direction:column;gap:14px;"></div>
       <div class="form-err" id="reviewtoken-err" style="opacity:0;text-align:center;"></div>
+      <div id="reviewtoken-approve-wrap" style="display:none;margin-top:6px;">
+        <label class="fl">Sale Amount (₹) *</label>
+        <input class="fi" id="reviewtoken-sale-amount" type="number" placeholder="e.g. 4500000"/>
+        <label class="fl">Associate credited for this deal</label>
+        <select class="fsel" id="reviewtoken-associate-select"><option value="">— None —</option></select>
+        <button class="btn-approve-lg" style="width:100%;margin-top:10px;" onclick="decideTokenPublic(true)">Confirm Approve</button>
+      </div>
       <div id="reviewtoken-reject-wrap" style="display:none;margin-top:6px;">
         <label class="fl">Reason for rejection</label>
         <textarea class="visit-textarea" id="reviewtoken-reject-reason" placeholder="Let the team member know why" style="min-height:72px;"></textarea>
         <button class="btn-reject-lg" style="width:100%;margin-top:10px;" onclick="decideTokenPublic(false)">Confirm Reject</button>
       </div>
       <div style="display:flex;gap:10px;margin-top:14px;" id="reviewtoken-actions">
-        <button class="btn-approve-lg" onclick="decideTokenPublic(true)">✓ Approve</button>
+        <button class="btn-approve-lg" onclick="document.getElementById('reviewtoken-approve-wrap').style.display='block';document.getElementById('reviewtoken-actions').style.display='none';">✓ Approve</button>
         <button class="btn-reject-lg" onclick="document.getElementById('reviewtoken-reject-wrap').style.display='block';document.getElementById('reviewtoken-actions').style.display='none';">✕ Reject</button>
       </div>
       <button style="width:100%;margin-top:14px;padding:14px;border-radius:999px;border:1.5px solid var(--border);background:white;color:var(--muted-foreground);font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer;" onclick="closeReviewTokenPublic()">Close</button>

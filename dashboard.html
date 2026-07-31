@@ -814,6 +814,7 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <button onclick="showTab('crm')" id="tab-crm" class="tab-btn"><span class="tab-btn-icon">👥</span><span class="tab-btn-label">CRM</span></button>
     <button onclick="showTab('schedule')" id="tab-schedule" class="tab-btn"><span class="tab-btn-icon">📅</span><span class="tab-btn-label">Visits</span></button>
     <button onclick="showTab('quotation')" id="tab-quotation" class="tab-btn"><span class="tab-btn-icon">🧾</span><span class="tab-btn-label">Quotation</span></button>
+    <a href="employees.html" id="tab-employees" class="tab-btn" style="text-decoration:none;"><span class="tab-btn-icon">🧑‍💼</span><span class="tab-btn-label">Employees</span></a>
     <button onclick="showTab('performance')" id="tab-performance" class="tab-btn" style="display:none;"><span class="tab-btn-icon">📊</span><span class="tab-btn-label">Performance</span></button>
     <button onclick="showTab('blogs')" id="tab-blogs" class="tab-btn" style="display:none;"><span class="tab-btn-icon">✍️</span><span class="tab-btn-label">Blog</span></button>
   </div>
@@ -1530,13 +1531,20 @@ body{background:var(--background);background-image:radial-gradient(at 0% 0%,colo
     <div class="modal-title">Review Token Submission</div>
     <div class="form-err" id="review-token-err" style="opacity:0;"></div>
     <div id="review-token-body" style="display:flex;flex-direction:column;gap:14px;"></div>
+    <div id="review-approve-wrap" style="display:none;margin-top:14px;">
+      <label class="fl">Sale Amount (₹) *</label>
+      <input class="fi" id="review-sale-amount" type="number" placeholder="e.g. 4500000"/>
+      <label class="fl">Associate credited for this deal</label>
+      <select class="fsel" id="review-associate-select"><option value="">— None —</option></select>
+      <button class="btn-approve" style="width:100%;margin-top:8px;padding:12px;" onclick="decideToken(true)">Confirm Approve</button>
+    </div>
     <div id="review-reject-wrap" style="display:none;margin-top:14px;">
       <label class="fl">Reason for rejection</label>
       <textarea class="ftextarea" id="review-reject-reason" placeholder="Let the team member know why"></textarea>
       <button class="btn-reject" style="width:100%;margin-top:8px;padding:12px;" onclick="decideToken(false)">Confirm Reject</button>
     </div>
     <div style="display:flex;gap:10px;margin-top:18px;" id="review-actions">
-      <button class="btn-approve" style="flex:1;padding:12px;" onclick="decideToken(true)">✓ Approve</button>
+      <button class="btn-approve" style="flex:1;padding:12px;" onclick="document.getElementById('review-approve-wrap').style.display='block';document.getElementById('review-actions').style.display='none';">✓ Approve</button>
       <button class="btn-reject" style="flex:1;padding:12px;" onclick="document.getElementById('review-reject-wrap').style.display='block';document.getElementById('review-actions').style.display='none';">✕ Reject</button>
     </div>
     <button class="btn-ghost" onclick="closeReviewToken()" style="margin-top:12px;width:100%;">Close</button>
@@ -1869,6 +1877,20 @@ window.submitToken = async function(){
 
 // ── TOKEN REVIEW (admin): see the photo + buyer info, then approve or reject ──
 let currentReviewSubmissionId = null;
+let cachedEmployeesForReview = null;
+
+async function populateAssociateSelect(suggestedName){
+  if (!cachedEmployeesForReview) {
+    const { data } = await sb.from('employees').select('id,full_name').order('full_name');
+    cachedEmployeesForReview = data || [];
+  }
+  const sel = document.getElementById('review-associate-select');
+  sel.innerHTML = '<option value="">— None —</option>' + cachedEmployeesForReview.map(e=>`<option value="${e.id}">${e.full_name}</option>`).join('');
+  if (suggestedName) {
+    const match = cachedEmployeesForReview.find(e => e.full_name.trim().toLowerCase() === suggestedName.trim().toLowerCase());
+    if (match) sel.value = match.id;
+  }
+}
 
 window.openReviewToken = async function(unitId){
   const { data, error } = await sb.from('token_submissions').select('*').eq('unit_id', unitId).eq('status','pending').order('submitted_at',{ascending:false}).limit(1).maybeSingle();
@@ -1889,6 +1911,9 @@ window.openReviewToken = async function(unitId){
     + '<div><strong>Submitted by:</strong> ' + (data.submitted_by_name || '—') + ' · ' + submittedDate + '</div>'
     + (data.notes ? '<div><strong>Notes:</strong> ' + data.notes + '</div>' : '')
     + '</div>';
+  document.getElementById('review-approve-wrap').style.display = 'none';
+  document.getElementById('review-sale-amount').value = '';
+  populateAssociateSelect(data.associate_name);
   document.getElementById('review-reject-wrap').style.display = 'none';
   document.getElementById('review-reject-reason').value = '';
   document.getElementById('review-actions').style.display = 'flex';
@@ -1907,8 +1932,14 @@ window.decideToken = async function(approve){
   const meta = currentUser.user_metadata || {};
   const reviewerName = meta.full_name || meta.name || currentUser.email;
   const reason = document.getElementById('review-reject-reason').value.trim();
+  const saleAmount = document.getElementById('review-sale-amount').value;
   if (!approve && !reason) {
     errEl.textContent = 'Please add a reason for rejecting.';
+    errEl.style.opacity = '1';
+    return;
+  }
+  if (approve && (!saleAmount || Number(saleAmount) <= 0)) {
+    errEl.textContent = 'Please enter the sale amount before approving.';
     errEl.style.opacity = '1';
     return;
   }
@@ -1916,7 +1947,9 @@ window.decideToken = async function(approve){
     p_submission_id: currentReviewSubmissionId,
     p_approve: approve,
     p_reviewer_name: reviewerName,
-    p_rejection_reason: approve ? null : reason
+    p_rejection_reason: approve ? null : reason,
+    p_sale_amount: approve ? Number(saleAmount) : null,
+    p_associate_employee_id: approve ? (document.getElementById('review-associate-select').value || null) : null
   });
   if (error) { errEl.textContent = error.message; errEl.style.opacity = '1'; return; }
   closeReviewToken();

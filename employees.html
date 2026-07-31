@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>PinkCity — Employees</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..700,30&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" sizes="180x180" href="/logo.png"/>
+<style>
+:root {
+  --radius: 1.125rem;
+  --background: oklch(0.975 0.012 82);
+  --foreground: oklch(0.20 0.014 30);
+  --card: oklch(0.995 0.003 90);
+  --card-foreground: oklch(0.20 0.014 30);
+  --primary: oklch(0.50 0.18 8);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-soft: oklch(0.93 0.05 8);
+  --secondary: oklch(0.945 0.016 78);
+  --secondary-foreground: oklch(0.22 0.012 30);
+  --muted: oklch(0.955 0.012 78);
+  --muted-foreground: oklch(0.52 0.012 30);
+  --border: oklch(0.905 0.012 70);
+  --gold: oklch(0.78 0.10 78);
+  --shadow-soft: 0 1px 2px rgba(20,16,18,0.025), 0 4px 14px -6px rgba(20,16,18,0.06);
+  --shadow-card: 0 1px 2px rgba(20,16,18,0.03), 0 10px 30px -14px rgba(20,16,18,0.10);
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);padding-bottom:60px;}
+h1,h2,h3,h4{font-family:var(--font-display);letter-spacing:-0.02em;}
+a{color:inherit;text-decoration:none;}
+button{font-family:var(--font-sans);cursor:pointer;}
+input,select,textarea{font-family:var(--font-sans);}
+
+.nav{position:sticky;top:0;z-index:60;background:color-mix(in oklab,var(--background) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.nav-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;}
+.nav-left{display:flex;align-items:center;gap:10px;}
+.nav-logo{width:34px;height:34px;border-radius:10px;overflow:hidden;flex-shrink:0;}
+.nav-logo img{width:100%;height:100%;object-fit:cover;}
+.nav-title{font-family:var(--font-display);font-size:17px;}
+.nav-back{font-size:13px;color:var(--muted-foreground);display:flex;align-items:center;gap:4px;}
+.nav-signout{font-size:12px;color:var(--muted-foreground);border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:white;}
+
+.wrap{max-width:960px;margin:0 auto;padding:18px 16px 40px;}
+.page-title{font-size:26px;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--muted-foreground);margin-bottom:18px;}
+
+.tabbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:20px;-webkit-overflow-scrolling:touch;}
+.tabbar::-webkit-scrollbar{display:none;}
+.tab-btn{flex:0 0 auto;padding:9px 16px;border-radius:999px;border:1px solid var(--border);background:white;color:var(--muted-foreground);font-size:13px;font-weight:600;white-space:nowrap;}
+.tab-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-soft);}
+.btn-primary{background:var(--primary);color:white;border:none;border-radius:999px;padding:12px 20px;font-size:14px;font-weight:600;box-shadow:0 8px 20px -8px oklch(0.50 0.18 8 / 0.5);}
+.btn-primary:disabled{opacity:0.45;}
+.btn-ghost{background:white;color:var(--foreground);border:1.5px solid var(--border);border-radius:999px;padding:12px 20px;font-size:14px;font-weight:500;}
+.btn-sm{padding:7px 14px;border-radius:999px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:white;}
+.btn-sm.primary{background:var(--primary);color:white;border-color:var(--primary);}
+.btn-sm.approve{background:rgba(74,222,128,0.14);color:#166534;border-color:rgba(74,222,128,0.3);}
+.btn-sm.reject{background:rgba(248,113,113,0.12);color:#dc2626;border-color:rgba(248,113,113,0.25);}
+
+.search-row{display:flex;gap:8px;margin-bottom:14px;}
+.search-input{flex:1;background:white;border:1.5px solid var(--border);border-radius:999px;padding:11px 16px;font-size:14px;outline:none;}
+.filter-sel{background:white;border:1.5px solid var(--border);border-radius:999px;padding:11px 14px;font-size:13px;}
+
+.emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.emp-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer;transition:transform 0.12s;box-shadow:var(--shadow-soft);}
+.emp-card:active{transform:scale(0.98);}
+.emp-avatar{width:48px;height:48px;border-radius:14px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;background-size:cover;background-position:center;}
+.emp-info{flex:1;min-width:0;}
+.emp-name{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.emp-meta{font-size:12px;color:var(--muted-foreground);margin-top:2px;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:0.02em;text-transform:uppercase;margin-top:6px;}
+.chip.active{background:rgba(74,222,128,0.14);color:#166534;}
+.chip.on_leave{background:rgba(251,191,36,0.16);color:#92400e;}
+.chip.suspended{background:rgba(248,113,113,0.14);color:#b91c1c;}
+.chip.inactive{background:var(--muted);color:var(--muted-foreground);}
+
+.empty{text-align:center;padding:40px 20px;color:var(--muted-foreground);font-size:13px;}
+
+.overlay{position:fixed;inset:0;background:rgba(20,16,18,0.42);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.22s;}
+.overlay.on{opacity:1;pointer-events:auto;}
+.modal{background:var(--background);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px 20px 28px;transform:translateY(24px);transition:transform 0.25s;}
+.overlay.on .modal{transform:translateY(0);}
+@media(min-width:700px){.overlay{align-items:center;}.modal{border-radius:24px;max-height:88vh;}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 16px;}
+.modal-title{font-size:21px;margin-bottom:14px;}
+.fl{display:block;font-size:11.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted-foreground);margin-bottom:6px;}
+.fi{width:100%;background:white;border:1.5px solid var(--border);border-radius:14px;padding:11px 14px;font-size:14px;outline:none;margin-bottom:12px;}
+.fsel{width:100%;background:white;border:1.5px solid var(--border);border-radius:14px;padding:11px 14px;font-size:14px;margin-bottom:12px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-err{background:rgba(248,113,113,0.1);color:#b91c1c;border-radius:12px;padding:10px 14px;font-size:12.5px;margin-bottom:12px;}
+
+.profile-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 0 18px;}
+.profile-avatar{width:76px;height:76px;border-radius:22px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;margin-bottom:10px;background-size:cover;background-position:center;}
+.profile-name{font-size:20px;}
+.profile-code{font-size:12px;color:var(--muted-foreground);margin-top:2px;}
+.subtab-bar{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;}
+.subtab-btn{flex:0 0 auto;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--border);background:white;color:var(--muted-foreground);white-space:nowrap;}
+.subtab-btn.active{background:var(--foreground);color:white;border-color:var(--foreground);}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
+.info-row:last-child{border-bottom:none;}
+.info-row .k{color:var(--muted-foreground);}
+.info-row .v{font-weight:500;text-align:right;}
+.section-label{font-size:11.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted-foreground);margin:18px 0 8px;}
+.section-label:first-child{margin-top:0;}
+
+.doc-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.doc-row:last-child{border-bottom:none;}
+.doc-icon{width:38px;height:38px;border-radius:11px;background:var(--secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.doc-title{font-size:13.5px;font-weight:600;}
+.doc-status{font-size:11px;margin-top:2px;}
+.doc-status.pending{color:#92400e;}
+.doc-status.approved{color:#166534;}
+.doc-status.rejected{color:#b91c1c;}
+.doc-status.reupload_requested{color:#92400e;}
+.doc-status.none{color:var(--muted-foreground);}
+
+.stat-mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
+.stat-mini-card{background:var(--secondary);border-radius:14px;padding:12px 14px;}
+.stat-mini-card .n{font-family:var(--font-display);font-size:19px;}
+.stat-mini-card .l{font-size:10.5px;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.04em;margin-top:2px;}
+
+.hier-node{border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;background:white;}
+.hier-node .name{font-weight:600;font-size:13.5px;}
+.hier-node .meta{font-size:11.5px;color:var(--muted-foreground);}
+.hier-children{margin-left:20px;border-left:2px solid var(--border);padding-left:14px;margin-top:8px;}
+
+.activity-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);margin-top:5px;flex-shrink:0;}
+.activity-desc{font-size:13px;}
+.activity-meta{font-size:11px;color:var(--muted-foreground);margin-top:2px;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:white;padding:12px 20px;border-radius:999px;font-size:13px;z-index:400;opacity:0;pointer-events:none;transition:all 0.25s;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.badge-count{background:var(--primary);color:white;font-size:10px;border-radius:999px;padding:1px 6px;margin-left:5px;}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="nav-logo"><img src="/logo.png" alt="PinkCity"/></div>
+      <div class="nav-title">Employees</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="dashboard.html" class="nav-back">← Dashboard</a>
+      <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="page-title">Team</div>
+  <div class="page-sub" id="page-sub">Onboarding, verification, hierarchy and commission — all in one place.</div>
+
+  <div class="tabbar">
+    <button class="tab-btn active" onclick="showTab('all')">All Employees</button>
+    <button class="tab-btn" id="tab-btn-pending" style="display:none;" onclick="showTab('pending')">Pending Approvals<span class="badge-count" id="pending-count" style="display:none;">0</span></button>
+    <button class="tab-btn" onclick="showTab('hierarchy')">Hierarchy</button>
+    <button class="tab-btn" id="tab-btn-slabs" style="display:none;" onclick="showTab('slabs')">Commission Slabs</button>
+  </div>
+
+  <!-- ALL EMPLOYEES -->
+  <div id="section-all">
+    <div class="search-row">
+      <input class="search-input" id="emp-search" placeholder="Search name, code, designation, phone…" oninput="renderEmployeeGrid()"/>
+      <select class="filter-sel" id="emp-status-filter" onchange="renderEmployeeGrid()">
+        <option value="">All status</option>
+        <option value="active">Active</option>
+        <option value="on_leave">On Leave</option>
+        <option value="suspended">Suspended</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <button class="btn-primary" id="add-employee-btn" style="display:none;width:100%;margin-bottom:16px;" onclick="openAddEmployee()">+ Add Employee</button>
+    <div class="emp-grid" id="emp-grid"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- PENDING APPROVALS -->
+  <div id="section-pending" style="display:none;">
+    <div class="section-label">Pending Documents</div>
+    <div id="pending-docs-list"><div class="empty">Loading…</div></div>
+    <div class="section-label">Pending Hierarchy Requests</div>
+    <div id="pending-hierarchy-list"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- HIERARCHY TREE -->
+  <div id="section-hierarchy" style="display:none;">
+    <div id="hierarchy-tree"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- COMMISSION SLABS -->
+  <div id="section-slabs" style="display:none;">
+    <button class="btn-primary" style="width:100%;margin-bottom:16px;" onclick="openAddSlab()">+ Add Commission Slab</button>
+    <div id="slabs-list"><div class="empty">Loading…</div></div>
+  </div>
+</div>
+
+<!-- ADD / EDIT EMPLOYEE MODAL -->
+<div class="overlay" id="employee-form-overlay" onclick="if(event.target===this)closeEmployeeForm()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="employee-form-title">Add Employee</div>
+    <div class="form-err" id="employee-form-err" style="display:none;"></div>
+    <div class="section-label">Basic Information</div>
+    <div class="frow">
+      <div><label class="fl">Full Name *</label><input class="fi" id="ef-name"/></div>
+      <div><label class="fl">Designation</label><input class="fi" id="ef-designation" placeholder="e.g. Sales Associate"/></div>
+    </div>
+    <div class="frow">
+      <div><label class="fl">Department</label><input class="fi" id="ef-department"/></div>
+      <div><label class="fl">Employment Type</label>
+        <select class="fsel" id="ef-employment-type">
+          <option value="full_time">Full Time</option><option value="part_time">Part Time</option>
+          <option value="intern">Intern</option><option value="consultant">Consultant</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div><label class="fl">Date of Birth</label><input class="fi" id="ef-dob" type="date"/></div>
+      <div><label class="fl">Gender</label><input class="fi" id="ef-gender"/></div>
+    </div>
+    <div class="frow">
+      <div><label class="fl">Blood Group</label><input class="fi" id="ef-blood-group" placeholder="e.g. B+"/></div>
+      <div><label class="fl">Joining Date</label><input class="fi" id="ef-joining-date" type="date"/></div>
+    </div>
+    <div class="section-label">Contact Details</div>
+    <div class="frow">
+      <div><label class="fl">Mobile Number</label><input class="fi" id="ef-mobile" type="tel"/></div>
+      <div><label class="fl">Alternate Mobile</label><input class="fi" id="ef-alt-mobile" type="tel"/></div>
+    </div>
+    <label class="fl">Email</label><input class="fi" id="ef-email" type="email"/>
+    <div class="frow">
+      <div><label class="fl">Emergency Contact Name</label><input class="fi" id="ef-emergency-name"/></div>
+      <div><label class="fl">Emergency Contact Number</label><input class="fi" id="ef-emergency-number" type="tel"/></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeEmployeeForm()">Cancel</button>
+      <button class="btn-primary" style="flex:1;" id="ef-save-btn" onclick="saveEmployee()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMPLOYEE PROFILE MODAL -->
+<div class="overlay" id="profile-overlay" onclick="if(event.target===this)closeProfile()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="profile-hero">
+      <div class="profile-avatar" id="profile-avatar">?</div>
+      <div class="profile-name" id="profile-name">—</div>
+      <div class="profile-code" id="profile-code">—</div>
+      <span class="chip" id="profile-status-chip">—</span>
+    </div>
+    <div class="subtab-bar">
+      <button class="subtab-btn active" onclick="showProfileTab('overview')">Overview</button>
+      <button class="subtab-btn" onclick="showProfileTab('documents')">Documents</button>
+      <button class="subtab-btn" onclick="showProfileTab('hierarchy')">Hierarchy</button>
+      <button class="subtab-btn" onclick="showProfileTab('commission')">Commission</button>
+      <button class="subtab-btn" onclick="showProfileTab('activity')">Activity</button>
+    </div>
+
+    <div id="ptab-overview">
+      <div class="stat-mini">
+        <div class="stat-mini-card"><div class="n" id="ov-experience">—</div><div class="l">Experience</div></div>
+        <div class="stat-mini-card"><div class="n" id="ov-slab">—</div><div class="l">Commission Slab</div></div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-card"><div class="n" id="ov-deals">—</div><div class="l">Total Deals</div></div>
+        <div class="stat-mini-card"><div class="n" id="ov-sales">—</div><div class="l">Total Sales</div></div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-card"><div class="n" id="ov-commission-total">—</div><div class="l">Commission Earned</div></div>
+        <div class="stat-mini-card"><div class="n" id="ov-commission-month">—</div><div class="l">This Month</div></div>
+      </div>
+      <button class="btn-sm" id="edit-basic-btn" style="width:100%;margin-bottom:14px;" onclick="openEditBasic()">Edit Basic Info</button>
+      <div class="section-label">Basic Information</div>
+      <div id="ov-basic"></div>
+      <div class="section-label">Contact</div>
+      <div id="ov-contact"></div>
+      <div class="section-label">Current Address</div>
+      <div id="ov-addr-current"></div>
+      <button class="btn-sm" style="margin-top:8px;" onclick="openEditAddress('current')">Edit Current Address</button>
+      <div class="section-label">Permanent Address</div>
+      <div id="ov-addr-permanent"></div>
+      <button class="btn-sm" style="margin-top:8px;" onclick="openEditAddress('permanent')">Edit Permanent Address</button>
+    </div>
+
+    <div id="ptab-documents" style="display:none;">
+      <div id="doc-list"></div>
+    </div>
+
+    <div id="ptab-hierarchy" style="display:none;">
+      <div class="section-label">Senior</div>
+      <div id="hier-senior"></div>
+      <div class="section-label">Associates <span id="hier-assoc-count"></span></div>
+      <div id="hier-associates"></div>
+      <div class="section-label">Pending Requests</div>
+      <div id="hier-pending"></div>
+    </div>
+
+    <div id="ptab-commission" style="display:none;">
+      <div class="section-label">Current Slab</div>
+      <div id="comm-current"></div>
+      <button class="btn-sm primary" id="comm-assign-btn" style="display:none;margin:10px 0 4px;" onclick="openAssignCommission()">Assign New Slab</button>
+      <div class="section-label">History</div>
+      <div id="comm-history"></div>
+    </div>
+
+    <div id="ptab-activity" style="display:none;">
+      <div id="activity-list"></div>
+    </div>
+
+    <button class="btn-ghost" style="width:100%;margin-top:18px;" onclick="closeProfile()">Close</button>
+  </div>
+</div>
+
+<!-- EDIT BASIC INFO MODAL (self or admin) -->
+<div class="overlay" id="edit-basic-overlay" onclick="if(event.target===this)closeEditBasic()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Basic Info</div>
+    <div class="form-err" id="eb-err" style="display:none;"></div>
+    <label class="fl">Full Name</label><input class="fi" id="eb-name"/>
+    <div class="frow">
+      <div><label class="fl">Date of Birth</label><input class="fi" id="eb-dob" type="date"/></div>
+      <div><label class="fl">Gender</label><input class="fi" id="eb-gender"/></div>
+    </div>
+    <label class="fl">Blood Group</label><input class="fi" id="eb-blood-group"/>
+    <div class="frow">
+      <div><label class="fl">Mobile</label><input class="fi" id="eb-mobile" type="tel"/></div>
+      <div><label class="fl">Alternate Mobile</label><input class="fi" id="eb-alt-mobile" type="tel"/></div>
+    </div>
+    <label class="fl">Email</label><input class="fi" id="eb-email" type="email"/>
+    <div class="frow">
+      <div><label class="fl">Emergency Contact Name</label><input class="fi" id="eb-emergency-name"/></div>
+      <div><label class="fl">Emergency Contact Number</label><input class="fi" id="eb-emergency-number" type="tel"/></div>
+    </div>
+    <div id="eb-admin-fields" style="display:none;">
+      <div class="section-label">Admin only</div>
+      <div class="frow">
+        <div><label class="fl">Designation</label><input class="fi" id="eb-designation"/></div>
+        <div><label class="fl">Department</label><input class="fi" id="eb-department"/></div>
+      </div>
+      <div class="frow">
+        <div><label class="fl">Employment Type</label>
+          <select class="fsel" id="eb-employment-type">
+            <option value="full_time">Full Time</option><option value="part_time">Part Time</option>
+            <option value="intern">Intern</option><option value="consultant">Consultant</option>
+          </select>
+        </div>
+        <div><label class="fl">Status</label>
+          <select class="fsel" id="eb-status">
+            <option value="active">Active</option><option value="on_leave">On Leave</option>
+            <option value="suspended">Suspended</option><option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeEditBasic()">Cancel</button>
+      <button class="btn-primary" style="flex:1;" onclick="saveEditBasic()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ADDRESS MODAL -->
+<div class="overlay" id="edit-address-overlay" onclick="if(event.target===this)closeEditAddress()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="ea-title">Edit Address</div>
+    <label class="fl">House No.</label><input class="fi" id="ea-house"/>
+    <label class="fl">Street</label><input class="fi" id="ea-street"/>
+    <div class="frow">
+      <div><label class="fl">Area</label><input class="fi" id="ea-area"/></div>
+      <div><label class="fl">City</label><input class="fi" id="ea-city"/></div>
+    </div>
+    <div class="frow">
+      <div><label class="fl">State</label><input class="fi" id="ea-state"/></div>
+      <div><label class="fl">Pincode</label><input class="fi" id="ea-pincode"/></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeEditAddress()">Cancel</button>
+      <button class="btn-primary" style="flex:1;" onclick="saveEditAddress()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENT REVIEW MODAL (admin) -->
+<div class="overlay" id="doc-review-overlay" onclick="if(event.target===this)closeDocReview()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Review Document</div>
+    <div id="doc-review-body" style="margin-bottom:14px;"></div>
+    <label class="fl">Remarks (required to reject / request re-upload)</label>
+    <textarea class="fi" id="doc-review-remarks" style="min-height:70px;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn-sm approve" style="flex:1;padding:11px;" onclick="decideDocument('approved')">✓ Approve</button>
+      <button class="btn-sm reject" style="flex:1;padding:11px;" onclick="decideDocument('rejected')">✕ Reject</button>
+      <button class="btn-sm" style="flex:1;padding:11px;" onclick="decideDocument('reupload_requested')">↻ Re-upload</button>
+    </div>
+    <button class="btn-ghost" style="width:100%;margin-top:10px;" onclick="closeDocReview()">Close</button>
+  </div>
+</div>
+
+<!-- HIERARCHY SEARCH MODAL -->
+<div class="overlay" id="hier-search-overlay" onclick="if(event.target===this)closeHierSearch()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="hier-search-title">Add Senior</div>
+    <input class="fi" id="hier-search-input" placeholder="Search by name or code…" oninput="runHierSearch()"/>
+    <div id="hier-search-results"></div>
+    <button class="btn-ghost" style="width:100%;margin-top:10px;" onclick="closeHierSearch()">Cancel</button>
+  </div>
+</div>
+
+<!-- ASSIGN COMMISSION MODAL (admin) -->
+<div class="overlay" id="assign-comm-overlay" onclick="if(event.target===this)closeAssignCommission()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Assign Commission Slab</div>
+    <label class="fl">Slab</label>
+    <select class="fsel" id="ac-slab"></select>
+    <label class="fl">Effective Date</label>
+    <input class="fi" id="ac-date" type="date"/>
+    <label class="fl">Remarks</label>
+    <textarea class="fi" id="ac-remarks" style="min-height:60px;"></textarea>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeAssignCommission()">Cancel</button>
+      <button class="btn-primary" style="flex:1;" onclick="saveAssignCommission()">Assign</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT COMMISSION SLAB MODAL (admin) -->
+<div class="overlay" id="slab-form-overlay" onclick="if(event.target===this)closeSlabForm()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="slab-form-title">Add Commission Slab</div>
+    <label class="fl">Name</label><input class="fi" id="sf-name" placeholder="e.g. Senior Associate"/>
+    <label class="fl">Commission %</label><input class="fi" id="sf-percent" type="number" step="0.1"/>
+    <label class="fl">Description</label><textarea class="fi" id="sf-desc" style="min-height:60px;"></textarea>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeSlabForm()">Cancel</button>
+      <button class="btn-primary" style="flex:1;" onclick="saveSlab()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="push-subscribe.js"></script>
+<script>
+const sb = window.supabase.createClient(
+  "https://mfpnndrszjygespcfdbo.supabase.co",
+  "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf"
+);
+const ADMIN_EMAIL = "sandyjangir07@gmail.com";
+let currentUser = null, isAdmin = false, myEmployeeId = null;
+let allEmployees = [];
+let currentProfileId = null;
+let editAddressType = null;
+let docReviewId = null;
+let hierSearchMode = null; // 'senior' | 'associate'
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'), 2600);
+}
+function initials(name){ return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+// Same downscale-before-upload helper used elsewhere in the CRM.
+async function compressImageFile(file, maxDimension = 1600, quality = 0.85) {
+  if (!file || !file.type || !file.type.startsWith("image/") || file.type === "image/gif") return file;
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const { width, height } = bitmap;
+    if (width <= maxDimension && height <= maxDimension && file.size < 500*1024) { bitmap.close && bitmap.close(); return file; }
+    const scale = Math.min(1, maxDimension / Math.max(width, height));
+    const tw = Math.round(width*scale), th = Math.round(height*scale);
+    const canvas = document.createElement("canvas"); canvas.width=tw; canvas.height=th;
+    canvas.getContext("2d").drawImage(bitmap,0,0,tw,th);
+    bitmap.close && bitmap.close();
+    const blob = await new Promise(r=>canvas.toBlob(r,"image/jpeg",quality));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.\w+$/,".jpg"), {type:"image/jpeg"});
+  } catch(e){ console.error(e); return file; }
+}
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (!session) { window.location.href = "login.html"; return; }
+  currentUser = session.user;
+  isAdmin = currentUser.email === ADMIN_EMAIL;
+  if (isAdmin) {
+    document.getElementById('tab-btn-pending').style.display = 'inline-flex';
+    document.getElementById('tab-btn-slabs').style.display = 'inline-flex';
+    document.getElementById('add-employee-btn').style.display = 'block';
+  }
+  const { data: me } = await sb.from('employees').select('id').eq('user_id', currentUser.id).maybeSingle();
+  myEmployeeId = me ? me.id : null;
+  loadEmployees();
+  if (isAdmin) loadPendingCounts();
+});
+window.handleSignOut = async () => { await sb.auth.signOut(); window.location.href = "login.html"; };
+
+// ── TABS ──
+window.showTab = function(name){
+  ['all','pending','hierarchy','slabs'].forEach(t=>{
+    document.getElementById('section-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tabbar .tab-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (name==='pending') loadPendingApprovals();
+  if (name==='hierarchy') loadHierarchyTree();
+  if (name==='slabs') loadSlabs();
+};
+
+// ── ALL EMPLOYEES ──
+async function loadEmployees(){
+  const { data, error } = await sb.from('employees').select('*').order('full_name');
+  allEmployees = data || [];
+  renderEmployeeGrid();
+}
+window.renderEmployeeGrid = function(){
+  const q = (document.getElementById('emp-search').value||'').toLowerCase();
+  const statusF = document.getElementById('emp-status-filter').value;
+  const grid = document.getElementById('emp-grid');
+  let list = allEmployees.filter(e=>{
+    if (statusF && e.status!==statusF) return false;
+    if (!q) return true;
+    return [e.full_name,e.employee_code,e.designation,e.department,e.mobile,e.email].some(f=>(f||'').toLowerCase().includes(q));
+  });
+  if (!list.length){ grid.innerHTML = '<div class="empty">No employees found.</div>'; return; }
+  grid.innerHTML = list.map(e=>`
+    <div class="emp-card" onclick="openProfile('${e.id}')">
+      <div class="emp-avatar" style="${e.photo_url?`background-image:url('${e.photo_url}')`:''}">${e.photo_url?'':initials(e.full_name)}</div>
+      <div class="emp-info">
+        <div class="emp-name">${esc(e.full_name)}</div>
+        <div class="emp-meta">${esc(e.employee_code||'')}${e.designation?' · '+esc(e.designation):''}</div>
+        <span class="chip ${e.status}">${e.status.replace('_',' ')}</span>
+      </div>
+    </div>`).join('');
+};
+
+// ── ADD EMPLOYEE ──
+window.openAddEmployee = function(){
+  document.getElementById('employee-form-title').textContent = 'Add Employee';
+  ['ef-name','ef-designation','ef-department','ef-dob','ef-mobile','ef-alt-mobile','ef-email','ef-emergency-name','ef-emergency-number'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ef-employment-type').value = 'full_time';
+  document.getElementById('ef-joining-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('employee-form-err').style.display='none';
+  document.getElementById('employee-form-overlay').classList.add('on');
+};
+window.closeEmployeeForm = function(){ document.getElementById('employee-form-overlay').classList.remove('on'); };
+window.saveEmployee = async function(){
+  const name = document.getElementById('ef-name').value.trim();
+  const errEl = document.getElementById('employee-form-err');
+  if (!name){ errEl.textContent='Full name is required.'; errEl.style.display='block'; return; }
+  const emailVal = document.getElementById('ef-email').value.trim()||null;
+  let linkedUserId = null;
+  if (emailVal){
+    const { data: matchProfile } = await sb.from('profiles').select('id').eq('email', emailVal).maybeSingle();
+    if (matchProfile) linkedUserId = matchProfile.id;
+  }
+  const payload = {
+    full_name: name,
+    user_id: linkedUserId,
+    designation: document.getElementById('ef-designation').value.trim()||null,
+    department: document.getElementById('ef-department').value.trim()||null,
+    employment_type: document.getElementById('ef-employment-type').value,
+    dob: document.getElementById('ef-dob').value||null,
+    gender: document.getElementById('ef-gender') ? (document.getElementById('ef-gender').value||null) : null,
+    blood_group: document.getElementById('ef-blood-group').value.trim()||null,
+    joining_date: document.getElementById('ef-joining-date').value||null,
+    mobile: document.getElementById('ef-mobile').value.trim()||null,
+    alternate_mobile: document.getElementById('ef-alt-mobile').value.trim()||null,
+    email: emailVal,
+    emergency_contact_name: document.getElementById('ef-emergency-name').value.trim()||null,
+    emergency_contact_number: document.getElementById('ef-emergency-number').value.trim()||null,
+    created_by: currentUser.id
+  };
+  const { data, error } = await sb.from('employees').insert(payload).select().single();
+  if (error){ errEl.textContent = error.message; errEl.style.display='block'; return; }
+  await sb.rpc('log_employee_activity', { p_employee_id: data.id, p_action_type:'profile_updated', p_description:'Employee record created' });
+  closeEmployeeForm();
+  toast('✓ Employee added');
+  loadEmployees();
+};
+
+// ── PROFILE ──
+window.openProfile = async function(id){
+  currentProfileId = id;
+  const e = allEmployees.find(x=>x.id===id) || (await sb.from('employees').select('*').eq('id',id).single()).data;
+  document.getElementById('profile-avatar').style.backgroundImage = e.photo_url?`url('${e.photo_url}')`:'';
+  document.getElementById('profile-avatar').textContent = e.photo_url?'':initials(e.full_name);
+  document.getElementById('profile-name').textContent = e.full_name;
+  document.getElementById('profile-code').textContent = e.employee_code||'';
+  const chip = document.getElementById('profile-status-chip');
+  chip.textContent = e.status.replace('_',' '); chip.className = 'chip '+e.status;
+  document.getElementById('edit-basic-btn').style.display = (isAdmin || e.user_id===currentUser.id) ? 'block' : 'none';
+
+  const yrs = e.joining_date ? ((Date.now()-new Date(e.joining_date))/(1000*3600*24*365.25)) : null;
+  document.getElementById('ov-experience').textContent = yrs!=null ? (yrs<1 ? Math.round(yrs*12)+' mo' : yrs.toFixed(1)+' yr') : '—';
+
+  document.getElementById('ov-basic').innerHTML = [
+    ['Designation', e.designation], ['Department', e.department],
+    ['Employment Type', e.employment_type?.replace('_',' ')], ['Joining Date', e.joining_date],
+    ['Date of Birth', e.dob], ['Gender', e.gender], ['Blood Group', e.blood_group]
+  ].map(([k,v])=>`<div class="info-row"><span class="k">${k}</span><span class="v">${esc(v)||'—'}</span></div>`).join('');
+  document.getElementById('ov-contact').innerHTML = [
+    ['Mobile', e.mobile], ['Alternate Mobile', e.alternate_mobile], ['Email', e.email],
+    ['Emergency Contact', e.emergency_contact_name], ['Emergency Number', e.emergency_contact_number]
+  ].map(([k,v])=>`<div class="info-row"><span class="k">${k}</span><span class="v">${esc(v)||'—'}</span></div>`).join('');
+
+  const { data: addrs } = await sb.from('employee_addresses').select('*').eq('employee_id', id);
+  renderAddress('current', (addrs||[]).find(a=>a.address_type==='current'));
+  renderAddress('permanent', (addrs||[]).find(a=>a.address_type==='permanent'));
+
+  const { data: slabRows } = await sb.from('employee_commission_assignments').select('*, commission_slabs(name)').eq('employee_id', id).order('effective_date',{ascending:false}).limit(1);
+  document.getElementById('ov-slab').textContent = slabRows && slabRows[0] ? slabRows[0].commission_slabs.name : '—';
+
+  document.getElementById('profile-overlay').classList.add('on');
+  showProfileTab('overview');
+  loadDocuments(id);
+  loadHierarchyForProfile(id);
+  loadCommission(id);
+  loadDealStats(id);
+  loadActivity(id);
+};
+function renderAddress(type, a){
+  const el = document.getElementById('ov-addr-'+type);
+  if (!a || (!a.house_no && !a.city)) { el.innerHTML = '<div class="empty" style="padding:12px 0;">Not added yet.</div>'; return; }
+  el.innerHTML = [a.house_no,a.street,a.area,a.city,a.state,a.pincode].filter(Boolean).map(esc).join(', ');
+}
+window.closeProfile = function(){ document.getElementById('profile-overlay').classList.remove('on'); };
+window.showProfileTab = function(name){
+  ['overview','documents','hierarchy','commission','activity'].forEach(t=>{
+    document.getElementById('ptab-'+t).style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('.subtab-bar .subtab-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+};
+
+// ── DOCUMENTS ──
+const DOC_TYPES = [
+  {key:'aadhaar_front', label:'Aadhaar Card — Front'},
+  {key:'aadhaar_back', label:'Aadhaar Card — Back'},
+  {key:'pan', label:'PAN Card'},
+  {key:'police_verification', label:'Police Verification'}
+];
+async function loadDocuments(employeeId){
+  const { data } = await sb.from('employee_documents').select('*').eq('employee_id', employeeId).order('uploaded_at',{ascending:false});
+  const docs = data || [];
+  const canUpload = isAdmin || (allEmployees.find(e=>e.id===employeeId)||{}).user_id === currentUser.id;
+  document.getElementById('doc-list').innerHTML = DOC_TYPES.map(dt=>{
+    const latest = docs.find(d=>d.document_type===dt.key);
+    const statusClass = latest ? latest.status : 'none';
+    const statusText = latest ? latest.status.replace('_',' ') : 'Not uploaded';
+    return `<div class="doc-row">
+      <div class="doc-icon">📄</div>
+      <div style="flex:1;min-width:0;">
+        <div class="doc-title">${dt.label}</div>
+        <div class="doc-status ${statusClass}">${statusText}${latest && latest.admin_remarks ? ' · '+esc(latest.admin_remarks) : ''}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        ${latest ? `<button class="btn-sm" onclick="viewDocument('${latest.file_url}')">View</button>` : ''}
+        ${canUpload && (!latest || latest.status==='rejected' || latest.status==='reupload_requested') ? `<button class="btn-sm primary" onclick="pickDocFile('${dt.key}')">${latest?'Re-upload':'Upload'}</button>` : ''}
+        ${isAdmin && latest && latest.status==='pending' ? `<button class="btn-sm" onclick="openDocReview('${latest.id}','${dt.label}','${latest.file_url}')">Review</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+window.viewDocument = async function(path){
+  toast('Opening…');
+  const { data, error } = await sb.storage.from('employee-documents').createSignedUrl(path, 300);
+  if (error || !data){ toast('Could not open document.'); return; }
+  window.open(data.signedUrl, '_blank');
+};
+window.pickDocFile = function(docType){
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*,application/pdf';
+  input.onchange = async () => {
+    const file = input.files[0]; if (!file) return;
+    toast('Uploading…');
+    try {
+      const compressed = await compressImageFile(file);
+      const path = `${currentUser.id}/${currentProfileId}-${docType}-${Date.now()}.${compressed.name.split('.').pop()}`;
+      const buffer = await compressed.arrayBuffer();
+      const { error: upErr } = await sb.storage.from('employee-documents').upload(path, buffer, {cacheControl:'3600',upsert:false,contentType:compressed.type||'application/octet-stream'});
+      if (upErr) throw upErr;
+      const { error: insErr } = await sb.from('employee_documents').insert({ employee_id: currentProfileId, document_type: docType, file_url: path });
+      if (insErr) throw insErr;
+      await sb.rpc('log_employee_activity', { p_employee_id: currentProfileId, p_action_type:'document_uploaded', p_description: docType.replace('_',' ')+' uploaded' });
+      toast('✓ Document uploaded — pending review');
+      loadDocuments(currentProfileId);
+      if (isAdmin) loadPendingCounts();
+    } catch(e){ toast('Upload failed: '+(e.message||'unknown error')); }
+  };
+  input.click();
+};
+window.openDocReview = async function(docId, label, path){
+  docReviewId = docId;
+  document.getElementById('doc-review-body').innerHTML = `<div class="section-label" style="margin-top:0;">${esc(label)}</div><span style="font-size:12px;color:var(--muted-foreground);">Loading document…</span>`;
+  document.getElementById('doc-review-remarks').value = '';
+  document.getElementById('doc-review-overlay').classList.add('on');
+  const { data, error } = await sb.storage.from('employee-documents').createSignedUrl(path, 300);
+  document.getElementById('doc-review-body').innerHTML = `<div class="section-label" style="margin-top:0;">${esc(label)}</div>` +
+    (data ? `<a href="${data.signedUrl}" target="_blank" class="btn-sm">Open document ↗</a>` : `<span style="font-size:12px;color:#b91c1c;">Could not load document.</span>`);
+};
+window.closeDocReview = function(){ document.getElementById('doc-review-overlay').classList.remove('on'); };
+window.decideDocument = async function(decision){
+  const remarks = document.getElementById('doc-review-remarks').value.trim();
+  if (decision!=='approved' && !remarks){ toast('Add a remark first.'); return; }
+  const { error } = await sb.rpc('review_employee_document', { p_document_id: docReviewId, p_decision: decision, p_remarks: remarks||null });
+  if (error){ toast(error.message); return; }
+  closeDocReview();
+  toast('✓ Document '+decision.replace('_',' '));
+  loadDocuments(currentProfileId);
+  loadPendingCounts();
+};
+
+// ── HIERARCHY (within profile) ──
+async function loadHierarchyForProfile(employeeId){
+  const { data: senior } = await sb.from('employee_hierarchy').select('*, senior:senior_id(id,full_name,employee_code,designation)').eq('junior_id',employeeId).eq('status','approved').maybeSingle();
+  document.getElementById('hier-senior').innerHTML = senior
+    ? `<div class="hier-node"><div class="name">${esc(senior.senior.full_name)}</div><div class="meta">${esc(senior.senior.employee_code||'')} · ${esc(senior.senior.designation||'')}</div></div>`
+    : `<div class="empty" style="padding:10px 0;">No senior set.</div><button class="btn-sm primary" onclick="openHierSearch('senior')">+ Add Senior</button>`;
+
+  const { data: assoc } = await sb.from('employee_hierarchy').select('*, junior:junior_id(id,full_name,employee_code,designation)').eq('senior_id',employeeId).eq('status','approved');
+  document.getElementById('hier-assoc-count').textContent = assoc && assoc.length ? '('+assoc.length+')' : '';
+  document.getElementById('hier-associates').innerHTML = (assoc&&assoc.length ? assoc.map(a=>
+    `<div class="hier-node"><div class="name">${esc(a.junior.full_name)}</div><div class="meta">${esc(a.junior.employee_code||'')} · ${esc(a.junior.designation||'')}</div></div>`
+  ).join('') : '<div class="empty" style="padding:10px 0;">No associates yet.</div>') + '<button class="btn-sm primary" style="margin-top:6px;" onclick="openHierSearch(\'associate\')">+ Add Associate</button>';
+
+  const { data: pending } = await sb.from('employee_hierarchy').select('*, junior:junior_id(full_name), senior:senior_id(full_name)').or(`junior_id.eq.${employeeId},senior_id.eq.${employeeId}`).eq('status','pending');
+  const myRow = allEmployees.find(e=>e.id===employeeId);
+  const canRespond = myEmployeeId===employeeId;
+  document.getElementById('hier-pending').innerHTML = pending && pending.length ? pending.map(p=>{
+    const iAmRecipient = canRespond;
+    const label = p.junior_id===employeeId ? `Senior request from ${esc(p.senior.full_name)}` : `Associate invite for ${esc(p.junior.full_name)}`;
+    return `<div class="hier-node"><div class="name">${label}</div>
+      ${iAmRecipient ? `<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm approve" onclick="respondHierarchy('${p.id}',true)">Approve</button><button class="btn-sm reject" onclick="respondHierarchy('${p.id}',false)">Reject</button></div>` : '<div class="meta">Waiting for response</div>'}
+      </div>`;
+  }).join('') : '<div class="empty" style="padding:10px 0;">None.</div>';
+}
+window.openHierSearch = function(mode){
+  hierSearchMode = mode;
+  document.getElementById('hier-search-title').textContent = mode==='senior' ? 'Add Senior' : 'Add Associate';
+  document.getElementById('hier-search-input').value = '';
+  document.getElementById('hier-search-results').innerHTML = '';
+  document.getElementById('hier-search-overlay').classList.add('on');
+};
+window.closeHierSearch = function(){ document.getElementById('hier-search-overlay').classList.remove('on'); };
+window.runHierSearch = function(){
+  const q = document.getElementById('hier-search-input').value.toLowerCase().trim();
+  const results = document.getElementById('hier-search-results');
+  if (!q){ results.innerHTML=''; return; }
+  const matches = allEmployees.filter(e=>e.id!==currentProfileId && ((e.full_name||'').toLowerCase().includes(q) || (e.employee_code||'').toLowerCase().includes(q))).slice(0,8);
+  results.innerHTML = matches.map(e=>`<div class="hier-node" style="cursor:pointer;" onclick="sendHierRequest('${e.id}')"><div class="name">${esc(e.full_name)}</div><div class="meta">${esc(e.employee_code||'')} · ${esc(e.designation||'')}</div></div>`).join('') || '<div class="empty">No matches.</div>';
+};
+window.sendHierRequest = async function(targetId){
+  const { error } = await sb.rpc('request_hierarchy_link', { p_target_employee_id: targetId, p_as_senior: hierSearchMode==='senior' });
+  if (error){ toast(error.message); return; }
+  closeHierSearch();
+  toast('✓ Request sent');
+  loadHierarchyForProfile(currentProfileId);
+};
+window.respondHierarchy = async function(reqId, approve){
+  const { error } = await sb.rpc('respond_hierarchy_request', { p_request_id: reqId, p_approve: approve });
+  if (error){ toast(error.message); return; }
+  toast(approve ? '✓ Approved' : 'Declined');
+  loadHierarchyForProfile(currentProfileId);
+};
+
+// ── COMMISSION (within profile) ──
+async function loadCommission(employeeId){
+  const { data } = await sb.from('employee_commission_assignments').select('*, commission_slabs(name,commission_percent)').eq('employee_id',employeeId).order('effective_date',{ascending:false});
+  const rows = data || [];
+  document.getElementById('comm-current').innerHTML = rows[0]
+    ? `<div class="hier-node"><div class="name">${esc(rows[0].commission_slabs.name)} ${rows[0].commission_slabs.commission_percent?'· '+rows[0].commission_slabs.commission_percent+'%':''}</div><div class="meta">Effective ${rows[0].effective_date}</div></div>`
+    : '<div class="empty" style="padding:10px 0;">No slab assigned yet.</div>';
+  document.getElementById('comm-assign-btn').style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('comm-history').innerHTML = rows.length ? rows.map(r=>
+    `<div class="info-row"><span class="k">${r.effective_date}</span><span class="v">${esc(r.commission_slabs.name)}${r.remarks?' — '+esc(r.remarks):''}</span></div>`
+  ).join('') : '<div class="empty" style="padding:10px 0;">No history.</div>';
+}
+
+// ── DEALS / SALES / COMMISSION (computed from approved token submissions — the only
+//    real "deal closed" signal in the CRM right now). Commission per deal uses whichever
+//    slab was actually in effect on that deal's approval date, not just the current one.
+const INR_FMT = n => '₹' + Math.round(n).toLocaleString('en-IN');
+async function loadDealStats(employeeId){
+  const [{ data: deals }, { data: slabHistory }] = await Promise.all([
+    sb.from('token_submissions').select('sale_amount, reviewed_at').eq('associate_employee_id', employeeId).eq('status','approved'),
+    sb.from('employee_commission_assignments').select('effective_date, commission_slabs(commission_percent)').eq('employee_id', employeeId).order('effective_date')
+  ]);
+  const dealList = deals || [];
+  const slabs = (slabHistory || []).map(s => ({ date: s.effective_date, pct: s.commission_slabs ? s.commission_slabs.commission_percent : null }));
+
+  function slabPctFor(dateStr){
+    let pct = null;
+    for (const s of slabs) { if (s.date <= dateStr) pct = s.pct; else break; }
+    return pct;
+  }
+
+  const now = new Date();
+  let totalSales = 0, totalCommission = 0, monthCommission = 0, commissionKnownForAll = true;
+  dealList.forEach(d => {
+    const amount = Number(d.sale_amount) || 0;
+    totalSales += amount;
+    const dateStr = (d.reviewed_at || '').slice(0,10);
+    const pct = slabPctFor(dateStr);
+    if (pct == null) { commissionKnownForAll = false; return; }
+    const commission = amount * pct / 100;
+    totalCommission += commission;
+    const d2 = new Date(d.reviewed_at);
+    if (d2.getFullYear() === now.getFullYear() && d2.getMonth() === now.getMonth()) monthCommission += commission;
+  });
+
+  document.getElementById('ov-deals').textContent = dealList.length;
+  document.getElementById('ov-sales').textContent = dealList.length ? INR_FMT(totalSales) : '—';
+  document.getElementById('ov-commission-total').textContent = dealList.length ? (commissionKnownForAll ? INR_FMT(totalCommission) : INR_FMT(totalCommission)+'*') : '—';
+  document.getElementById('ov-commission-month').textContent = dealList.length ? INR_FMT(monthCommission) : '—';
+}
+window.openAssignCommission = async function(){
+  const { data: slabs } = await sb.from('commission_slabs').select('*').eq('is_active',true).order('name');
+  document.getElementById('ac-slab').innerHTML = (slabs||[]).map(s=>`<option value="${s.id}">${esc(s.name)}${s.commission_percent?' ('+s.commission_percent+'%)':''}</option>`).join('');
+  document.getElementById('ac-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('ac-remarks').value = '';
+  document.getElementById('assign-comm-overlay').classList.add('on');
+};
+window.closeAssignCommission = function(){ document.getElementById('assign-comm-overlay').classList.remove('on'); };
+window.saveAssignCommission = async function(){
+  const { error } = await sb.rpc('assign_commission_slab', {
+    p_employee_id: currentProfileId, p_slab_id: document.getElementById('ac-slab').value,
+    p_effective_date: document.getElementById('ac-date').value, p_remarks: document.getElementById('ac-remarks').value.trim()||null
+  });
+  if (error){ toast(error.message); return; }
+  closeAssignCommission();
+  toast('✓ Commission slab assigned');
+  loadCommission(currentProfileId);
+};
+
+// ── ACTIVITY (within profile) ──
+async function loadActivity(employeeId){
+  const { data } = await sb.from('employee_activity_logs').select('*').eq('employee_id',employeeId).order('performed_at',{ascending:false}).limit(50);
+  document.getElementById('activity-list').innerHTML = (data&&data.length) ? data.map(a=>
+    `<div class="activity-item"><div class="activity-dot"></div><div><div class="activity-desc">${esc(a.description||a.action_type)}</div><div class="activity-meta">${esc(a.performed_by_name||'')} · ${new Date(a.performed_at).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})}</div></div></div>`
+  ).join('') : '<div class="empty">No activity yet.</div>';
+}
+
+// ── EDIT BASIC INFO ──
+window.openEditBasic = function(){
+  const e = allEmployees.find(x=>x.id===currentProfileId);
+  document.getElementById('eb-err').style.display='none';
+  document.getElementById('eb-name').value = e.full_name||'';
+  document.getElementById('eb-dob').value = e.dob||'';
+  document.getElementById('eb-gender').value = e.gender||'';
+  document.getElementById('eb-blood-group').value = e.blood_group||'';
+  document.getElementById('eb-mobile').value = e.mobile||'';
+  document.getElementById('eb-alt-mobile').value = e.alternate_mobile||'';
+  document.getElementById('eb-email').value = e.email||'';
+  document.getElementById('eb-emergency-name').value = e.emergency_contact_name||'';
+  document.getElementById('eb-emergency-number').value = e.emergency_contact_number||'';
+  document.getElementById('eb-admin-fields').style.display = isAdmin ? 'block' : 'none';
+  if (isAdmin){
+    document.getElementById('eb-designation').value = e.designation||'';
+    document.getElementById('eb-department').value = e.department||'';
+    document.getElementById('eb-employment-type').value = e.employment_type||'full_time';
+    document.getElementById('eb-status').value = e.status||'active';
+  }
+  document.getElementById('edit-basic-overlay').classList.add('on');
+};
+window.closeEditBasic = function(){ document.getElementById('edit-basic-overlay').classList.remove('on'); };
+window.saveEditBasic = async function(){
+  const payload = {
+    full_name: document.getElementById('eb-name').value.trim(),
+    dob: document.getElementById('eb-dob').value||null,
+    gender: document.getElementById('eb-gender').value.trim()||null,
+    blood_group: document.getElementById('eb-blood-group').value.trim()||null,
+    mobile: document.getElementById('eb-mobile').value.trim()||null,
+    alternate_mobile: document.getElementById('eb-alt-mobile').value.trim()||null,
+    email: document.getElementById('eb-email').value.trim()||null,
+    emergency_contact_name: document.getElementById('eb-emergency-name').value.trim()||null,
+    emergency_contact_number: document.getElementById('eb-emergency-number').value.trim()||null,
+  };
+  if (isAdmin){
+    payload.designation = document.getElementById('eb-designation').value.trim()||null;
+    payload.department = document.getElementById('eb-department').value.trim()||null;
+    payload.employment_type = document.getElementById('eb-employment-type').value;
+    payload.status = document.getElementById('eb-status').value;
+  }
+  const { error } = await sb.from('employees').update(payload).eq('id', currentProfileId);
+  const errEl = document.getElementById('eb-err');
+  if (error){ errEl.textContent = error.message; errEl.style.display='block'; return; }
+  await sb.rpc('log_employee_activity', { p_employee_id: currentProfileId, p_action_type:'profile_updated', p_description:'Profile updated' });
+  closeEditBasic();
+  toast('✓ Saved');
+  await loadEmployees();
+  openProfile(currentProfileId);
+};
+
+// ── EDIT ADDRESS ──
+window.openEditAddress = async function(type){
+  editAddressType = type;
+  document.getElementById('ea-title').textContent = type==='current' ? 'Current Address' : 'Permanent Address';
+  const { data } = await sb.from('employee_addresses').select('*').eq('employee_id',currentProfileId).eq('address_type',type).maybeSingle();
+  ['house','street','area','city','state','pincode'].forEach(f=>document.getElementById('ea-'+f).value = data ? (data[f==='house'?'house_no':f]||'') : '');
+  document.getElementById('edit-address-overlay').classList.add('on');
+};
+window.closeEditAddress = function(){ document.getElementById('edit-address-overlay').classList.remove('on'); };
+window.saveEditAddress = async function(){
+  const payload = {
+    employee_id: currentProfileId, address_type: editAddressType,
+    house_no: document.getElementById('ea-house').value.trim()||null,
+    street: document.getElementById('ea-street').value.trim()||null,
+    area: document.getElementById('ea-area').value.trim()||null,
+    city: document.getElementById('ea-city').value.trim()||null,
+    state: document.getElementById('ea-state').value.trim()||null,
+    pincode: document.getElementById('ea-pincode').value.trim()||null,
+  };
+  const { error } = await sb.from('employee_addresses').upsert(payload, { onConflict: 'employee_id,address_type' });
+  if (error){ toast(error.message); return; }
+  closeEditAddress();
+  toast('✓ Address saved');
+  const { data: addrs } = await sb.from('employee_addresses').select('*').eq('employee_id', currentProfileId);
+  renderAddress('current', (addrs||[]).find(a=>a.address_type==='current'));
+  renderAddress('permanent', (addrs||[]).find(a=>a.address_type==='permanent'));
+};
+
+// ── PENDING APPROVALS (admin) ──
+async function loadPendingCounts(){
+  const { count: docCount } = await sb.from('employee_documents').select('id',{count:'exact',head:true}).eq('status','pending');
+  const { count: hierCount } = await sb.from('employee_hierarchy').select('id',{count:'exact',head:true}).eq('status','pending');
+  const total = (docCount||0)+(hierCount||0);
+  const badge = document.getElementById('pending-count');
+  if (total){ badge.textContent = total; badge.style.display='inline-block'; } else badge.style.display='none';
+}
+async function loadPendingApprovals(){
+  const { data: docs } = await sb.from('employee_documents').select('*, employees(full_name,employee_code)').eq('status','pending').order('uploaded_at');
+  document.getElementById('pending-docs-list').innerHTML = (docs&&docs.length) ? docs.map(d=>
+    `<div class="doc-row"><div class="doc-icon">📄</div><div style="flex:1;"><div class="doc-title">${esc(d.employees.full_name)} — ${d.document_type.replace('_',' ')}</div><div class="doc-status pending">Uploaded ${new Date(d.uploaded_at).toLocaleDateString('en-IN')}</div></div><button class="btn-sm primary" onclick="openDocReview('${d.id}','${d.document_type.replace('_',' ')}','${d.file_url}')">Review</button></div>`
+  ).join('') : '<div class="empty">Nothing pending.</div>';
+
+  const { data: hier } = await sb.from('employee_hierarchy').select('*, junior:junior_id(full_name), senior:senior_id(full_name)').eq('status','pending').order('requested_at');
+  document.getElementById('pending-hierarchy-list').innerHTML = (hier&&hier.length) ? hier.map(h=>
+    `<div class="hier-node"><div class="name">${esc(h.junior.full_name)} → ${esc(h.senior.full_name)}</div><div class="meta">Requested ${new Date(h.requested_at).toLocaleDateString('en-IN')}</div>
+      <div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm approve" onclick="adminRespondHierarchy('${h.id}',true)">Approve</button><button class="btn-sm reject" onclick="adminRespondHierarchy('${h.id}',false)">Reject</button></div></div>`
+  ).join('') : '<div class="empty">Nothing pending.</div>';
+  loadPendingCounts();
+}
+window.adminRespondHierarchy = async function(id, approve){
+  // Admin override: same RPC works for admin too since it checks recipient OR admin — using direct table update via admin RLS bypass is simpler here.
+  const { data: row } = await sb.from('employee_hierarchy').select('*').eq('id',id).single();
+  const { error } = await sb.from('employee_hierarchy').update({ status: approve?'approved':'rejected', responded_at: new Date().toISOString() }).eq('id', id);
+  if (error){ toast(error.message); return; }
+  await sb.rpc('log_employee_activity', { p_employee_id: row.junior_id, p_action_type:'hierarchy_changed', p_description: 'Hierarchy request '+(approve?'approved':'rejected')+' by admin' });
+  toast(approve?'✓ Approved':'Rejected');
+  loadPendingApprovals();
+};
+
+// ── HIERARCHY TREE (company-wide) ──
+async function loadHierarchyTree(){
+  const { data } = await sb.from('employee_hierarchy').select('junior_id,senior_id').eq('status','approved');
+  const links = data || [];
+  const bySenior = {};
+  links.forEach(l=>{ (bySenior[l.senior_id] = bySenior[l.senior_id]||[]).push(l.junior_id); });
+  const hasSenior = new Set(links.map(l=>l.junior_id));
+  const topLevel = allEmployees.filter(e=>!hasSenior.has(e.id));
+  function renderNode(emp){
+    const kids = (bySenior[emp.id]||[]).map(id=>allEmployees.find(e=>e.id===id)).filter(Boolean);
+    return `<div class="hier-node"><div class="name">${esc(emp.full_name)}</div><div class="meta">${esc(emp.employee_code||'')} · ${esc(emp.designation||'')}</div>
+      ${kids.length ? `<div class="hier-children">${kids.map(renderNode).join('')}</div>` : ''}</div>`;
+  }
+  document.getElementById('hierarchy-tree').innerHTML = topLevel.length ? topLevel.map(renderNode).join('') : '<div class="empty">No employees yet.</div>';
+}
+
+// ── COMMISSION SLABS (admin) ──
+async function loadSlabs(){
+  const { data } = await sb.from('commission_slabs').select('*').order('name');
+  document.getElementById('slabs-list').innerHTML = (data&&data.length) ? data.map(s=>
+    `<div class="hier-node"><div class="name">${esc(s.name)} ${s.commission_percent?'· '+s.commission_percent+'%':''} ${!s.is_active?'<span class="chip inactive">inactive</span>':''}</div><div class="meta">${esc(s.description||'')}</div>
+     <button class="btn-sm" style="margin-top:8px;" onclick='openAddSlab(${JSON.stringify(s).replace(/'/g,"&apos;")})'>Edit</button></div>`
+  ).join('') : '<div class="empty">No commission slabs yet.</div>';
+}
+let editingSlabId = null;
+window.openAddSlab = function(slab){
+  editingSlabId = slab ? slab.id : null;
+  document.getElementById('slab-form-title').textContent = slab ? 'Edit Commission Slab' : 'Add Commission Slab';
+  document.getElementById('sf-name').value = slab ? slab.name : '';
+  document.getElementById('sf-percent').value = slab ? (slab.commission_percent||'') : '';
+  document.getElementById('sf-desc').value = slab ? (slab.description||'') : '';
+  document.getElementById('slab-form-overlay').classList.add('on');
+};
+window.closeSlabForm = function(){ document.getElementById('slab-form-overlay').classList.remove('on'); };
+window.saveSlab = async function(){
+  const payload = {
+    name: document.getElementById('sf-name').value.trim(),
+    commission_percent: document.getElementById('sf-percent').value ? Number(document.getElementById('sf-percent').value) : null,
+    description: document.getElementById('sf-desc').value.trim()||null
+  };
+  if (!payload.name){ toast('Name is required'); return; }
+  const { error } = editingSlabId
+    ? await sb.from('commission_slabs').update(payload).eq('id', editingSlabId)
+    : await sb.from('commission_slabs').insert(payload);
+  if (error){ toast(error.message); return; }
+  closeSlabForm();
+  toast('✓ Saved');
+  loadSlabs();
+};
+</script>
+</body></html>
