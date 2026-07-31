@@ -159,10 +159,26 @@ input,select,textarea{font-family:var(--font-sans);}
   <div class="page-sub" id="page-sub">Onboarding, verification, hierarchy and commission — all in one place.</div>
 
   <div class="tabbar">
-    <button class="tab-btn active" onclick="showTab('all')">All Employees</button>
+    <button class="tab-btn active" id="tab-btn-all" onclick="showTab('all')">All Employees</button>
     <button class="tab-btn" id="tab-btn-pending" style="display:none;" onclick="showTab('pending')">Pending Approvals<span class="badge-count" id="pending-count" style="display:none;">0</span></button>
-    <button class="tab-btn" onclick="showTab('hierarchy')">Hierarchy</button>
+    <button class="tab-btn" id="tab-btn-hierarchy" style="display:none;" onclick="showTab('hierarchy')">Hierarchy</button>
     <button class="tab-btn" id="tab-btn-slabs" style="display:none;" onclick="showTab('slabs')">Commission Slabs</button>
+  </div>
+
+  <!-- NO PROFILE YET (self-signup) -->
+  <div id="no-profile-cta" style="display:none;text-align:center;padding:40px 20px;">
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px;">You don't have an employee profile yet</div>
+    <div style="font-size:13px;color:var(--muted-foreground);margin-bottom:18px;">Create one and an admin will review it before you can manage hierarchy.</div>
+    <button class="btn-primary" onclick="openSelfSignup()">Create Your Profile</button>
+  </div>
+
+  <!-- PENDING PROFILE BANNER -->
+  <div id="pending-profile-banner" style="display:none;background:rgba(251,191,36,0.14);border:1px solid rgba(251,191,36,0.3);border-radius:14px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#92400e;">
+    Your profile is awaiting admin approval. You can still fill in your details and upload documents — hierarchy actions unlock once approved.
+  </div>
+
+  <div id="my-profile-reopen" style="display:none;text-align:center;padding:24px 0;">
+    <button class="btn-primary" onclick="openProfile(myEmployeeId)">Open My Profile</button>
   </div>
 
   <!-- ALL EMPLOYEES -->
@@ -183,6 +199,8 @@ input,select,textarea{font-family:var(--font-sans);}
 
   <!-- PENDING APPROVALS -->
   <div id="section-pending" style="display:none;">
+    <div class="section-label">Pending Profiles</div>
+    <div id="pending-profiles-list"><div class="empty">Loading…</div></div>
     <div class="section-label">Pending Documents</div>
     <div id="pending-docs-list"><div class="empty">Loading…</div></div>
     <div class="section-label">Pending Hierarchy Requests</div>
@@ -210,9 +228,9 @@ input,select,textarea{font-family:var(--font-sans);}
     <div class="section-label">Basic Information</div>
     <div class="frow">
       <div><label class="fl">Full Name *</label><input class="fi" id="ef-name"/></div>
-      <div><label class="fl">Designation</label><input class="fi" id="ef-designation" placeholder="e.g. Sales Associate"/></div>
+      <div id="ef-designation-wrap"><label class="fl">Designation</label><input class="fi" id="ef-designation" placeholder="e.g. Sales Associate"/></div>
     </div>
-    <div class="frow">
+    <div class="frow" id="ef-role-row">
       <div><label class="fl">Department</label><input class="fi" id="ef-department"/></div>
       <div><label class="fl">Employment Type</label>
         <select class="fsel" id="ef-employment-type">
@@ -255,6 +273,7 @@ input,select,textarea{font-family:var(--font-sans);}
       <div class="profile-name" id="profile-name">—</div>
       <div class="profile-code" id="profile-code">—</div>
       <span class="chip" id="profile-status-chip">—</span>
+      <span class="chip" id="profile-approval-chip" style="display:none;margin-left:6px;"></span>
     </div>
     <div class="subtab-bar">
       <button class="subtab-btn active" onclick="showProfileTab('overview')">Overview</button>
@@ -461,7 +480,7 @@ const sb = window.supabase.createClient(
   "sb_publishable_BN03ClNsFtgDS32FbAFckQ_vSGfFccf"
 );
 const ADMIN_EMAIL = "sandyjangir07@gmail.com";
-let currentUser = null, isAdmin = false, myEmployeeId = null;
+let currentUser = null, isAdmin = false, myEmployeeId = null, myEmployee = null, isSelfSignup = false;
 let allEmployees = [];
 let currentProfileId = null;
 let editAddressType = null;
@@ -500,13 +519,31 @@ sb.auth.onAuthStateChange(async (event, session) => {
   isAdmin = currentUser.email === ADMIN_EMAIL;
   if (isAdmin) {
     document.getElementById('tab-btn-pending').style.display = 'inline-flex';
+    document.getElementById('tab-btn-hierarchy').style.display = 'inline-flex';
     document.getElementById('tab-btn-slabs').style.display = 'inline-flex';
     document.getElementById('add-employee-btn').style.display = 'block';
   }
-  const { data: me } = await sb.from('employees').select('id').eq('user_id', currentUser.id).maybeSingle();
+  const { data: me } = await sb.from('employees').select('*').eq('user_id', currentUser.id).maybeSingle();
+  myEmployee = me || null;
   myEmployeeId = me ? me.id : null;
-  loadEmployees();
-  if (isAdmin) loadPendingCounts();
+
+  if (isAdmin) {
+    loadEmployees();
+    loadPendingCounts();
+  } else {
+    // Non-admin: no browsing the company directory — own profile only.
+    document.getElementById('tab-btn-all').textContent = 'My Profile';
+    document.querySelector('#section-all .search-row').style.display = 'none';
+    document.getElementById('emp-grid').style.display = 'none';
+    if (!myEmployee) {
+      document.getElementById('no-profile-cta').style.display = 'block';
+    } else {
+      allEmployees = [myEmployee];
+      if (myEmployee.profile_status === 'pending_review') document.getElementById('pending-profile-banner').style.display = 'block';
+      document.getElementById('my-profile-reopen').style.display = 'block';
+      openProfile(myEmployee.id);
+    }
+  }
 });
 window.handleSignOut = async () => { await sb.auth.signOut(); window.location.href = "login.html"; };
 
@@ -551,9 +588,25 @@ window.renderEmployeeGrid = function(){
 
 // ── ADD EMPLOYEE ──
 window.openAddEmployee = function(){
+  isSelfSignup = false;
   document.getElementById('employee-form-title').textContent = 'Add Employee';
+  document.getElementById('ef-designation-wrap').style.display = 'block';
+  document.getElementById('ef-role-row').style.display = 'grid';
   ['ef-name','ef-designation','ef-department','ef-dob','ef-mobile','ef-alt-mobile','ef-email','ef-emergency-name','ef-emergency-number'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('ef-employment-type').value = 'full_time';
+  document.getElementById('ef-joining-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('employee-form-err').style.display='none';
+  document.getElementById('employee-form-overlay').classList.add('on');
+};
+window.openSelfSignup = function(){
+  isSelfSignup = true;
+  document.getElementById('employee-form-title').textContent = 'Create Your Profile';
+  document.getElementById('ef-designation-wrap').style.display = 'none';
+  document.getElementById('ef-role-row').style.display = 'none';
+  ['ef-name','ef-designation','ef-department','ef-dob','ef-mobile','ef-alt-mobile','ef-email','ef-emergency-name','ef-emergency-number'].forEach(id=>document.getElementById(id).value='');
+  const meta = currentUser.user_metadata || {};
+  document.getElementById('ef-name').value = meta.full_name || meta.name || '';
+  document.getElementById('ef-email').value = currentUser.email || '';
   document.getElementById('ef-joining-date').value = new Date().toISOString().slice(0,10);
   document.getElementById('employee-form-err').style.display='none';
   document.getElementById('employee-form-overlay').classList.add('on');
@@ -564,34 +617,61 @@ window.saveEmployee = async function(){
   const errEl = document.getElementById('employee-form-err');
   if (!name){ errEl.textContent='Full name is required.'; errEl.style.display='block'; return; }
   const emailVal = document.getElementById('ef-email').value.trim()||null;
-  let linkedUserId = null;
-  if (emailVal){
-    const { data: matchProfile } = await sb.from('profiles').select('id').eq('email', emailVal).maybeSingle();
-    if (matchProfile) linkedUserId = matchProfile.id;
+
+  let payload;
+  if (isSelfSignup) {
+    payload = {
+      full_name: name,
+      user_id: currentUser.id,
+      profile_status: 'pending_review',
+      dob: document.getElementById('ef-dob').value||null,
+      gender: document.getElementById('ef-gender') ? (document.getElementById('ef-gender').value||null) : null,
+      blood_group: document.getElementById('ef-blood-group').value.trim()||null,
+      joining_date: document.getElementById('ef-joining-date').value||null,
+      mobile: document.getElementById('ef-mobile').value.trim()||null,
+      alternate_mobile: document.getElementById('ef-alt-mobile').value.trim()||null,
+      email: emailVal,
+      emergency_contact_name: document.getElementById('ef-emergency-name').value.trim()||null,
+      emergency_contact_number: document.getElementById('ef-emergency-number').value.trim()||null,
+    };
+  } else {
+    let linkedUserId = null;
+    if (emailVal){
+      const { data: matchProfile } = await sb.from('profiles').select('id').eq('email', emailVal).maybeSingle();
+      if (matchProfile) linkedUserId = matchProfile.id;
+    }
+    payload = {
+      full_name: name,
+      user_id: linkedUserId,
+      designation: document.getElementById('ef-designation').value.trim()||null,
+      department: document.getElementById('ef-department').value.trim()||null,
+      employment_type: document.getElementById('ef-employment-type').value,
+      dob: document.getElementById('ef-dob').value||null,
+      gender: document.getElementById('ef-gender') ? (document.getElementById('ef-gender').value||null) : null,
+      blood_group: document.getElementById('ef-blood-group').value.trim()||null,
+      joining_date: document.getElementById('ef-joining-date').value||null,
+      mobile: document.getElementById('ef-mobile').value.trim()||null,
+      alternate_mobile: document.getElementById('ef-alt-mobile').value.trim()||null,
+      email: emailVal,
+      emergency_contact_name: document.getElementById('ef-emergency-name').value.trim()||null,
+      emergency_contact_number: document.getElementById('ef-emergency-number').value.trim()||null,
+      created_by: currentUser.id
+    };
   }
-  const payload = {
-    full_name: name,
-    user_id: linkedUserId,
-    designation: document.getElementById('ef-designation').value.trim()||null,
-    department: document.getElementById('ef-department').value.trim()||null,
-    employment_type: document.getElementById('ef-employment-type').value,
-    dob: document.getElementById('ef-dob').value||null,
-    gender: document.getElementById('ef-gender') ? (document.getElementById('ef-gender').value||null) : null,
-    blood_group: document.getElementById('ef-blood-group').value.trim()||null,
-    joining_date: document.getElementById('ef-joining-date').value||null,
-    mobile: document.getElementById('ef-mobile').value.trim()||null,
-    alternate_mobile: document.getElementById('ef-alt-mobile').value.trim()||null,
-    email: emailVal,
-    emergency_contact_name: document.getElementById('ef-emergency-name').value.trim()||null,
-    emergency_contact_number: document.getElementById('ef-emergency-number').value.trim()||null,
-    created_by: currentUser.id
-  };
   const { data, error } = await sb.from('employees').insert(payload).select().single();
   if (error){ errEl.textContent = error.message; errEl.style.display='block'; return; }
-  await sb.rpc('log_employee_activity', { p_employee_id: data.id, p_action_type:'profile_updated', p_description:'Employee record created' });
+  await sb.rpc('log_employee_activity', { p_employee_id: data.id, p_action_type:'profile_updated', p_description: isSelfSignup ? 'Profile self-created — pending review' : 'Employee record created' });
   closeEmployeeForm();
-  toast('✓ Employee added');
-  loadEmployees();
+  if (isSelfSignup) {
+    myEmployee = data; myEmployeeId = data.id; allEmployees = [data];
+    toast('✓ Profile created — waiting for admin approval');
+    document.getElementById('no-profile-cta').style.display = 'none';
+    document.getElementById('pending-profile-banner').style.display = 'block';
+    openProfile(data.id);
+  } else {
+    toast('✓ Employee added');
+    loadEmployees();
+  }
 };
 
 // ── PROFILE ──
@@ -604,6 +684,12 @@ window.openProfile = async function(id){
   document.getElementById('profile-code').textContent = e.employee_code||'';
   const chip = document.getElementById('profile-status-chip');
   chip.textContent = e.status.replace('_',' '); chip.className = 'chip '+e.status;
+  const psChip = document.getElementById('profile-approval-chip');
+  if (e.profile_status && e.profile_status !== 'approved') {
+    psChip.style.display = 'inline-flex';
+    psChip.textContent = e.profile_status === 'pending_review' ? 'profile pending review' : 'profile rejected';
+    psChip.className = 'chip ' + (e.profile_status === 'pending_review' ? 'on_leave' : 'suspended');
+  } else { psChip.style.display = 'none'; }
   document.getElementById('edit-basic-btn').style.display = (isAdmin || e.user_id===currentUser.id) ? 'block' : 'none';
 
   const yrs = e.joining_date ? ((Date.now()-new Date(e.joining_date))/(1000*3600*24*365.25)) : null;
@@ -728,25 +814,41 @@ window.decideDocument = async function(decision){
 
 // ── HIERARCHY (within profile) ──
 async function loadHierarchyForProfile(employeeId){
-  const { data: senior } = await sb.from('employee_hierarchy').select('*, senior:senior_id(id,full_name,employee_code,designation)').eq('junior_id',employeeId).eq('status','approved').maybeSingle();
-  document.getElementById('hier-senior').innerHTML = senior
-    ? `<div class="hier-node"><div class="name">${esc(senior.senior.full_name)}</div><div class="meta">${esc(senior.senior.employee_code||'')} · ${esc(senior.senior.designation||'')}</div></div>`
-    : `<div class="empty" style="padding:10px 0;">No senior set.</div><button class="btn-sm primary" onclick="openHierSearch('senior')">+ Add Senior</button>`;
+  const viewingEmployee = allEmployees.find(e=>e.id===employeeId) || (myEmployeeId===employeeId ? myEmployee : null);
+  const isApproved = viewingEmployee ? viewingEmployee.profile_status === 'approved' : true;
+  const canManage = (myEmployeeId===employeeId && isApproved) || isAdmin;
 
-  const { data: assoc } = await sb.from('employee_hierarchy').select('*, junior:junior_id(id,full_name,employee_code,designation)').eq('senior_id',employeeId).eq('status','approved');
-  document.getElementById('hier-assoc-count').textContent = assoc && assoc.length ? '('+assoc.length+')' : '';
-  document.getElementById('hier-associates').innerHTML = (assoc&&assoc.length ? assoc.map(a=>
-    `<div class="hier-node"><div class="name">${esc(a.junior.full_name)}</div><div class="meta">${esc(a.junior.employee_code||'')} · ${esc(a.junior.designation||'')}</div></div>`
-  ).join('') : '<div class="empty" style="padding:10px 0;">No associates yet.</div>') + '<button class="btn-sm primary" style="margin-top:6px;" onclick="openHierSearch(\'associate\')">+ Add Associate</button>';
+  const { data: seniorRow } = await sb.from('employee_hierarchy').select('*').eq('junior_id',employeeId).eq('status','approved').maybeSingle();
+  const { data: assocRows } = await sb.from('employee_hierarchy').select('*').eq('senior_id',employeeId).eq('status','approved');
+  const { data: pending } = await sb.from('employee_hierarchy').select('*').or(`junior_id.eq.${employeeId},senior_id.eq.${employeeId}`).eq('status','pending');
 
-  const { data: pending } = await sb.from('employee_hierarchy').select('*, junior:junior_id(full_name), senior:senior_id(full_name)').or(`junior_id.eq.${employeeId},senior_id.eq.${employeeId}`).eq('status','pending');
-  const myRow = allEmployees.find(e=>e.id===employeeId);
+  const idsToResolve = new Set();
+  if (seniorRow) idsToResolve.add(seniorRow.senior_id);
+  (assocRows||[]).forEach(a=>idsToResolve.add(a.junior_id));
+  (pending||[]).forEach(p=>{ idsToResolve.add(p.junior_id); idsToResolve.add(p.senior_id); });
+  let names = {};
+  if (idsToResolve.size) {
+    const { data: resolved } = await sb.rpc('get_hierarchy_names', { p_ids: Array.from(idsToResolve) });
+    (resolved||[]).forEach(r=>names[r.id]=r);
+  }
+  const nameOf = id => names[id] || { full_name:'—', employee_code:'', designation:'' };
+
+  const addSeniorBtn = canManage ? '<button class="btn-sm primary" onclick="openHierSearch(\'senior\')">+ Add Senior</button>' : (!isApproved ? '<div class="empty" style="padding:6px 0;font-size:11.5px;">Unlocks once your profile is approved.</div>' : '');
+  document.getElementById('hier-senior').innerHTML = seniorRow
+    ? `<div class="hier-node"><div class="name">${esc(nameOf(seniorRow.senior_id).full_name)}</div><div class="meta">${esc(nameOf(seniorRow.senior_id).employee_code||'')} · ${esc(nameOf(seniorRow.senior_id).designation||'')}</div></div>`
+    : `<div class="empty" style="padding:10px 0;">No senior set.</div>${addSeniorBtn}`;
+
+  document.getElementById('hier-assoc-count').textContent = assocRows && assocRows.length ? '('+assocRows.length+')' : '';
+  const addAssocBtn = canManage ? '<button class="btn-sm primary" style="margin-top:6px;" onclick="openHierSearch(\'associate\')">+ Add Associate</button>' : '';
+  document.getElementById('hier-associates').innerHTML = (assocRows&&assocRows.length ? assocRows.map(a=>
+    `<div class="hier-node"><div class="name">${esc(nameOf(a.junior_id).full_name)}</div><div class="meta">${esc(nameOf(a.junior_id).employee_code||'')} · ${esc(nameOf(a.junior_id).designation||'')}</div></div>`
+  ).join('') : '<div class="empty" style="padding:10px 0;">No associates yet.</div>') + addAssocBtn;
+
   const canRespond = myEmployeeId===employeeId;
   document.getElementById('hier-pending').innerHTML = pending && pending.length ? pending.map(p=>{
-    const iAmRecipient = canRespond;
-    const label = p.junior_id===employeeId ? `Senior request from ${esc(p.senior.full_name)}` : `Associate invite for ${esc(p.junior.full_name)}`;
+    const label = p.junior_id===employeeId ? `Senior request from ${esc(nameOf(p.senior_id).full_name)}` : `Associate invite for ${esc(nameOf(p.junior_id).full_name)}`;
     return `<div class="hier-node"><div class="name">${label}</div>
-      ${iAmRecipient ? `<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm approve" onclick="respondHierarchy('${p.id}',true)">Approve</button><button class="btn-sm reject" onclick="respondHierarchy('${p.id}',false)">Reject</button></div>` : '<div class="meta">Waiting for response</div>'}
+      ${canRespond ? `<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm approve" onclick="respondHierarchy('${p.id}',true)">Approve</button><button class="btn-sm reject" onclick="respondHierarchy('${p.id}',false)">Reject</button></div>` : '<div class="meta">Waiting for response</div>'}
       </div>`;
   }).join('') : '<div class="empty" style="padding:10px 0;">None.</div>';
 }
@@ -758,11 +860,12 @@ window.openHierSearch = function(mode){
   document.getElementById('hier-search-overlay').classList.add('on');
 };
 window.closeHierSearch = function(){ document.getElementById('hier-search-overlay').classList.remove('on'); };
-window.runHierSearch = function(){
-  const q = document.getElementById('hier-search-input').value.toLowerCase().trim();
+window.runHierSearch = async function(){
+  const q = document.getElementById('hier-search-input').value.trim();
   const results = document.getElementById('hier-search-results');
   if (!q){ results.innerHTML=''; return; }
-  const matches = allEmployees.filter(e=>e.id!==currentProfileId && ((e.full_name||'').toLowerCase().includes(q) || (e.employee_code||'').toLowerCase().includes(q))).slice(0,8);
+  const { data, error } = await sb.rpc('search_employees_directory', { p_query: q });
+  const matches = (data||[]).filter(e=>e.id!==currentProfileId).slice(0,8);
   results.innerHTML = matches.map(e=>`<div class="hier-node" style="cursor:pointer;" onclick="sendHierRequest('${e.id}')"><div class="name">${esc(e.full_name)}</div><div class="meta">${esc(e.employee_code||'')} · ${esc(e.designation||'')}</div></div>`).join('') || '<div class="empty">No matches.</div>';
 };
 window.sendHierRequest = async function(targetId){
@@ -939,13 +1042,20 @@ window.saveEditAddress = async function(){
 
 // ── PENDING APPROVALS (admin) ──
 async function loadPendingCounts(){
+  const { count: profileCount } = await sb.from('employees').select('id',{count:'exact',head:true}).eq('profile_status','pending_review');
   const { count: docCount } = await sb.from('employee_documents').select('id',{count:'exact',head:true}).eq('status','pending');
   const { count: hierCount } = await sb.from('employee_hierarchy').select('id',{count:'exact',head:true}).eq('status','pending');
-  const total = (docCount||0)+(hierCount||0);
+  const total = (profileCount||0)+(docCount||0)+(hierCount||0);
   const badge = document.getElementById('pending-count');
   if (total){ badge.textContent = total; badge.style.display='inline-block'; } else badge.style.display='none';
 }
 async function loadPendingApprovals(){
+  const { data: profilesPending } = await sb.from('employees').select('*').eq('profile_status','pending_review').order('created_at');
+  document.getElementById('pending-profiles-list').innerHTML = (profilesPending&&profilesPending.length) ? profilesPending.map(p=>
+    `<div class="hier-node"><div class="name">${esc(p.full_name)}</div><div class="meta">${esc(p.email||p.mobile||'')} · self-created ${new Date(p.created_at).toLocaleDateString('en-IN')}</div>
+      <div style="display:flex;gap:6px;margin-top:8px;"><button class="btn-sm" onclick="openProfile('${p.id}')">View</button><button class="btn-sm approve" onclick="decideProfile('${p.id}',true)">Approve</button><button class="btn-sm reject" onclick="decideProfile('${p.id}',false)">Reject</button></div></div>`
+  ).join('') : '<div class="empty">Nothing pending.</div>';
+
   const { data: docs } = await sb.from('employee_documents').select('*, employees(full_name,employee_code)').eq('status','pending').order('uploaded_at');
   document.getElementById('pending-docs-list').innerHTML = (docs&&docs.length) ? docs.map(d=>
     `<div class="doc-row"><div class="doc-icon">📄</div><div style="flex:1;"><div class="doc-title">${esc(d.employees.full_name)} — ${d.document_type.replace('_',' ')}</div><div class="doc-status pending">Uploaded ${new Date(d.uploaded_at).toLocaleDateString('en-IN')}</div></div><button class="btn-sm primary" onclick="openDocReview('${d.id}','${d.document_type.replace('_',' ')}','${d.file_url}')">Review</button></div>`
@@ -958,6 +1068,12 @@ async function loadPendingApprovals(){
   ).join('') : '<div class="empty">Nothing pending.</div>';
   loadPendingCounts();
 }
+window.decideProfile = async function(employeeId, approve){
+  const { error } = await sb.rpc('approve_employee_profile', { p_employee_id: employeeId, p_approve: approve });
+  if (error){ toast(error.message); return; }
+  toast(approve ? '✓ Profile approved' : 'Profile rejected');
+  loadPendingApprovals();
+};
 window.adminRespondHierarchy = async function(id, approve){
   // Admin override: same RPC works for admin too since it checks recipient OR admin — using direct table update via admin RLS bypass is simpler here.
   const { data: row } = await sb.from('employee_hierarchy').select('*').eq('id',id).single();
