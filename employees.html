@@ -442,7 +442,7 @@ input,select,textarea{font-family:var(--font-sans);}
     <div class="modal-handle"></div>
     <div class="modal-title" id="slab-form-title">Add Commission Slab</div>
     <label class="fl">Name</label><input class="fi" id="sf-name" placeholder="e.g. Senior Associate"/>
-    <label class="fl">Commission %</label><input class="fi" id="sf-percent" type="number" step="0.1"/>
+    <label class="fl">Commission per Gaj (₹)</label><input class="fi" id="sf-per-gaj" type="number" step="1"/>
     <label class="fl">Description</label><textarea class="fi" id="sf-desc" style="min-height:60px;"></textarea>
     <div style="display:flex;gap:10px;margin-top:8px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeSlabForm()">Cancel</button>
@@ -781,10 +781,10 @@ window.respondHierarchy = async function(reqId, approve){
 
 // ── COMMISSION (within profile) ──
 async function loadCommission(employeeId){
-  const { data } = await sb.from('employee_commission_assignments').select('*, commission_slabs(name,commission_percent)').eq('employee_id',employeeId).order('effective_date',{ascending:false});
+  const { data } = await sb.from('employee_commission_assignments').select('*, commission_slabs(name,commission_per_gaj)').eq('employee_id',employeeId).order('effective_date',{ascending:false});
   const rows = data || [];
   document.getElementById('comm-current').innerHTML = rows[0]
-    ? `<div class="hier-node"><div class="name">${esc(rows[0].commission_slabs.name)} ${rows[0].commission_slabs.commission_percent?'· '+rows[0].commission_slabs.commission_percent+'%':''}</div><div class="meta">Effective ${rows[0].effective_date}</div></div>`
+    ? `<div class="hier-node"><div class="name">${esc(rows[0].commission_slabs.name)} ${rows[0].commission_slabs.commission_per_gaj?'· ₹'+rows[0].commission_slabs.commission_per_gaj+'/Gaj':''}</div><div class="meta">Effective ${rows[0].effective_date}</div></div>`
     : '<div class="empty" style="padding:10px 0;">No slab assigned yet.</div>';
   document.getElementById('comm-assign-btn').style.display = isAdmin ? 'block' : 'none';
   document.getElementById('comm-history').innerHTML = rows.length ? rows.map(r=>
@@ -794,20 +794,21 @@ async function loadCommission(employeeId){
 
 // ── DEALS / SALES / COMMISSION (computed from approved token submissions — the only
 //    real "deal closed" signal in the CRM right now). Commission per deal uses whichever
-//    slab was actually in effect on that deal's approval date, not just the current one.
+//    slab was actually in effect on that deal's approval date, not just the current one,
+//    applied as ₹ per Gaj of the plot's size (not a percentage of sale price).
 const INR_FMT = n => '₹' + Math.round(n).toLocaleString('en-IN');
 async function loadDealStats(employeeId){
   const [{ data: deals }, { data: slabHistory }] = await Promise.all([
-    sb.from('token_submissions').select('sale_amount, reviewed_at').eq('associate_employee_id', employeeId).eq('status','approved'),
-    sb.from('employee_commission_assignments').select('effective_date, commission_slabs(commission_percent)').eq('employee_id', employeeId).order('effective_date')
+    sb.from('token_submissions').select('sale_amount, reviewed_at, colony_units(unit_size)').eq('associate_employee_id', employeeId).eq('status','approved'),
+    sb.from('employee_commission_assignments').select('effective_date, commission_slabs(commission_per_gaj)').eq('employee_id', employeeId).order('effective_date')
   ]);
   const dealList = deals || [];
-  const slabs = (slabHistory || []).map(s => ({ date: s.effective_date, pct: s.commission_slabs ? s.commission_slabs.commission_percent : null }));
+  const slabs = (slabHistory || []).map(s => ({ date: s.effective_date, rate: s.commission_slabs ? s.commission_slabs.commission_per_gaj : null }));
 
-  function slabPctFor(dateStr){
-    let pct = null;
-    for (const s of slabs) { if (s.date <= dateStr) pct = s.pct; else break; }
-    return pct;
+  function slabRateFor(dateStr){
+    let rate = null;
+    for (const s of slabs) { if (s.date <= dateStr) rate = s.rate; else break; }
+    return rate;
   }
 
   const now = new Date();
@@ -816,9 +817,10 @@ async function loadDealStats(employeeId){
     const amount = Number(d.sale_amount) || 0;
     totalSales += amount;
     const dateStr = (d.reviewed_at || '').slice(0,10);
-    const pct = slabPctFor(dateStr);
-    if (pct == null) { commissionKnownForAll = false; return; }
-    const commission = amount * pct / 100;
+    const rate = slabRateFor(dateStr);
+    const gaj = parseFloat(d.colony_units ? d.colony_units.unit_size : '');
+    if (rate == null || isNaN(gaj)) { commissionKnownForAll = false; return; }
+    const commission = rate * gaj;
     totalCommission += commission;
     const d2 = new Date(d.reviewed_at);
     if (d2.getFullYear() === now.getFullYear() && d2.getMonth() === now.getMonth()) monthCommission += commission;
@@ -826,12 +828,12 @@ async function loadDealStats(employeeId){
 
   document.getElementById('ov-deals').textContent = dealList.length;
   document.getElementById('ov-sales').textContent = dealList.length ? INR_FMT(totalSales) : '—';
-  document.getElementById('ov-commission-total').textContent = dealList.length ? (commissionKnownForAll ? INR_FMT(totalCommission) : INR_FMT(totalCommission)+'*') : '—';
+  document.getElementById('ov-commission-total').textContent = dealList.length ? INR_FMT(totalCommission)+(commissionKnownForAll?'':'*') : '—';
   document.getElementById('ov-commission-month').textContent = dealList.length ? INR_FMT(monthCommission) : '—';
 }
 window.openAssignCommission = async function(){
   const { data: slabs } = await sb.from('commission_slabs').select('*').eq('is_active',true).order('name');
-  document.getElementById('ac-slab').innerHTML = (slabs||[]).map(s=>`<option value="${s.id}">${esc(s.name)}${s.commission_percent?' ('+s.commission_percent+'%)':''}</option>`).join('');
+  document.getElementById('ac-slab').innerHTML = (slabs||[]).map(s=>`<option value="${s.id}">${esc(s.name)}${s.commission_per_gaj?' (₹'+s.commission_per_gaj+'/Gaj)':''}</option>`).join('');
   document.getElementById('ac-date').value = new Date().toISOString().slice(0,10);
   document.getElementById('ac-remarks').value = '';
   document.getElementById('assign-comm-overlay').classList.add('on');
@@ -986,7 +988,7 @@ async function loadHierarchyTree(){
 async function loadSlabs(){
   const { data } = await sb.from('commission_slabs').select('*').order('name');
   document.getElementById('slabs-list').innerHTML = (data&&data.length) ? data.map(s=>
-    `<div class="hier-node"><div class="name">${esc(s.name)} ${s.commission_percent?'· '+s.commission_percent+'%':''} ${!s.is_active?'<span class="chip inactive">inactive</span>':''}</div><div class="meta">${esc(s.description||'')}</div>
+    `<div class="hier-node"><div class="name">${esc(s.name)} ${s.commission_per_gaj?'· ₹'+s.commission_per_gaj+'/Gaj':''} ${!s.is_active?'<span class="chip inactive">inactive</span>':''}</div><div class="meta">${esc(s.description||'')}</div>
      <button class="btn-sm" style="margin-top:8px;" onclick='openAddSlab(${JSON.stringify(s).replace(/'/g,"&apos;")})'>Edit</button></div>`
   ).join('') : '<div class="empty">No commission slabs yet.</div>';
 }
@@ -995,7 +997,7 @@ window.openAddSlab = function(slab){
   editingSlabId = slab ? slab.id : null;
   document.getElementById('slab-form-title').textContent = slab ? 'Edit Commission Slab' : 'Add Commission Slab';
   document.getElementById('sf-name').value = slab ? slab.name : '';
-  document.getElementById('sf-percent').value = slab ? (slab.commission_percent||'') : '';
+  document.getElementById('sf-per-gaj').value = slab ? (slab.commission_per_gaj||'') : '';
   document.getElementById('sf-desc').value = slab ? (slab.description||'') : '';
   document.getElementById('slab-form-overlay').classList.add('on');
 };
@@ -1003,7 +1005,7 @@ window.closeSlabForm = function(){ document.getElementById('slab-form-overlay').
 window.saveSlab = async function(){
   const payload = {
     name: document.getElementById('sf-name').value.trim(),
-    commission_percent: document.getElementById('sf-percent').value ? Number(document.getElementById('sf-percent').value) : null,
+    commission_per_gaj: document.getElementById('sf-per-gaj').value ? Number(document.getElementById('sf-per-gaj').value) : null,
     description: document.getElementById('sf-desc').value.trim()||null
   };
   if (!payload.name){ toast('Name is required'); return; }
