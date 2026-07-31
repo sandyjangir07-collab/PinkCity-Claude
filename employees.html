@@ -81,6 +81,7 @@ input,select,textarea{font-family:var(--font-sans);}
 .empty{text-align:center;padding:40px 20px;color:var(--muted-foreground);font-size:13px;}
 
 .overlay{position:fixed;inset:0;background:rgba(20,16,18,0.42);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.22s;}
+#doc-review-overlay,#hier-search-overlay,#edit-basic-overlay,#edit-address-overlay,#assign-comm-overlay,#slab-form-overlay{z-index:220;}
 .overlay.on{opacity:1;pointer-events:auto;}
 .modal{background:var(--background);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px 20px 28px;transform:translateY(24px);transition:transform 0.25s;}
 .overlay.on .modal{transform:translateY(0);}
@@ -962,14 +963,24 @@ async function loadDealStats(employeeId){
   document.getElementById('ov-commission-month').textContent = dealList.length ? INR_FMT(monthCommission) : '—';
 }
 window.openAssignCommission = async function(){
-  const { data: slabs } = await sb.from('commission_slabs').select('*').eq('is_active',true).order('name');
-  document.getElementById('ac-slab').innerHTML = (slabs||[]).map(s=>`<option value="${s.id}">${esc(s.name)}${s.commission_per_gaj?' (₹'+s.commission_per_gaj+'/Gaj)':''}</option>`).join('');
-  document.getElementById('ac-date').value = new Date().toISOString().slice(0,10);
-  document.getElementById('ac-remarks').value = '';
-  document.getElementById('assign-comm-overlay').classList.add('on');
+  try {
+    const { data: slabs, error } = await sb.from('commission_slabs').select('*').eq('is_active',true).order('name');
+    if (error) throw error;
+    if (!slabs || !slabs.length) {
+      toast('No commission slabs yet — create one in the Commission Slabs tab first.');
+      return;
+    }
+    document.getElementById('ac-slab').innerHTML = slabs.map(s=>`<option value="${s.id}">${esc(s.name)}${s.commission_per_gaj?' (₹'+s.commission_per_gaj+'/Gaj)':''}</option>`).join('');
+    document.getElementById('ac-date').value = new Date().toISOString().slice(0,10);
+    document.getElementById('ac-remarks').value = '';
+    document.getElementById('assign-comm-overlay').classList.add('on');
+  } catch(e) {
+    toast('Could not open — ' + (e.message || 'unknown error'));
+  }
 };
 window.closeAssignCommission = function(){ document.getElementById('assign-comm-overlay').classList.remove('on'); };
 window.saveAssignCommission = async function(){
+  if (!document.getElementById('ac-slab').value) { toast('Pick a slab first.'); return; }
   const { error } = await sb.rpc('assign_commission_slab', {
     p_employee_id: currentProfileId, p_slab_id: document.getElementById('ac-slab').value,
     p_effective_date: document.getElementById('ac-date').value, p_remarks: document.getElementById('ac-remarks').value.trim()||null
