@@ -523,7 +523,16 @@ sb.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('tab-btn-slabs').style.display = 'inline-flex';
     document.getElementById('add-employee-btn').style.display = 'block';
   }
-  const { data: me } = await sb.from('employees').select('*').eq('user_id', currentUser.id).maybeSingle();
+  let { data: me } = await sb.from('employees').select('*').eq('user_id', currentUser.id).maybeSingle();
+  if (!me && !isAdmin) {
+    // Might already have an employee record admin created before this person ever logged in.
+    const { data: linkedId } = await sb.rpc('link_my_employee_profile');
+    if (linkedId) {
+      toast('✓ Linked to your existing employee profile');
+      const refetch = await sb.from('employees').select('*').eq('id', linkedId).maybeSingle();
+      me = refetch.data;
+    }
+  }
   myEmployee = me || null;
   myEmployeeId = me ? me.id : null;
 
