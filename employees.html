@@ -90,7 +90,8 @@ input,select,textarea{font-family:var(--font-sans);}
 .fl{display:block;font-size:11.5px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted-foreground);margin-bottom:6px;}
 .fi{width:100%;background:white;border:1.5px solid var(--border);border-radius:14px;padding:11px 14px;font-size:14px;outline:none;margin-bottom:12px;}
 .fsel{width:100%;background:white;border:1.5px solid var(--border);border-radius:14px;padding:11px 14px;font-size:14px;margin-bottom:12px;}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:0;}
+.frow > div{min-width:0;}
 .form-err{background:rgba(248,113,113,0.1);color:#b91c1c;border-radius:12px;padding:10px 14px;font-size:12.5px;margin-bottom:12px;}
 
 .profile-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 0 18px;}
@@ -241,7 +242,14 @@ input,select,textarea{font-family:var(--font-sans);}
     </div>
     <div class="frow">
       <div><label class="fl">Date of Birth</label><input class="fi" id="ef-dob" type="date"/></div>
-      <div><label class="fl">Gender</label><input class="fi" id="ef-gender"/></div>
+      <div><label class="fl">Gender</label>
+        <select class="fsel" id="ef-gender">
+          <option value="">Select</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
     </div>
     <div class="frow">
       <div><label class="fl">Blood Group</label><input class="fi" id="ef-blood-group" placeholder="e.g. B+"/></div>
@@ -347,7 +355,14 @@ input,select,textarea{font-family:var(--font-sans);}
     <label class="fl">Full Name</label><input class="fi" id="eb-name"/>
     <div class="frow">
       <div><label class="fl">Date of Birth</label><input class="fi" id="eb-dob" type="date"/></div>
-      <div><label class="fl">Gender</label><input class="fi" id="eb-gender"/></div>
+      <div><label class="fl">Gender</label>
+        <select class="fsel" id="eb-gender">
+          <option value="">Select</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
     </div>
     <label class="fl">Blood Group</label><input class="fi" id="eb-blood-group"/>
     <div class="frow">
@@ -625,6 +640,9 @@ window.saveEmployee = async function(){
   const name = document.getElementById('ef-name').value.trim();
   const errEl = document.getElementById('employee-form-err');
   if (!name){ errEl.textContent='Full name is required.'; errEl.style.display='block'; return; }
+  const emergencyName = document.getElementById('ef-emergency-name').value.trim();
+  const emergencyNumber = document.getElementById('ef-emergency-number').value.trim();
+  if (!emergencyName || !emergencyNumber){ errEl.textContent='Emergency contact name and number are required.'; errEl.style.display='block'; return; }
   const emailVal = document.getElementById('ef-email').value.trim()||null;
 
   let payload;
@@ -878,7 +896,7 @@ window.runHierSearch = async function(){
   results.innerHTML = matches.map(e=>`<div class="hier-node" style="cursor:pointer;" onclick="sendHierRequest('${e.id}')"><div class="name">${esc(e.full_name)}</div><div class="meta">${esc(e.employee_code||'')} · ${esc(e.designation||'')}</div></div>`).join('') || '<div class="empty">No matches.</div>';
 };
 window.sendHierRequest = async function(targetId){
-  const { error } = await sb.rpc('request_hierarchy_link', { p_target_employee_id: targetId, p_as_senior: hierSearchMode==='senior' });
+  const { error } = await sb.rpc('request_hierarchy_link', { p_employee_id: currentProfileId, p_target_employee_id: targetId, p_as_senior: hierSearchMode==='senior' });
   if (error){ toast(error.message); return; }
   closeHierSearch();
   toast('✓ Request sent');
@@ -994,6 +1012,14 @@ window.openEditBasic = function(){
 };
 window.closeEditBasic = function(){ document.getElementById('edit-basic-overlay').classList.remove('on'); };
 window.saveEditBasic = async function(){
+  const errEl = document.getElementById('eb-err');
+  const emergencyName = document.getElementById('eb-emergency-name').value.trim();
+  const emergencyNumber = document.getElementById('eb-emergency-number').value.trim();
+  if (!emergencyName || !emergencyNumber){
+    errEl.textContent = 'Emergency contact name and number are required.';
+    errEl.style.display = 'block';
+    return;
+  }
   const payload = {
     full_name: document.getElementById('eb-name').value.trim(),
     dob: document.getElementById('eb-dob').value||null,
@@ -1002,8 +1028,8 @@ window.saveEditBasic = async function(){
     mobile: document.getElementById('eb-mobile').value.trim()||null,
     alternate_mobile: document.getElementById('eb-alt-mobile').value.trim()||null,
     email: document.getElementById('eb-email').value.trim()||null,
-    emergency_contact_name: document.getElementById('eb-emergency-name').value.trim()||null,
-    emergency_contact_number: document.getElementById('eb-emergency-number').value.trim()||null,
+    emergency_contact_name: emergencyName,
+    emergency_contact_number: emergencyNumber,
   };
   if (isAdmin){
     payload.designation = document.getElementById('eb-designation').value.trim()||null;
@@ -1012,7 +1038,6 @@ window.saveEditBasic = async function(){
     payload.status = document.getElementById('eb-status').value;
   }
   const { error } = await sb.from('employees').update(payload).eq('id', currentProfileId);
-  const errEl = document.getElementById('eb-err');
   if (error){ errEl.textContent = error.message; errEl.style.display='block'; return; }
   await sb.rpc('log_employee_activity', { p_employee_id: currentProfileId, p_action_type:'profile_updated', p_description:'Profile updated' });
   closeEditBasic();
@@ -1084,11 +1109,8 @@ window.decideProfile = async function(employeeId, approve){
   loadPendingApprovals();
 };
 window.adminRespondHierarchy = async function(id, approve){
-  // Admin override: same RPC works for admin too since it checks recipient OR admin — using direct table update via admin RLS bypass is simpler here.
-  const { data: row } = await sb.from('employee_hierarchy').select('*').eq('id',id).single();
-  const { error } = await sb.from('employee_hierarchy').update({ status: approve?'approved':'rejected', responded_at: new Date().toISOString() }).eq('id', id);
+  const { error } = await sb.rpc('respond_hierarchy_request', { p_request_id: id, p_approve: approve });
   if (error){ toast(error.message); return; }
-  await sb.rpc('log_employee_activity', { p_employee_id: row.junior_id, p_action_type:'hierarchy_changed', p_description: 'Hierarchy request '+(approve?'approved':'rejected')+' by admin' });
   toast(approve?'✓ Approved':'Rejected');
   loadPendingApprovals();
 };

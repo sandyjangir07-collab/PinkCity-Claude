@@ -495,6 +495,9 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .subpage-hero p{font-size:16px;color:var(--muted-foreground);line-height:1.7;max-width:520px;margin:0 auto 32px}
 .sub-content{max-width:1200px;margin:0 auto;padding:80px 20px 120px}
 @media(min-width:640px){.sub-content{padding:80px 32px 120px}}
+.nav-signin{display:none;font-size:13px;font-weight:500;color:color-mix(in oklab,var(--foreground) 65%,transparent);text-decoration:none;padding:8px 10px;transition:color 0.2s;}
+.nav-signin:hover{color:var(--primary);}
+@media(min-width:640px){.nav-signin{display:inline-flex;align-items:center;}}
 </style>
 
   <!-- PWA -->
@@ -537,6 +540,7 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
+      <a href="login.html" class="nav-signin">Sign In</a>
       <a href="login.html" class="nav-cta">List Property<div class="nav-cta-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div></a>
       <button class="mobile-menu-btn" onclick="toggleMenu()" aria-label="Menu">
         <svg id="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>

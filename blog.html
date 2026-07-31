@@ -551,6 +551,9 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
 .skel{background:linear-gradient(90deg,var(--secondary) 25%,color-mix(in oklab,var(--secondary) 50%,white) 50%,var(--secondary) 75%);background-size:200% 100%;animation:skel 1.4s ease-in-out infinite;border-radius:12px;position:relative;}
 .skel-logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;object-fit:contain;opacity:0.25;}
 @keyframes skel{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.nav-signin{display:none;font-size:13px;font-weight:500;color:color-mix(in oklab,var(--foreground) 65%,transparent);text-decoration:none;padding:8px 10px;transition:color 0.2s;}
+.nav-signin:hover{color:var(--primary);}
+@media(min-width:640px){.nav-signin{display:inline-flex;align-items:center;}}
 </style>
 
   <!-- PWA -->
@@ -594,6 +597,7 @@ footer { background:var(--ink); color:rgba(255,255,255,0.6); border-top:1px soli
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
+      <a href="login.html" class="nav-signin">Sign In</a>
       <a href="login.html" class="nav-cta">
         List Property
         <div class="nav-cta-icon">
