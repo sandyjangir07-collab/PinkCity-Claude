@@ -263,11 +263,6 @@ input,select,textarea{font-family:var(--font-sans);}
       </div>
     </div>
 
-    <div id="team-slabs-preview" style="display:none;margin-bottom:26px;">
-      <div class="section-label" style="margin-top:0;">Commission Slabs</div>
-      <div id="team-slabs-preview-list"></div>
-    </div>
-
     <div class="search-row">
       <input class="search-input" id="emp-search" placeholder="Search name, code, designation, phone…" oninput="renderEmployeeGrid()"/>
       <select class="filter-sel" id="emp-status-filter" onchange="renderEmployeeGrid()">
@@ -368,7 +363,13 @@ input,select,textarea{font-family:var(--font-sans);}
       </button>
     </div>
     <div class="profile-hero">
-      <div class="profile-avatar" id="profile-avatar">?</div>
+      <div style="position:relative;display:inline-block;">
+        <div class="profile-avatar" id="profile-avatar">?</div>
+        <button id="photo-upload-btn" style="display:none;position:absolute;bottom:8px;right:-2px;width:30px;height:30px;border-radius:50%;background:var(--primary);border:2.5px solid var(--background);display:flex;align-items:center;justify-content:center;color:white;" onclick="document.getElementById('photo-upload-input').click()" aria-label="Change photo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        </button>
+        <input type="file" id="photo-upload-input" accept="image/*" style="display:none;" onchange="handleProfilePhoto(this)"/>
+      </div>
       <div class="profile-name" id="profile-name">—</div>
       <div class="profile-code" id="profile-code">—</div>
       <span class="chip" id="profile-status-chip">—</span>
@@ -674,11 +675,10 @@ async function loadEmployees(){
 }
 
 async function loadTeamOverviewData(){
-  const [{ data: docs }, { data: hier }, { data: deals }, { data: slabs }] = await Promise.all([
+  const [{ data: docs }, { data: hier }, { data: deals }] = await Promise.all([
     sb.from('employee_documents').select('employee_id,document_type,status'),
     sb.from('employee_hierarchy').select('junior_id,senior_id').eq('status','approved'),
-    sb.from('token_submissions').select('associate_employee_id,sale_amount').eq('status','approved'),
-    sb.from('commission_slabs').select('*').eq('is_active',true).order('name')
+    sb.from('token_submissions').select('associate_employee_id,sale_amount').eq('status','approved')
   ]);
   hierarchyLinksCache = hier || [];
 
@@ -707,18 +707,6 @@ async function loadTeamOverviewData(){
   document.getElementById('stat-verified').textContent = fullyVerified+'/'+allEmployees.length;
   document.getElementById('stat-sales').textContent = INR_FMT(totalSales);
   document.getElementById('team-stat-grid').style.display = 'grid';
-
-  const slabsList = slabs || [];
-  document.getElementById('team-slabs-preview').style.display = slabsList.length ? 'block' : 'none';
-  document.getElementById('team-slabs-preview-list').innerHTML = slabsList.map(s=>`
-    <div class="slab-card">
-      <div class="slab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/><path d="M12 3v3m0 12v3"/></svg></div>
-      <div style="flex:1;min-width:0;">
-        <div class="slab-name">${esc(s.name)}</div>
-        ${s.description?`<div class="slab-desc">${esc(s.description)}</div>`:''}
-      </div>
-      <div class="slab-rate">${s.commission_per_gaj?'₹'+s.commission_per_gaj:'—'}</div>
-    </div>`).join('');
 }
 
 function docSummaryPill(employeeId){
@@ -902,6 +890,7 @@ window.openProfile = async function(id){
     psChip.className = 'chip ' + (e.profile_status === 'pending_review' ? 'on_leave' : 'suspended');
   } else { psChip.style.display = 'none'; }
   document.getElementById('edit-basic-btn').style.display = (isAdmin || e.user_id===currentUser.id) ? 'inline-flex' : 'none';
+  document.getElementById('photo-upload-btn').style.display = (isAdmin || e.user_id===currentUser.id) ? 'flex' : 'none';
 
   const ctaBar = document.getElementById('profile-cta-bar');
   if (e.mobile) {
@@ -939,6 +928,37 @@ window.openProfile = async function(id){
   loadHierarchyForProfile(id);
   loadCommission(id);
   loadActivity(id);
+};
+window.handleProfilePhoto = async function(input){
+  const file = input.files[0];
+  if (!file) return;
+  const btn = document.getElementById('photo-upload-btn');
+  btn.style.opacity = '0.5'; btn.disabled = true;
+  try {
+    const compressed = await compressImageFile(file);
+    const ext = compressed.name.split('.').pop();
+    const path = `employees/${currentProfileId}-${Date.now()}.${ext}`;
+    const buffer = await compressed.arrayBuffer();
+    const { error: upErr } = await sb.storage.from('property-images').upload(path, buffer, {cacheControl:'3600', upsert:false, contentType: compressed.type || `image/${ext}`});
+    if (upErr) throw upErr;
+    const { data: pub } = sb.storage.from('property-images').getPublicUrl(path);
+    const { error: updErr } = await sb.from('employees').update({ photo_url: pub.publicUrl }).eq('id', currentProfileId);
+    if (updErr) throw updErr;
+
+    document.getElementById('profile-avatar').style.backgroundImage = `url('${pub.publicUrl}')`;
+    document.getElementById('profile-avatar').textContent = '';
+    const cached = allEmployees.find(x=>x.id===currentProfileId);
+    if (cached) cached.photo_url = pub.publicUrl;
+    if (myEmployee && myEmployee.id===currentProfileId) myEmployee.photo_url = pub.publicUrl;
+    await sb.rpc('log_employee_activity', { p_employee_id: currentProfileId, p_action_type:'profile_updated', p_description:'Profile photo updated' });
+    toast('✓ Photo updated');
+    if (isAdmin) renderEmployeeGrid();
+  } catch(e) {
+    toast('Could not upload photo — ' + (e.message || 'unknown error'));
+  } finally {
+    btn.style.opacity = '1'; btn.disabled = false;
+    input.value = '';
+  }
 };
 function renderAddress(type, a){
   const el = document.getElementById('ov-addr-'+type);
@@ -1051,7 +1071,7 @@ async function loadHierarchyForProfile(employeeId){
   const nameOf = id => names[id] || { full_name:'—', employee_code:'', designation:'' };
   const staticPersonRow = p => `
     <div class="person-row" style="cursor:default;">
-      <div class="person-avatar">${initials(p.full_name)}</div>
+      <div class="person-avatar" style="${p.photo_url?`background-image:url('${p.photo_url}')`:''}">${p.photo_url?'':initials(p.full_name)}</div>
       <div class="person-info">
         <div class="person-name">${esc(p.full_name)}</div>
         <div class="person-meta">${esc(p.employee_code||'')}${p.designation?' · '+esc(p.designation):''}</div>
@@ -1089,7 +1109,7 @@ window.runHierSearch = async function(){
   if (!q){ results.innerHTML=''; return; }
   const { data, error } = await sb.rpc('search_employees_directory', { p_query: q });
   const matches = (data||[]).filter(e=>e.id!==currentProfileId).slice(0,8);
-  results.innerHTML = matches.map(e=>`<div class="hier-node" style="cursor:pointer;" onclick="sendHierRequest('${e.id}')"><div class="name">${esc(e.full_name)}</div><div class="meta">${esc(e.employee_code||'')} · ${esc(e.designation||'')}</div></div>`).join('') || '<div class="empty">No matches.</div>';
+  results.innerHTML = matches.map(e=>`<div class="person-row" style="cursor:pointer;" onclick="sendHierRequest('${e.id}')"><div class="person-avatar" style="${e.photo_url?`background-image:url('${e.photo_url}')`:''}">${e.photo_url?'':initials(e.full_name)}</div><div class="person-info"><div class="person-name">${esc(e.full_name)}</div><div class="person-meta">${esc(e.employee_code||'')} · ${esc(e.designation||'')}</div></div></div>`).join('') || '<div class="empty">No matches.</div>';
 };
 window.sendHierRequest = async function(targetId){
   const { error } = await sb.rpc('request_hierarchy_link', { p_employee_id: currentProfileId, p_target_employee_id: targetId, p_as_senior: hierSearchMode==='senior' });
